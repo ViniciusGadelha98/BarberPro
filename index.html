@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meu Salão</title>
+    <title>BarberPro</title>
     <link rel="manifest" href="manifest.json">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, -apple-system, sans-serif; }
@@ -103,7 +103,7 @@
 
 <!-- TELA DE LOGIN -->
 <div id="loginScreen">
-    <h1>✂️ Meu Salão</h1>
+    <h1>✂️ BarberPro</h1>
     <p>Digite seu PIN de 4 dígitos</p>
     <div class="pin-dots" id="pinDots">
         <div class="pin-dot" data-i="0"></div><div class="pin-dot" data-i="1"></div>
@@ -125,7 +125,7 @@
 <!-- APP PRINCIPAL -->
 <div id="app" style="display:none;">
     <div class="header no-print">
-        <h2 id="barberShopName">✂️ Meu Salão</h2>
+        <h2 id="barberShopName">✂️ BarberPro</h2>
         <div class="header-actions">
             <input type="text" id="globalSearch" placeholder="🔍 Pesquisar..." oninput="globalSearch(this.value)">
         </div>
@@ -423,7 +423,7 @@ document.querySelectorAll('.sub-tab').forEach(btn => {
 });
 
 function carregarTudo() {
-    const nome = localStorage.getItem('barberShopName') || '✂️ Meu Salão';
+    const nome = localStorage.getItem('barberShopName') || '✂️ BarberPro';
     document.getElementById('barberShopName').textContent = nome;
     document.getElementById('confNome').value = nome;
     document.getElementById('confPin').value = getPin();
@@ -1196,7 +1196,7 @@ function salvarConfig() {
     if(nome) localStorage.setItem('barberShopName', nome);
     if(pin && pin.length===4 && /^\d{4}$/.test(pin)) setPin(pin);
     else if(pin) alert('PIN deve ter 4 dígitos');
-    document.getElementById('barberShopName').textContent = localStorage.getItem('barberShopName') || '✂️ Meu Salão';
+    document.getElementById('barberShopName').textContent = localStorage.getItem('barberShopName') || '✂️ BarberPro';
 }
 
 function salvarPerfil() {
