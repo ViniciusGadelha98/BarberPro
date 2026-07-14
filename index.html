@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Meu Salão</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, -apple-system, sans-serif; }
+        body { background:#f5f7fb; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+        :root { --primary:#1e293b; --primary-light:#334155; --accent:#f59e0b; --success:#22c55e; --danger:#ef4444; --gray:#94a3b8; }
+
+        #loginScreen {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:var(--primary); display:flex; align-items:center; justify-content:center;
+            z-index:9999; flex-direction:column; padding:20px;
+        }
+        #loginScreen.hidden { display:none; }
+        #loginScreen h1 { color:white; font-size:2.2rem; margin-bottom:8px; }
+        #loginScreen p { color:var(--gray); margin-bottom:30px; }
+        .pin-dots { display:flex; gap:15px; margin-bottom:30px; }
+        .pin-dot { width:20px; height:20px; border-radius:50%; border:2px solid white; background:transparent; }
+        .pin-dot.filled { background:white; }
+        .pin-input { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:280px; }
+        .pin-input button { width:60px; height:60px; border-radius:50%; border:none; font-size:1.5rem; background:#334155; color:white; font-weight:bold; cursor:pointer; transition:0.1s; }
+        .pin-input button:active { transform:scale(0.9); background:var(--accent); }
+        .pin-input button.empty { background:transparent; color:var(--gray); pointer-events:none; }
+        .login-options { margin-top:20px; display:flex; gap:20px; }
+        .login-options button { background:transparent; border:1px solid var(--gray); color:white; padding:8px 18px; border-radius:20px; font-size:0.9rem; cursor:pointer; }
+
+        #app { flex:1; display:flex; flex-direction:column; height:100%; }
+        .header { background:var(--primary); color:white; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:10px; flex-wrap:wrap; }
+        .header h2 { font-size:1.1rem; font-weight:600; }
+        .header-actions { display:flex; gap:8px; align-items:center; flex:1; max-width:300px; }
+        .header-actions input { padding:6px 12px; border-radius:20px; border:none; background:#334155; color:white; width:100%; font-size:0.9rem; }
+        .header-actions input::placeholder { color:var(--gray); }
+
+        .main-content { flex:1; overflow-y:auto; padding:12px; padding-bottom:75px; }
+        .tab-page { display:none; animation:fade .3s; }
+        .tab-page.active { display:block; }
+        @keyframes fade { from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)} }
+
+        .bottom-nav {
+            position:fixed; bottom:0; left:0; right:0; background:white; border-top:1px solid #e2e8f0;
+            display:flex; justify-content:space-around; padding:4px 0 8px; z-index:100; overflow-x:auto;
+        }
+        .nav-item {
+            background:none; border:none; display:flex; flex-direction:column; align-items:center;
+            font-size:0.6rem; color:var(--gray); cursor:pointer; padding:2px 6px; transition:0.2s; min-width:48px;
+        }
+        .nav-item .nav-icon { font-size:1.4rem; line-height:1.2; }
+        .nav-item.active { color:var(--primary); font-weight:600; }
+        .nav-item.active .nav-icon { color:var(--accent); }
+
+        .card { background:white; border-radius:16px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
+        .card-title { font-weight:600; font-size:0.95rem; margin-bottom:10px; color:var(--primary); display:flex; justify-content:space-between; align-items:center; }
+        .grid-cards { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .stat-card { background:#f8fafc; border-radius:12px; padding:10px; text-align:center; }
+        .stat-card .number { font-size:1.3rem; font-weight:700; color:var(--primary); }
+        .stat-card .label { font-size:0.65rem; color:var(--gray); }
+
+        input, select, textarea, button { width:100%; padding:8px 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem; margin-bottom:6px; }
+        input:focus, select:focus, textarea:focus { outline:2px solid var(--accent); border-color:transparent; }
+        textarea { resize:vertical; min-height:50px; }
+        .btn { font-weight:600; border:none; cursor:pointer; transition:0.15s; }
+        .btn:active { transform:scale(0.95); }
+        .btn-primary { background:var(--primary); color:white; }
+        .btn-success { background:var(--success); color:white; }
+        .btn-danger { background:var(--danger); color:white; }
+        .btn-accent { background:var(--accent); color:var(--primary); }
+        .btn-outline { background:transparent; border:1px solid var(--gray); color:var(--primary); }
+        .btn-sm { padding:3px 10px; font-size:0.75rem; width:auto; display:inline-block; }
+
+        .list-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f1f5f9; flex-wrap:wrap; gap:4px; }
+        .list-item:last-child { border-bottom:none; }
+        .list-item .info { flex:1; }
+        .list-item .actions { display:flex; gap:4px; flex-wrap:wrap; }
+        .badge { background:#e2e8f0; padding:2px 8px; border-radius:20px; font-size:0.65rem; font-weight:600; }
+        .badge-success { background:#dcfce7; color:#166534; }
+        .badge-danger { background:#fee2e2; color:#991b1b; }
+        .badge-warning { background:#fef3c7; color:#92400e; }
+        .empty { text-align:center; color:var(--gray); padding:16px 0; font-size:0.9rem; }
+
+        .flex-row { display:flex; gap:6px; flex-wrap:wrap; }
+        .flex-row .btn { flex:1; min-width:60px; }
+        .sub-tabs { display:flex; gap:4px; background:#f1f5f9; border-radius:12px; padding:4px; margin-bottom:12px; flex-wrap:wrap; }
+        .sub-tab { flex:1; text-align:center; padding:5px; border-radius:8px; font-size:0.75rem; font-weight:500; background:transparent; border:none; cursor:pointer; min-width:60px; }
+        .sub-tab.active { background:white; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+
+        .modal-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);
+            display:none; align-items:center; justify-content:center; z-index:999;
+        }
+        .modal-overlay.open { display:flex; }
+        .modal-box { background:white; width:94%; max-width:450px; max-height:85vh; overflow-y:auto; border-radius:24px; padding:20px; }
+        .text-muted { color:var(--gray); font-size:0.75rem; }
+        .text-center { text-align:center; }
+        .hidden { display:none !important; }
+        @media print { body * { visibility:hidden; } #printArea, #printArea * { visibility:visible; } #printArea { position:absolute; top:0; left:0; width:100%; background:white; padding:20px; } .bottom-nav, .header, .no-print { display:none !important; } }
+    </style>
+</head>
+<body>
+
+<!-- TELA DE LOGIN -->
+<div id="loginScreen">
+    <h1>✂️ Meu Salão</h1>
+    <p>Digite seu PIN de 4 dígitos</p>
+    <div class="pin-dots" id="pinDots">
+        <div class="pin-dot" data-i="0"></div><div class="pin-dot" data-i="1"></div>
+        <div class="pin-dot" data-i="2"></div><div class="pin-dot" data-i="3"></div>
+    </div>
+    <div class="pin-input" id="pinInput">
+        <button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button>
+        <button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button>
+        <button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button>
+        <button class="empty"></button><button data-v="0">0</button><button id="pinBack">⌫</button>
+    </div>
+    <div class="login-options">
+        <button id="btnChangePin">Alterar PIN</button>
+        <button id="btnResetPin">Redefinir</button>
+    </div>
+    <div id="loginError" style="color:#f87171; margin-top:10px;"></div>
+</div>
+
+<!-- APP PRINCIPAL -->
+<div id="app" style="display:none;">
+    <div class="header no-print">
+        <h2 id="barberShopName">✂️ Meu Salão</h2>
+        <div class="header-actions">
+            <input type="text" id="globalSearch" placeholder="🔍 Pesquisar..." oninput="globalSearch(this.value)">
+        </div>
+    </div>
+
+    <div class="main-content" id="mainContent">
+
+        <!-- DASHBOARD -->
+        <div id="tab-dashboard" class="tab-page active">
+            <div class="grid-cards" id="dashCards">
+                <div class="stat-card"><div class="number" id="dashFaturamentoHoje">R$0</div><div class="label">💰 Hoje</div></div>
+                <div class="stat-card"><div class="number" id="dashAgendamentosHoje">0</div><div class="label">📅 Agenda</div></div>
+                <div class="stat-card"><div class="number" id="dashCortesHoje">0</div><div class="label">✂️ Cortes</div></div>
+                <div class="stat-card"><div class="number" id="dashPlanosAtivos">0</div><div class="label">⭐ Planos</div></div>
+            </div>
+            <div class="card"><div class="card-title">📋 Agenda de Hoje</div><div id="agendaHojeList"><div class="empty">Nenhum</div></div></div>
+            <div class="card"><div class="card-title">⏳ Vencimentos (3 dias)</div><div id="proximosVencimentos"><div class="empty">Nenhum</div></div></div>
+            <div class="card"><div class="card-title">📊 Receita 7 Dias</div><canvas id="graficoReceita" height="80" style="width:100%;"></canvas></div>
+        </div>
+
+        <!-- CLIENTES -->
+        <div id="tab-clientes" class="tab-page">
+            <div class="card">
+                <div class="card-title" id="cliFormTitle">➕ Novo Cliente</div>
+                <input type="text" id="cliNome" placeholder="Nome *">
+                <input type="text" id="cliTelefone" placeholder="Telefone">
+                <input type="text" id="cliCpf" placeholder="CPF">
+                <input type="date" id="cliNascimento">
+                <input type="text" id="cliEndereco" placeholder="Endereço">
+                <textarea id="cliObs" placeholder="Observações"></textarea>
+                <button class="btn btn-primary" id="cliBtnSalvar" onclick="salvarCliente()">Salvar Cliente</button>
+                <button class="btn btn-outline hidden" id="cliBtnCancelar" onclick="cancelarEdicao('cliente')">Cancelar</button>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Lista <span id="qtdClientes" class="badge">0</span></div>
+                <div id="clientesLista"><div class="empty">Nenhum cliente</div></div>
+            </div>
+            <div id="fichaCliente" style="display:none;" class="card">
+                <div class="card-title" id="fichaNome">Cliente</div>
+                <div id="fichaDados"></div>
+                <hr><div class="card-title">📜 Histórico</div><div id="fichaHistorico"></div>
+                <hr><div class="card-title">📊 Estatísticas</div><div id="fichaStats"></div>
+                <button class="btn btn-sm btn-outline" onclick="fecharFicha()">Fechar</button>
+            </div>
+        </div>
+
+        <!-- CATEGORIAS -->
+        <div id="tab-categorias" class="tab-page">
+            <div class="card">
+                <div class="card-title" id="catFormTitle">➕ Nova Categoria</div>
+                <input type="text" id="catNome" placeholder="Nome da Categoria *">
+                <button class="btn btn-primary" id="catBtnSalvar" onclick="salvarCategoria()">Salvar</button>
+                <button class="btn btn-outline hidden" id="catBtnCancelar" onclick="cancelarEdicao('categoria')">Cancelar</button>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Categorias</div>
+                <div id="categoriasLista"><div class="empty">Nenhuma categoria</div></div>
+            </div>
+        </div>
+
+        <!-- SERVIÇOS -->
+        <div id="tab-servicos" class="tab-page">
+            <div class="card">
+                <div class="card-title" id="servFormTitle">✂️ Novo Serviço</div>
+                <input type="text" id="servNome" placeholder="Nome *">
+                <input type="text" id="servDesc" placeholder="Descrição">
+                <input type="number" id="servPreco" placeholder="Preço (R$)" step="0.01">
+                <input type="number" id="servTempo" placeholder="Tempo (min)">
+                <select id="servCategoria"><option value="">Selecione a Categoria</option></select>
+                <select id="servStatus"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
+                <button class="btn btn-primary" id="servBtnSalvar" onclick="salvarServico()">Salvar</button>
+                <button class="btn btn-outline hidden" id="servBtnCancelar" onclick="cancelarEdicao('servico')">Cancelar</button>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Serviços</div>
+                <div id="servicosLista"><div class="empty">Nenhum</div></div>
+            </div>
+        </div>
+
+        <!-- PLANOS -->
+        <div id="tab-planos" class="tab-page">
+            <div class="card">
+                <div class="card-title" id="planoFormTitle">📦 Novo Plano</div>
+                <input type="text" id="planoNome" placeholder="Nome *">
+                <input type="number" id="planoPreco" placeholder="Preço (R$)" step="0.01">
+                <input type="number" id="planoValidade" placeholder="Validade (dias)" value="30">
+                <input type="number" id="planoQtdCortes" placeholder="Qtd Cortes" value="0">
+                <input type="number" id="planoQtdBarbas" placeholder="Qtd Barbas" value="0">
+                <input type="number" id="planoDesconto" placeholder="Desconto (%)" value="0">
+                <textarea id="planoDesc" placeholder="Descrição"></textarea>
+                <button class="btn btn-primary" id="planoBtnSalvar" onclick="salvarPlano()">Salvar</button>
+                <button class="btn btn-outline hidden" id="planoBtnCancelar" onclick="cancelarEdicao('plano')">Cancelar</button>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Planos</div>
+                <div id="planosLista"><div class="empty">Nenhum</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title">🔗 Vincular Plano</div>
+                <select id="vinculoCliente"><option value="">Cliente</option></select>
+                <select id="vinculoPlano"><option value="">Plano</option></select>
+                <input type="date" id="vinculoInicio" value="">
+                <button class="btn btn-success" onclick="vincularPlano()">Vincular</button>
+            </div>
+            <div class="card">
+                <div class="card-title">📋 Assinaturas</div>
+                <div id="assinaturasLista"><div class="empty">Nenhuma</div></div>
+            </div>
+        </div>
+
+        <!-- AGENDA -->
+        <div id="tab-agenda" class="tab-page">
+            <div class="flex-row"><input type="date" id="agendaData" onchange="carregarAgendaDia()"><button class="btn btn-primary btn-sm" onclick="carregarAgendaDia()">Ver</button></div>
+            <div class="card">
+                <div class="card-title" id="agendaTituloDia">📆 Agenda</div>
+                <div id="agendaLista"><div class="empty">Nenhum</div></div>
+            </div>
+            <div class="card">
+                <div class="card-title" id="agendaFormTitle">➕ Agendamento</div>
+                <select id="agendaClienteSelect"><option value="">Cliente</option></select>
+                <input type="datetime-local" id="agendaDateTime">
+                <select id="agendaServicoSelect"><option value="">Serviço</option></select>
+                <button class="btn btn-primary" id="agendaBtnSalvar" onclick="salvarAgendamento()">Agendar</button>
+                <button class="btn btn-outline hidden" id="agendaBtnCancelar" onclick="cancelarEdicao('agendamento')">Cancelar</button>
+            </div>
+        </div>
+
+        <!-- FINANCEIRO -->
+        <div id="tab-financeiro" class="tab-page">
+            <div class="sub-tabs">
+                <button class="sub-tab active" data-sub="finan-receitas">Receitas</button>
+                <button class="sub-tab" data-sub="finan-despesas">Despesas</button>
+                <button class="sub-tab" data-sub="finan-relatorio">Relatório</button>
+            </div>
+            <div id="finan-receitas" class="sub-page">
+                <div class="card">
+                    <div class="card-title" id="recFormTitle">💰 Nova Receita</div>
+                    <select id="finRecCliente"><option value="">Cliente</option></select>
+                    <input type="number" id="finRecValor" placeholder="Valor (R$)" step="0.01">
+                    <input type="text" id="finRecDesc" placeholder="Descrição">
+                    <input type="date" id="finRecData" value="">
+                    <select id="finRecForma"><option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option><option value="Cartão">Cartão</option></select>
+                    <button class="btn btn-success" id="recBtnSalvar" onclick="salvarReceita()">Salvar</button>
+                    <button class="btn btn-outline hidden" id="recBtnCancelar" onclick="cancelarEdicao('receita')">Cancelar</button>
+                </div>
+                <div class="card"><div class="card-title">📋 Receitas</div><div id="receitasLista"><div class="empty">Nenhuma</div></div></div>
+            </div>
+            <div id="finan-despesas" class="sub-page" style="display:none;">
+                <div class="card">
+                    <div class="card-title" id="despFormTitle">📉 Nova Despesa</div>
+                    <input type="text" id="finDespDesc" placeholder="Descrição *">
+                    <input type="number" id="finDespValor" placeholder="Valor (R$)" step="0.01">
+                    <input type="date" id="finDespData" value="">
+                    <select id="finDespCategoria"><option value="Água">Água</option><option value="Luz">Luz</option><option value="Aluguel">Aluguel</option><option value="Produtos">Produtos</option><option value="Outros">Outros</option></select>
+                    <button class="btn btn-danger" id="despBtnSalvar" onclick="salvarDespesa()">Salvar</button>
+                    <button class="btn btn-outline hidden" id="despBtnCancelar" onclick="cancelarEdicao('despesa')">Cancelar</button>
+                </div>
+                <div class="card"><div class="card-title">📋 Despesas</div><div id="despesasLista"><div class="empty">Nenhuma</div></div></div>
+            </div>
+            <div id="finan-relatorio" class="sub-page" style="display:none;">
+                <div class="card">
+                    <div class="card-title">📊 Relatório</div>
+                    <select id="finRelPeriodo" onchange="gerarRelatorioFinanceiro()">
+                        <option value="hoje">Hoje</option><option value="semana">Semana</option>
+                        <option value="mes">Mês</option><option value="ano">Ano</option>
+                    </select>
+                    <div id="finRelatorioConteudo"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONFIG -->
+        <div id="tab-config" class="tab-page">
+            <div class="card">
+                <div class="card-title">⚙️ Configurações</div>
+                <label>Nome da Barbearia</label><input type="text" id="confNome" onchange="salvarConfig()">
+                <label>PIN (4 dígitos)</label><input type="password" id="confPin" maxlength="4" onchange="salvarConfig()">
+                <button class="btn btn-primary" onclick="exportarBackup()">📥 Exportar Backup</button>
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📤 Importar</button>
+                <input type="file" id="fileInput" accept=".json" style="display:none;" onchange="importarBackup(event)">
+                <button class="btn btn-danger" onclick="limparTudo()">🗑️ Apagar Tudo</button>
+            </div>
+            <div class="card">
+                <div class="card-title">👤 Perfil</div>
+                <input type="text" id="perfNome" placeholder="Seu nome">
+                <input type="text" id="perfTelefone" placeholder="Telefone">
+                <input type="email" id="perfEmail" placeholder="E-mail">
+                <button class="btn btn-primary" onclick="salvarPerfil()">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RODAPÉ -->
+    <div class="bottom-nav no-print">
+        <button class="nav-item active" data-tab="tab-dashboard"><span class="nav-icon">🏠</span>Início</button>
+        <button class="nav-item" data-tab="tab-clientes"><span class="nav-icon">👤</span>Clientes</button>
+        <button class="nav-item" data-tab="tab-categorias"><span class="nav-icon">🏷️</span>Categorias</button>
+        <button class="nav-item" data-tab="tab-servicos"><span class="nav-icon">✂️</span>Serviços</button>
+        <button class="nav-item" data-tab="tab-planos"><span class="nav-icon">📦</span>Planos</button>
+        <button class="nav-item" data-tab="tab-agenda"><span class="nav-icon">📆</span>Agenda</button>
+        <button class="nav-item" data-tab="tab-financeiro"><span class="nav-icon">💰</span>Caixa</button>
+        <button class="nav-item" data-tab="tab-config"><span class="nav-icon">⚙️</span>Config</button>
+    </div>
+</div>
+
+<div id="printArea" style="display:none;"></div>
+
+<!-- MODAL DE EDIÇÃO GENÉRICO -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal-box">
+        <h3 id="modalTitle">Editar</h3>
+        <div id="modalBody"></div>
+        <div class="flex-row" style="margin-top:10px;">
+            <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
+            <button class="btn btn-primary" id="modalConfirmBtn" onclick="fecharModal()">Salvar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ================================================================
+//  BANCO DE DADOS
+// ================================================================
+function getData(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
+function setData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
+function genId() { return Date.now().toString(36)+Math.random().toString(36).substr(2,5); }
+function today() { return new Date().toISOString().split('T')[0]; }
+function nowISO() { return new Date().toISOString(); }
+function formatDate(d) { if(!d) return '--'; let dt=new Date(d); return dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function formatCurrency(v) { return 'R$ '+parseFloat(v||0).toFixed(2).replace('.',','); }
+
+let editContext = { tipo: null, id: null };
+
+// ================================================================
+//  PIN
+// ================================================================
+let pinCorrente = '';
+function getPin() { return localStorage.getItem('appPin') || '1234'; }
+function setPin(p) { localStorage.setItem('appPin', p); }
+
+function initLogin() {
+    document.getElementById('loginScreen').classList.remove('hidden');
+    document.getElementById('app').style.display = 'none';
+    pinCorrente = '';
+    atualizarDots();
+    document.getElementById('loginError').textContent = '';
+}
+function atualizarDots() { document.querySelectorAll('.pin-dot').forEach((dot,i) => dot.classList.toggle('filled', i < pinCorrente.length)); }
+document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        if(pinCorrente.length < 4) {
+            pinCorrente += this.dataset.v;
+            atualizarDots();
+            if(pinCorrente.length === 4) {
+                if(pinCorrente === getPin()) { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('app').style.display = 'flex'; carregarTudo(); }
+                else { document.getElementById('loginError').textContent = 'PIN incorreto!'; pinCorrente = ''; atualizarDots(); }
+            }
+        }
+    });
+});
+document.getElementById('pinBack').addEventListener('click', function() { pinCorrente = pinCorrente.slice(0,-1); atualizarDots(); });
+document.getElementById('btnChangePin').addEventListener('click', function() {
+    const novo = prompt('Digite o novo PIN de 4 dígitos:');
+    if(novo && novo.length===4 && /^\d{4}$/.test(novo)) { setPin(novo); alert('PIN alterado!'); initLogin(); } else alert('Inválido');
+});
+document.getElementById('btnResetPin').addEventListener('click', function() { if(confirm('Redefinir para 1234?')) { setPin('1234'); alert('Redefinido'); initLogin(); } });
+
+// ================================================================
+//  NAVEGAÇÃO
+// ================================================================
+document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
+        document.getElementById(this.dataset.tab).classList.add('active');
+        const tab = this.dataset.tab;
+        if(tab === 'tab-agenda') { document.getElementById('agendaData').value = today(); carregarAgendaDia(); }
+        if(tab === 'tab-clientes') carregarClientes();
+        if(tab === 'tab-categorias') carregarCategorias();
+        if(tab === 'tab-servicos') { carregarServicos(); carregarSelectCategorias(); }
+        if(tab === 'tab-planos') { carregarPlanos(); carregarAssinaturas(); carregarSelectsPlanos(); }
+        if(tab === 'tab-financeiro') { carregarReceitas(); carregarDespesas(); }
+        if(tab === 'tab-dashboard') atualizarDashboard();
+    });
+});
+document.querySelectorAll('.sub-tab').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.sub-page').forEach(p=>p.style.display='none');
+        document.getElementById(this.dataset.sub).style.display = 'block';
+        if(this.dataset.sub === 'finan-relatorio') gerarRelatorioFinanceiro();
+    });
+});
+
+function carregarTudo() {
+    const nome = localStorage.getItem('barberShopName') || '✂️ Meu Salão';
+    document.getElementById('barberShopName').textContent = nome;
+    document.getElementById('confNome').value = nome;
+    document.getElementById('confPin').value = getPin();
+    ['perfNome','perfTelefone','perfEmail'].forEach(id => document.getElementById(id).value = localStorage.getItem(id) || '');
+    document.getElementById('agendaData').value = today();
+    document.getElementById('finRecData').value = today();
+    document.getElementById('finDespData').value = today();
+    document.getElementById('vinculoInicio').value = today();
+    carregarCategorias();
+    carregarSelectCategorias();
+    carregarClientes();
+    carregarServicos();
+    carregarPlanos();
+    carregarAssinaturas();
+    carregarSelectsPlanos();
+    carregarAgendaDia();
+    carregarReceitas();
+    carregarDespesas();
+    carregarSelectsClientes();
+    atualizarDashboard();
+}
+
+// ================================================================
+//  DASHBOARD
+// ================================================================
+function atualizarDashboard() {
+    const hoje = today();
+    const agendamentos = getData('agendamentos');
+    const pagamentos = getData('pagamentos');
+    const assinaturas = getData('assinaturas');
+    let fatHoje = pagamentos.filter(p => p.data && p.data.startsWith(hoje)).reduce((s,p) => s + parseFloat(p.valor||0), 0);
+    document.getElementById('dashFaturamentoHoje').textContent = formatCurrency(fatHoje);
+    const agHoje = agendamentos.filter(a => a.data && a.data.startsWith(hoje));
+    document.getElementById('dashAgendamentosHoje').textContent = agHoje.length;
+    document.getElementById('dashCortesHoje').textContent = agendamentos.filter(a => a.data && a.data.startsWith(hoje) && a.status === 'realizado').length;
+    document.getElementById('dashPlanosAtivos').textContent = assinaturas.filter(a => a.fim && a.fim >= hoje && a.status === 'ativo').length;
+    const containerAgenda = document.getElementById('agendaHojeList');
+    if(agHoje.length === 0) containerAgenda.innerHTML = '<div class="empty">Nenhum</div>';
+    else {
+        containerAgenda.innerHTML = agHoje.sort((a,b)=>a.hora.localeCompare(b.hora)).map(a => {
+            const cliente = getData('clientes').find(c => c.id === a.clienteId);
+            return `<div class="list-item"><span>${a.hora} - ${cliente?cliente.nome:'Cliente'}</span><span class="badge ${a.status==='realizado'?'badge-success':'badge-warning'}">${a.status||'Agendado'}</span></div>`;
+        }).join('');
+    }
+    const tresDias = new Date(); tresDias.setDate(tresDias.getDate()+3);
+    const tresDiasStr = tresDias.toISOString().split('T')[0];
+    const vencimentos = assinaturas.filter(a => a.fim && a.fim >= hoje && a.fim <= tresDiasStr && a.status === 'ativo');
+    const containerVen = document.getElementById('proximosVencimentos');
+    if(vencimentos.length === 0) containerVen.innerHTML = '<div class="empty">Nenhum</div>';
+    else {
+        containerVen.innerHTML = vencimentos.map(a => {
+            const cliente = getData('clientes').find(c => c.id === a.clienteId);
+            return `<div class="list-item"><span>${cliente?cliente.nome:'Cliente'}</span><span class="badge badge-danger">Vence ${a.fim}</span></div>`;
+        }).join('');
+    }
+    desenharGraficoReceita();
+}
+
+function desenharGraficoReceita() {
+    const canvas = document.getElementById('graficoReceita');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.parentElement.clientWidth - 32;
+    canvas.width = width * (devicePixelRatio || 1);
+    canvas.height = 80 * (devicePixelRatio || 1);
+    canvas.style.width = width + 'px';
+    canvas.style.height = '80px';
+    const pagamentos = getData('pagamentos');
+    const dias = [];
+    for(let i=6; i>=0; i--) {
+        const d = new Date(); d.setDate(d.getDate()-i);
+        const ds = d.toISOString().split('T')[0];
+        const total = pagamentos.filter(p => p.data && p.data.startsWith(ds)).reduce((s,p) => s + parseFloat(p.valor||0), 0);
+        dias.push({label: ds.slice(5), value: total});
+    }
+    const max = Math.max(...dias.map(d=>d.value), 1);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const barW = canvas.width / dias.length * 0.6;
+    const gap = canvas.width / dias.length * 0.4;
+    const scale = (canvas.height - 20) / max;
+    dias.forEach((d,i) => {
+        const x = i * (barW + gap) + gap/2;
+        const h = d.value * scale;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(x, canvas.height - h - 10, barW, h);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(d.label, x+barW/2, canvas.height-2);
+        if(d.value > 0) { ctx.fillStyle = '#1e293b'; ctx.fillText(formatCurrency(d.value), x+barW/2, canvas.height - h - 14); }
+    });
+}
+window.addEventListener('resize', function() { if(document.getElementById('tab-dashboard').classList.contains('active')) desenharGraficoReceita(); });
+
+// ================================================================
+//  CRUD CLIENTES (Create, Read, Update, Delete)
+// ================================================================
+function salvarCliente() {
+    const nome = document.getElementById('cliNome').value.trim();
+    if(!nome) { alert('Nome é obrigatório'); return; }
+    const clientes = getData('clientes');
+    if(editContext.tipo === 'cliente' && editContext.id) {
+        const idx = clientes.findIndex(c => c.id === editContext.id);
+        if(idx > -1) {
+            clientes[idx] = { ...clientes[idx], nome, telefone: document.getElementById('cliTelefone').value.trim(), cpf: document.getElementById('cliCpf').value.trim(), nascimento: document.getElementById('cliNascimento').value, endereco: document.getElementById('cliEndereco').value.trim(), obs: document.getElementById('cliObs').value.trim() };
+            setData('clientes', clientes);
+            cancelarEdicao('cliente');
+        }
+    } else {
+        clientes.push({ id: genId(), nome, telefone: document.getElementById('cliTelefone').value.trim(), cpf: document.getElementById('cliCpf').value.trim(), nascimento: document.getElementById('cliNascimento').value, endereco: document.getElementById('cliEndereco').value.trim(), obs: document.getElementById('cliObs').value.trim(), dataCadastro: nowISO() });
+        setData('clientes', clientes);
+    }
+    document.getElementById('cliNome').value = '';
+    document.getElementById('cliTelefone').value = '';
+    document.getElementById('cliCpf').value = '';
+    document.getElementById('cliNascimento').value = '';
+    document.getElementById('cliEndereco').value = '';
+    document.getElementById('cliObs').value = '';
+    carregarClientes();
+    carregarSelectsClientes();
+    atualizarDashboard();
+}
+
+function carregarClientes() {
+    const clientes = getData('clientes');
+    document.getElementById('qtdClientes').textContent = clientes.length;
+    const container = document.getElementById('clientesLista');
+    if(clientes.length === 0) { container.innerHTML = '<div class="empty">Nenhum cliente</div>'; return; }
+    container.innerHTML = clientes.map(c => `
+        <div class="list-item">
+            <div class="info"><strong>${c.nome}</strong> ${c.telefone ? '<br><span class="text-muted">'+c.telefone+'</span>' : ''}</div>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="editarCliente('${c.id}')">✏️</button>
+                <button class="btn btn-sm btn-primary" onclick="abrirFicha('${c.id}')">📄</button>
+                <button class="btn btn-sm btn-danger" onclick="excluirCliente('${c.id}')">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function editarCliente(id) {
+    const clientes = getData('clientes');
+    const c = clientes.find(x => x.id === id);
+    if(!c) return;
+    editContext = { tipo: 'cliente', id };
+    document.getElementById('cliFormTitle').textContent = '✏️ Editando Cliente';
+    document.getElementById('cliBtnSalvar').textContent = 'Atualizar Cliente';
+    document.getElementById('cliBtnCancelar').classList.remove('hidden');
+    document.getElementById('cliNome').value = c.nome;
+    document.getElementById('cliTelefone').value = c.telefone || '';
+    document.getElementById('cliCpf').value = c.cpf || '';
+    document.getElementById('cliNascimento').value = c.nascimento || '';
+    document.getElementById('cliEndereco').value = c.endereco || '';
+    document.getElementById('cliObs').value = c.obs || '';
+    document.getElementById('tab-clientes').scrollIntoView({behavior:'smooth'});
+}
+
+function excluirCliente(id) {
+    if(!confirm('Excluir cliente e todos os dados?')) return;
+    let clientes = getData('clientes').filter(c => c.id !== id);
+    setData('clientes', clientes);
+    setData('agendamentos', getData('agendamentos').filter(a => a.clienteId !== id));
+    setData('pagamentos', getData('pagamentos').filter(p => p.clienteId !== id));
+    setData('assinaturas', getData('assinaturas').filter(a => a.clienteId !== id));
+    carregarClientes();
+    carregarSelectsClientes();
+    atualizarDashboard();
+}
+
+function abrirFicha(id) {
+    const cliente = getData('clientes').find(c => c.id === id);
+    if(!cliente) return;
+    document.getElementById('fichaCliente').style.display = 'block';
+    document.getElementById('fichaNome').textContent = cliente.nome;
+    const agendamentos = getData('agendamentos').filter(a => a.clienteId === id).sort((a,b)=>b.data.localeCompare(a.data));
+    const pagamentos = getData('pagamentos').filter(p => p.clienteId === id);
+    document.getElementById('fichaDados').innerHTML = `<p><strong>Telefone:</strong> ${cliente.telefone||'--'}</p><p><strong>CPF:</strong> ${cliente.cpf||'--'}</p><p><strong>Nasc:</strong> ${cliente.nascimento||'--'}</p><p><strong>Obs:</strong> ${cliente.obs||'--'}</p>`;
+    let historico = [];
+    agendamentos.forEach(a => { const s = getData('servicos').find(ss => ss.id === a.servicoId); historico.push({ data: a.data, desc: s?s.nome:'Serviço', valor: a.valor||0, tipo: 'Atendimento', status: a.status }); });
+    pagamentos.forEach(p => { historico.push({ data: p.data, desc: p.descricao||'Pagamento', valor: p.valor, tipo: 'Pagamento', status: 'pago' }); });
+    historico.sort((a,b)=>b.data.localeCompare(a.data));
+    const containerHist = document.getElementById('fichaHistorico');
+    if(historico.length === 0) containerHist.innerHTML = '<div class="empty">Nenhum</div>';
+    else containerHist.innerHTML = historico.slice(0,20).map(h => `<div class="list-item"><span>${formatDate(h.data)} - ${h.desc}</span><span class="badge ${h.tipo==='Pagamento'?'badge-success':'badge-warning'}">${h.tipo} ${formatCurrency(h.valor)}</span></div>`).join('');
+    const totalGasto = pagamentos.reduce((s,p) => s + parseFloat(p.valor||0), 0);
+    const visitas = agendamentos.filter(a => a.status === 'realizado').length;
+    const ultima = agendamentos.filter(a => a.status === 'realizado').sort((a,b)=>b.data.localeCompare(a.data))[0];
+    let mediaDias = '--';
+    const datas = agendamentos.filter(a => a.status === 'realizado').map(a => a.data).sort();
+    if(datas.length > 1) { let total=0; for(let i=1; i<datas.length; i++) { total += Math.floor((new Date(datas[i]) - new Date(datas[i-1])) / (1000*60*60*24)); } mediaDias = (total/(datas.length-1)).toFixed(1); }
+    document.getElementById('fichaStats').innerHTML = `<p><strong>Total:</strong> ${formatCurrency(totalGasto)}</p><p><strong>Visitas:</strong> ${visitas}</p><p><strong>Última:</strong> ${ultima?formatDate(ultima.data):'--'}</p><p><strong>Média dias:</strong> ${mediaDias}</p>`;
+}
+function fecharFicha() { document.getElementById('fichaCliente').style.display = 'none'; }
+
+// ================================================================
+//  CRUD CATEGORIAS
+// ================================================================
+function salvarCategoria() {
+    const nome = document.getElementById('catNome').value.trim();
+    if(!nome) { alert('Nome é obrigatório'); return; }
+    const categorias = getData('categorias');
+    if(editContext.tipo === 'categoria' && editContext.id) {
+        const idx = categorias.findIndex(c => c.id === editContext.id);
+        if(idx > -1) { categorias[idx].nome = nome; setData('categorias', categorias); cancelarEdicao('categoria'); }
+    } else {
+        categorias.push({ id: genId(), nome });
+        setData('categorias', categorias);
+    }
+    document.getElementById('catNome').value = '';
+    carregarCategorias();
+    carregarSelectCategorias();
+}
+
+function carregarCategorias() {
+    const categorias = getData('categorias');
+    const container = document.getElementById('categoriasLista');
+    if(categorias.length === 0) { container.innerHTML = '<div class="empty">Nenhuma categoria</div>'; return; }
+    container.innerHTML = categorias.map(c => `
+        <div class="list-item">
+            <span>🏷️ ${c.nome}</span>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="editarCategoria('${c.id}')">✏️</button>
+                <button class="btn btn-sm btn-danger" onclick="excluirCategoria('${c.id}')">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function editarCategoria(id) {
+    const categorias = getData('categorias');
+    const c = categorias.find(x => x.id === id);
+    if(!c) return;
+    editContext = { tipo: 'categoria', id };
+    document.getElementById('catFormTitle').textContent = '✏️ Editando Categoria';
+    document.getElementById('catBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('catBtnCancelar').classList.remove('hidden');
+    document.getElementById('catNome').value = c.nome;
+}
+
+function excluirCategoria(id) {
+    if(!confirm('Excluir categoria?')) return;
+    setData('categorias', getData('categorias').filter(c => c.id !== id));
+    carregarCategorias();
+    carregarSelectCategorias();
+}
+
+// ================================================================
+//  CRUD SERVIÇOS
+// ================================================================
+function salvarServico() {
+    const nome = document.getElementById('servNome').value.trim();
+    if(!nome) { alert('Nome é obrigatório'); return; }
+    const servicos = getData('servicos');
+    const data = { nome, descricao: document.getElementById('servDesc').value.trim(), preco: parseFloat(document.getElementById('servPreco').value)||0, tempo: parseInt(document.getElementById('servTempo').value)||0, categoria: document.getElementById('servCategoria').value, status: document.getElementById('servStatus').value };
+    if(editContext.tipo === 'servico' && editContext.id) {
+        const idx = servicos.findIndex(s => s.id === editContext.id);
+        if(idx > -1) { servicos[idx] = { ...servicos[idx], ...data }; setData('servicos', servicos); cancelarEdicao('servico'); }
+    } else {
+        servicos.push({ id: genId(), ...data });
+        setData('servicos', servicos);
+    }
+    document.getElementById('servNome').value = ''; document.getElementById('servDesc').value = ''; document.getElementById('servPreco').value = ''; document.getElementById('servTempo').value = '';
+    carregarServicos();
+    carregarSelectsAgenda();
+}
+
+function carregarServicos() {
+    const servicos = getData('servicos');
+    const container = document.getElementById('servicosLista');
+    if(servicos.length === 0) { container.innerHTML = '<div class="empty">Nenhum</div>'; return; }
+    container.innerHTML = servicos.map(s => `
+        <div class="list-item">
+            <div class="info"><strong>${s.nome}</strong> ${s.categoria?'<span class="badge">'+s.categoria+'</span>':''}<br><span class="text-muted">${formatCurrency(s.preco)} - ${s.tempo}min ${s.status==='ativo'?'':' (inativo)'}</span></div>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="editarServico('${s.id}')">✏️</button>
+                <button class="btn btn-sm btn-danger" onclick="excluirServico('${s.id}')">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function editarServico(id) {
+    const servicos = getData('servicos');
+    const s = servicos.find(x => x.id === id);
+    if(!s) return;
+    editContext = { tipo: 'servico', id };
+    document.getElementById('servFormTitle').textContent = '✏️ Editando Serviço';
+    document.getElementById('servBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('servBtnCancelar').classList.remove('hidden');
+    document.getElementById('servNome').value = s.nome;
+    document.getElementById('servDesc').value = s.descricao||'';
+    document.getElementById('servPreco').value = s.preco||'';
+    document.getElementById('servTempo').value = s.tempo||'';
+    document.getElementById('servCategoria').value = s.categoria||'';
+    document.getElementById('servStatus').value = s.status||'ativo';
+}
+
+function excluirServico(id) {
+    if(!confirm('Excluir serviço?')) return;
+    setData('servicos', getData('servicos').filter(s => s.id !== id));
+    carregarServicos();
+}
+
+function carregarSelectCategorias() {
+    const categorias = getData('categorias');
+    const sel = document.getElementById('servCategoria');
+    sel.innerHTML = '<option value="">Selecione a Categoria</option>';
+    categorias.forEach(c => sel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
+}
+
+// ================================================================
+//  CRUD PLANOS
+// ================================================================
+function salvarPlano() {
+    const nome = document.getElementById('planoNome').value.trim();
+    if(!nome) { alert('Nome é obrigatório'); return; }
+    const planos = getData('planos');
+    const data = { nome, preco: parseFloat(document.getElementById('planoPreco').value)||0, validade: parseInt(document.getElementById('planoValidade').value)||30, qtdCortes: parseInt(document.getElementById('planoQtdCortes').value)||0, qtdBarbas: parseInt(document.getElementById('planoQtdBarbas').value)||0, desconto: parseFloat(document.getElementById('planoDesconto').value)||0, descricao: document.getElementById('planoDesc').value.trim() };
+    if(editContext.tipo === 'plano' && editContext.id) {
+        const idx = planos.findIndex(p => p.id === editContext.id);
+        if(idx > -1) { planos[idx] = { ...planos[idx], ...data }; setData('planos', planos); cancelarEdicao('plano'); }
+    } else {
+        planos.push({ id: genId(), ...data });
+        setData('planos', planos);
+    }
+    document.getElementById('planoNome').value = ''; document.getElementById('planoPreco').value = ''; document.getElementById('planoValidade').value = '30'; document.getElementById('planoQtdCortes').value = ''; document.getElementById('planoQtdBarbas').value = ''; document.getElementById('planoDesconto').value = ''; document.getElementById('planoDesc').value = '';
+    carregarPlanos();
+    carregarSelectsPlanos();
+}
+
+function carregarPlanos() {
+    const planos = getData('planos');
+    const container = document.getElementById('planosLista');
+    if(planos.length === 0) { container.innerHTML = '<div class="empty">Nenhum</div>'; return; }
+    container.innerHTML = planos.map(p => `
+        <div class="list-item">
+            <div class="info"><strong>${p.nome}</strong> ${formatCurrency(p.preco)} (${p.validade}d)<br><span class="text-muted">Cortes: ${p.qtdCortes} | Barbas: ${p.qtdBarbas}</span></div>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="editarPlano('${p.id}')">✏️</button>
+                <button class="btn btn-sm btn-danger" onclick="excluirPlano('${p.id}')">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function editarPlano(id) {
+    const planos = getData('planos');
+    const p = planos.find(x => x.id === id);
+    if(!p) return;
+    editContext = { tipo: 'plano', id };
+    document.getElementById('planoFormTitle').textContent = '✏️ Editando Plano';
+    document.getElementById('planoBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('planoBtnCancelar').classList.remove('hidden');
+    document.getElementById('planoNome').value = p.nome;
+    document.getElementById('planoPreco').value = p.preco||'';
+    document.getElementById('planoValidade').value = p.validade||30;
+    document.getElementById('planoQtdCortes').value = p.qtdCortes||0;
+    document.getElementById('planoQtdBarbas').value = p.qtdBarbas||0;
+    document.getElementById('planoDesconto').value = p.desconto||0;
+    document.getElementById('planoDesc').value = p.descricao||'';
+}
+
+function excluirPlano(id) {
+    if(!confirm('Excluir plano?')) return;
+    setData('planos', getData('planos').filter(p => p.id !== id));
+    carregarPlanos();
+    carregarSelectsPlanos();
+}
+
+function vincularPlano() {
+    const clienteId = document.getElementById('vinculoCliente').value;
+    const planoId = document.getElementById('vinculoPlano').value;
+    const inicio = document.getElementById('vinculoInicio').value;
+    if(!clienteId || !planoId || !inicio) { alert('Preencha todos'); return; }
+    const plano = getData('planos').find(p => p.id === planoId);
+    if(!plano) return;
+    const fim = new Date(inicio); fim.setDate(fim.getDate() + plano.validade);
+    const assinaturas = getData('assinaturas');
+    assinaturas.push({ id: genId(), clienteId, planoId, inicio, fim: fim.toISOString().split('T')[0], status: 'ativo', saldoCortes: plano.qtdCortes, saldoBarbas: plano.qtdBarbas, criadoEm: nowISO() });
+    setData('assinaturas', assinaturas);
+    carregarAssinaturas();
+    atualizarDashboard();
+}
+
+function carregarAssinaturas() {
+    const assinaturas = getData('assinaturas');
+    const container = document.getElementById('assinaturasLista');
+    if(assinaturas.length === 0) { container.innerHTML = '<div class="empty">Nenhuma</div>'; return; }
+    container.innerHTML = assinaturas.map(a => {
+        const cliente = getData('clientes').find(c => c.id === a.clienteId);
+        const plano = getData('planos').find(p => p.id === a.planoId);
+        return `<div class="list-item">
+            <div class="info"><strong>${cliente?cliente.nome:'Cliente'}</strong> - ${plano?plano.nome:'Plano'}<br><span class="text-muted">Vence: ${a.fim} | C:${a.saldoCortes} B:${a.saldoBarbas}</span></div>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="editarAssinatura('${a.id}')">✏️</button>
+                <button class="btn btn-sm btn-danger" onclick="excluirAssinatura('${a.id}')">✕</button>
+                <span class="badge ${a.status==='ativo'?'badge-success':'badge-danger'}">${a.status}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function editarAssinatura(id) {
+    const assinaturas = getData('assinaturas');
+    const a = assinaturas.find(x => x.id === id);
+    if(!a) return;
+    // Usar modal para editar saldo e status
+    const clientes = getData('clientes');
+    const planos = getData('planos');
+    const clienteNome = clientes.find(c=>c.id===a.clienteId)?.nome || 'Cliente';
+    const planoNome = planos.find(p=>p.id===a.planoId)?.nome || 'Plano';
+    document.getElementById('modalTitle').textContent = `✏️ Editando Assinatura - ${clienteNome}`;
+    document.getElementById('modalBody').innerHTML = `
+        <p><strong>Plano:</strong> ${planoNome}</p>
+        <label>Saldo Cortes</label><input type="number" id="editAssCortes" value="${a.saldoCortes||0}">
+        <label>Saldo Barbas</label><input type="number" id="editAssBarbas" value="${a.saldoBarbas||0}">
+        <label>Status</label>
+        <select id="editAssStatus"><option value="ativo" ${a.status==='ativo'?'selected':''}>Ativo</option><option value="expirado" ${a.status==='expirado'?'selected':''}>Expirado</option></select>
+        <label>Data Vencimento</label><input type="date" id="editAssFim" value="${a.fim}">
+    `;
+    document.getElementById('modalConfirmBtn').onclick = function() {
+        const ass = getData('assinaturas');
+        const idx = ass.findIndex(x => x.id === id);
+        if(idx > -1) {
+            ass[idx].saldoCortes = parseInt(document.getElementById('editAssCortes').value)||0;
+            ass[idx].saldoBarbas = parseInt(document.getElementById('editAssBarbas').value)||0;
+            ass[idx].status = document.getElementById('editAssStatus').value;
+            ass[idx].fim = document.getElementById('editAssFim').value;
+            setData('assinaturas', ass);
+            carregarAssinaturas();
+            atualizarDashboard();
+            fecharModal();
+        }
+    };
+    document.getElementById('modalOverlay').classList.add('open');
+}
+
+function excluirAssinatura(id) {
+    if(!confirm('Excluir assinatura?')) return;
+    setData('assinaturas', getData('assinaturas').filter(a => a.id !== id));
+    carregarAssinaturas();
+    atualizarDashboard();
+}
+
+function carregarSelectsPlanos() {
+    const clientes = getData('clientes');
+    const selCli = document.getElementById('vinculoCliente');
+    selCli.innerHTML = '<option value="">Cliente</option>';
+    clientes.forEach(c => selCli.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+    const planos = getData('planos');
+    const selPlano = document.getElementById('vinculoPlano');
+    selPlano.innerHTML = '<option value="">Plano</option>';
+    planos.forEach(p => selPlano.innerHTML += `<option value="${p.id}">${p.nome}</option>`);
+}
+
+// ================================================================
+//  CRUD AGENDA
+// ================================================================
+function carregarAgendaDia() {
+    const data = document.getElementById('agendaData').value || today();
+    const agendamentos = getData('agendamentos').filter(a => a.data && a.data.startsWith(data));
+    document.getElementById('agendaTituloDia').textContent = `📆 Agenda - ${data}`;
+    const container = document.getElementById('agendaLista');
+    if(agendamentos.length === 0) { container.innerHTML = '<div class="empty">Nenhum</div>'; return; }
+    container.innerHTML = agendamentos.sort((a,b)=>a.hora.localeCompare(b.hora)).map(a => {
+        const cliente = getData('clientes').find(c => c.id === a.clienteId);
+        const servico = getData('servicos').find(s => s.id === a.servicoId);
+        return `<div class="list-item">
+            <div class="info"><strong>${a.hora}</strong> - ${cliente?cliente.nome:'Cliente'} ${servico?servico.nome:''}</div>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="editarAgendamento('${a.id}')">✏️</button>
+                <button class="btn btn-sm btn-success" onclick="marcarRealizado('${a.id}')">✔</button>
+                <button class="btn btn-sm btn-danger" onclick="excluirAgendamento('${a.id}')">✕</button>
+                <span class="badge ${a.status==='realizado'?'badge-success':'badge-warning'}">${a.status||'Agendado'}</span>
+            </div>
+        </div>`;
+    }).join('');
+    carregarSelectsAgenda();
+}
+
+function salvarAgendamento() {
+    const clienteId = document.getElementById('agendaClienteSelect').value;
+    const datetime = document.getElementById('agendaDateTime').value;
+    const servicoId = document.getElementById('agendaServicoSelect').value;
+    if(!clienteId || !datetime || !servicoId) { alert('Preencha todos'); return; }
+    const data = datetime.split('T')[0];
+    const hora = datetime.split('T')[1]?.slice(0,5) || '00:00';
+    const agendamentos = getData('agendamentos');
+    if(editContext.tipo === 'agendamento' && editContext.id) {
+        const idx = agendamentos.findIndex(a => a.id === editContext.id);
+        if(idx > -1) { agendamentos[idx] = { ...agendamentos[idx], clienteId, data, hora, servicoId }; setData('agendamentos', agendamentos); cancelarEdicao('agendamento'); }
+    } else {
+        agendamentos.push({ id: genId(), clienteId, data, hora, servicoId, status: 'agendado', criadoEm: nowISO() });
+        setData('agendamentos', agendamentos);
+    }
+    document.getElementById('agendaDateTime').value = '';
+    carregarAgendaDia();
+    atualizarDashboard();
+}
+
+function editarAgendamento(id) {
+    const agendamentos = getData('agendamentos');
+    const a = agendamentos.find(x => x.id === id);
+    if(!a) return;
+    editContext = { tipo: 'agendamento', id };
+    document.getElementById('agendaFormTitle').textContent = '✏️ Editando Agendamento';
+    document.getElementById('agendaBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('agendaBtnCancelar').classList.remove('hidden');
+    document.getElementById('agendaClienteSelect').value = a.clienteId;
+    document.getElementById('agendaDateTime').value = a.data + 'T' + a.hora;
+    document.getElementById('agendaServicoSelect').value = a.servicoId || '';
+}
+
+function marcarRealizado(id) {
+    let agendamentos = getData('agendamentos');
+    const ag = agendamentos.find(a => a.id === id);
+    if(ag) ag.status = 'realizado';
+    setData('agendamentos', agendamentos);
+    carregarAgendaDia();
+    atualizarDashboard();
+}
+
+function excluirAgendamento(id) {
+    if(!confirm('Excluir?')) return;
+    setData('agendamentos', getData('agendamentos').filter(a => a.id !== id));
+    carregarAgendaDia();
+    atualizarDashboard();
+}
+
+function carregarSelectsAgenda() {
+    const clientes = getData('clientes');
+    const selCli = document.getElementById('agendaClienteSelect');
+    const valCli = selCli.value;
+    selCli.innerHTML = '<option value="">Cliente</option>';
+    clientes.forEach(c => selCli.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+    selCli.value = valCli;
+    const servicos = getData('servicos').filter(s => s.status === 'ativo');
+    const selServ = document.getElementById('agendaServicoSelect');
+    const valServ = selServ.value;
+    selServ.innerHTML = '<option value="">Serviço</option>';
+    servicos.forEach(s => selServ.innerHTML += `<option value="${s.id}">${s.nome} (${formatCurrency(s.preco)})</option>`);
+    selServ.value = valServ;
+}
+
+// ================================================================
+//  CRUD RECEITAS
+// ================================================================
+function salvarReceita() {
+    const valor = parseFloat(document.getElementById('finRecValor').value);
+    const desc = document.getElementById('finRecDesc').value.trim();
+    const data = document.getElementById('finRecData').value;
+    if(!valor || valor<=0 || !data) { alert('Valor e data obrigatórios'); return; }
+    const pagamentos = getData('pagamentos');
+    const obj = { id: genId(), clienteId: document.getElementById('finRecCliente').value || null, valor, descricao: desc||'Receita', data, forma: document.getElementById('finRecForma').value, tipo: 'receita', criadoEm: nowISO() };
+    if(editContext.tipo === 'receita' && editContext.id) {
+        const idx = pagamentos.findIndex(p => p.id === editContext.id);
+        if(idx > -1) { pagamentos[idx] = { ...pagamentos[idx], ...obj }; setData('pagamentos', pagamentos); cancelarEdicao('receita'); }
+    } else { pagamentos.push(obj); setData('pagamentos', pagamentos); }
+    document.getElementById('finRecValor').value = ''; document.getElementById('finRecDesc').value = '';
+    carregarReceitas();
+    atualizarDashboard();
+}
+
+function carregarReceitas() {
+    const pagamentos = getData('pagamentos').filter(p => p.tipo === 'receita').sort((a,b)=>b.data.localeCompare(a.data));
+    const container = document.getElementById('receitasLista');
+    if(pagamentos.length === 0) { container.innerHTML = '<div class="empty">Nenhuma</div>'; return; }
+    container.innerHTML = pagamentos.slice(0,30).map(p => {
+        const cliente = p.clienteId ? getData('clientes').find(c => c.id === p.clienteId) : null;
+        return `<div class="list-item">
+            <div class="info">${formatDate(p.data)} - ${p.descricao} ${cliente?'('+cliente.nome+')':''}</div>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="editarReceita('${p.id}')">✏️</button>
+                <button class="btn btn-sm btn-danger" onclick="excluirReceita('${p.id}')">✕</button>
+                <span class="badge badge-success">${formatCurrency(p.valor)}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function editarReceita(id) {
+    const pagamentos = getData('pagamentos');
+    const p = pagamentos.find(x => x.id === id);
+    if(!p) return;
+    editContext = { tipo: 'receita', id };
+    document.getElementById('recFormTitle').textContent = '✏️ Editando Receita';
+    document.getElementById('recBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('recBtnCancelar').classList.remove('hidden');
+    document.getElementById('finRecCliente').value = p.clienteId||'';
+    document.getElementById('finRecValor').value = p.valor||'';
+    document.getElementById('finRecDesc').value = p.descricao||'';
+    document.getElementById('finRecData').value = p.data||'';
+    document.getElementById('finRecForma').value = p.forma||'Dinheiro';
+}
+
+function excluirReceita(id) {
+    if(!confirm('Excluir receita?')) return;
+    setData('pagamentos', getData('pagamentos').filter(p => p.id !== id));
+    carregarReceitas();
+    atualizarDashboard();
+}
+
+// ================================================================
+//  CRUD DESPESAS
+// ================================================================
+function salvarDespesa() {
+    const desc = document.getElementById('finDespDesc').value.trim();
+    const valor = parseFloat(document.getElementById('finDespValor').value);
+    const data = document.getElementById('finDespData').value;
+    if(!desc || !valor || valor<=0 || !data) { alert('Preencha todos'); return; }
+    const despesas = getData('despesas') || [];
+    const obj = { id: genId(), desc, valor, data, categoria: document.getElementById('finDespCategoria').value, criadoEm: nowISO() };
+    if(editContext.tipo === 'despesa' && editContext.id) {
+        const idx = despesas.findIndex(d => d.id === editContext.id);
+        if(idx > -1) { despesas[idx] = { ...despesas[idx], ...obj }; setData('despesas', despesas); cancelarEdicao('despesa'); }
+    } else { despesas.push(obj); setData('despesas', despesas); }
+    document.getElementById('finDespDesc').value = ''; document.getElementById('finDespValor').value = '';
+    carregarDespesas();
+}
+
+function carregarDespesas() {
+    const despesas = getData('despesas').sort((a,b)=>b.data.localeCompare(a.data));
+    const container = document.getElementById('despesasLista');
+    if(despesas.length === 0) { container.innerHTML = '<div class="empty">Nenhuma</div>'; return; }
+    container.innerHTML = despesas.slice(0,30).map(d => `
+        <div class="list-item">
+            <div class="info">${formatDate(d.data)} - ${d.desc} (${d.categoria})</div>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="editarDespesa('${d.id}')">✏️</button>
+                <button class="btn btn-sm btn-danger" onclick="excluirDespesa('${d.id}')">✕</button>
+                <span class="badge badge-danger">${formatCurrency(d.valor)}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
+function editarDespesa(id) {
+    const despesas = getData('despesas');
+    const d = despesas.find(x => x.id === id);
+    if(!d) return;
+    editContext = { tipo: 'despesa', id };
+    document.getElementById('despFormTitle').textContent = '✏️ Editando Despesa';
+    document.getElementById('despBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('despBtnCancelar').classList.remove('hidden');
+    document.getElementById('finDespDesc').value = d.desc||'';
+    document.getElementById('finDespValor').value = d.valor||'';
+    document.getElementById('finDespData').value = d.data||'';
+    document.getElementById('finDespCategoria').value = d.categoria||'Outros';
+}
+
+function excluirDespesa(id) {
+    if(!confirm('Excluir despesa?')) return;
+    setData('despesas', getData('despesas').filter(d => d.id !== id));
+    carregarDespesas();
+}
+
+function gerarRelatorioFinanceiro() {
+    const periodo = document.getElementById('finRelPeriodo').value;
+    const agora = new Date();
+    let inicio = new Date();
+    if(periodo === 'hoje') { /* */ } else if(periodo === 'semana') { inicio.setDate(agora.getDate() - 7); } else if(periodo === 'mes') { inicio.setMonth(agora.getMonth() - 1); } else if(periodo === 'ano') { inicio.setFullYear(agora.getFullYear() - 1); }
+    const inicioStr = inicio.toISOString().split('T')[0];
+    const pagamentos = getData('pagamentos').filter(p => p.tipo === 'receita' && p.data >= inicioStr);
+    const despesas = getData('despesas').filter(d => d.data >= inicioStr);
+    const totalRec = pagamentos.reduce((s,p) => s + parseFloat(p.valor||0), 0);
+    const totalDesp = despesas.reduce((s,d) => s + parseFloat(d.valor||0), 0);
+    document.getElementById('finRelatorioConteudo').innerHTML = `
+        <p><strong>Período:</strong> ${periodo}</p><p><strong>Receitas:</strong> ${formatCurrency(totalRec)}</p>
+        <p><strong>Despesas:</strong> ${formatCurrency(totalDesp)}</p><p><strong>Lucro:</strong> ${formatCurrency(totalRec - totalDesp)}</p>
+    `;
+}
+
+// ================================================================
+//  UTILITÁRIOS: CANCELAR EDIÇÃO, SELECTS, BACKUP, CONFIG
+// ================================================================
+function cancelarEdicao(tipo) {
+    editContext = { tipo: null, id: null };
+    const map = {
+        cliente: { form: 'cliFormTitle', btn: 'cliBtnSalvar', cancel: 'cliBtnCancelar', text: '➕ Novo Cliente' },
+        categoria: { form: 'catFormTitle', btn: 'catBtnSalvar', cancel: 'catBtnCancelar', text: '➕ Nova Categoria' },
+        servico: { form: 'servFormTitle', btn: 'servBtnSalvar', cancel: 'servBtnCancelar', text: '✂️ Novo Serviço' },
+        plano: { form: 'planoFormTitle', btn: 'planoBtnSalvar', cancel: 'planoBtnCancelar', text: '📦 Novo Plano' },
+        agendamento: { form: 'agendaFormTitle', btn: 'agendaBtnSalvar', cancel: 'agendaBtnCancelar', text: '➕ Agendamento' },
+        receita: { form: 'recFormTitle', btn: 'recBtnSalvar', cancel: 'recBtnCancelar', text: '💰 Nova Receita' },
+        despesa: { form: 'despFormTitle', btn: 'despBtnSalvar', cancel: 'despBtnCancelar', text: '📉 Nova Despesa' }
+    };
+    const m = map[tipo];
+    if(m) {
+        document.getElementById(m.form).textContent = m.text;
+        document.getElementById(m.btn).textContent = 'Salvar';
+        document.getElementById(m.cancel).classList.add('hidden');
+        // Limpar campos específicos
+        if(tipo === 'cliente') { document.getElementById('cliNome').value=''; document.getElementById('cliTelefone').value=''; document.getElementById('cliCpf').value=''; document.getElementById('cliNascimento').value=''; document.getElementById('cliEndereco').value=''; document.getElementById('cliObs').value=''; }
+        if(tipo === 'categoria') document.getElementById('catNome').value='';
+        if(tipo === 'servico') { document.getElementById('servNome').value=''; document.getElementById('servDesc').value=''; document.getElementById('servPreco').value=''; document.getElementById('servTempo').value=''; }
+        if(tipo === 'plano') { document.getElementById('planoNome').value=''; document.getElementById('planoPreco').value=''; document.getElementById('planoValidade').value='30'; document.getElementById('planoQtdCortes').value=''; document.getElementById('planoQtdBarbas').value=''; document.getElementById('planoDesconto').value=''; document.getElementById('planoDesc').value=''; }
+        if(tipo === 'agendamento') document.getElementById('agendaDateTime').value='';
+        if(tipo === 'receita') { document.getElementById('finRecValor').value=''; document.getElementById('finRecDesc').value=''; }
+        if(tipo === 'despesa') { document.getElementById('finDespDesc').value=''; document.getElementById('finDespValor').value=''; }
+        carregarTudo();
+    }
+}
+
+function carregarSelectsClientes() {
+    const clientes = getData('clientes');
+    const sel = document.getElementById('finRecCliente');
+    sel.innerHTML = '<option value="">Cliente</option>';
+    clientes.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+}
+
+function fecharModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+
+// ================================================================
+//  BACKUP
+// ================================================================
+function exportarBackup() {
+    const data = {
+        clientes: getData('clientes'), agendamentos: getData('agendamentos'), pagamentos: getData('pagamentos'),
+        despesas: getData('despesas')||[], servicos: getData('servicos'), planos: getData('planos'),
+        assinaturas: getData('assinaturas'), categorias: getData('categorias'),
+        config: { nome: localStorage.getItem('barberShopName'), pin: getPin(), perfil: { nome: localStorage.getItem('perfNome'), telefone: localStorage.getItem('perfTelefone'), email: localStorage.getItem('perfEmail') } },
+        exportedAt: nowISO()
+    };
+    const json = JSON.stringify(data, null, 2);
+    const blob = new Blob([json], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `backup_salao_${today()}.json`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    alert('Backup exportado!');
+}
+
+function importarBackup(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if(!data.clientes) { alert('Arquivo inválido'); return; }
+            if(!confirm('Substituir todos os dados?')) return;
+            setData('clientes', data.clientes||[]);
+            setData('agendamentos', data.agendamentos||[]);
+            setData('pagamentos', data.pagamentos||[]);
+            setData('despesas', data.despesas||[]);
+            setData('servicos', data.servicos||[]);
+            setData('planos', data.planos||[]);
+            setData('assinaturas', data.assinaturas||[]);
+            setData('categorias', data.categorias||[]);
+            if(data.config) {
+                if(data.config.nome) localStorage.setItem('barberShopName', data.config.nome);
+                if(data.config.pin) setPin(data.config.pin);
+                if(data.config.perfil) {
+                    localStorage.setItem('perfNome', data.config.perfil.nome||'');
+                    localStorage.setItem('perfTelefone', data.config.perfil.telefone||'');
+                    localStorage.setItem('perfEmail', data.config.perfil.email||'');
+                }
+            }
+            alert('Restaurado!');
+            carregarTudo();
+        } catch(err) { alert('Erro: '+err.message); }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
+}
+
+function salvarConfig() {
+    const nome = document.getElementById('confNome').value.trim();
+    const pin = document.getElementById('confPin').value.trim();
+    if(nome) localStorage.setItem('barberShopName', nome);
+    if(pin && pin.length===4 && /^\d{4}$/.test(pin)) setPin(pin);
+    else if(pin) alert('PIN deve ter 4 dígitos');
+    document.getElementById('barberShopName').textContent = localStorage.getItem('barberShopName') || '✂️ Meu Salão';
+}
+
+function salvarPerfil() {
+    localStorage.setItem('perfNome', document.getElementById('perfNome').value.trim());
+    localStorage.setItem('perfTelefone', document.getElementById('perfTelefone').value.trim());
+    localStorage.setItem('perfEmail', document.getElementById('perfEmail').value.trim());
+    alert('Perfil salvo!');
+}
+
+function limparTudo() {
+    if(!confirm('⚠️ Apagar TODOS os dados?')) return;
+    if(!confirm('Última chance! Digite "SIM" no prompt.')) return;
+    localStorage.clear();
+    alert('Dados apagados. Recarregue.');
+    location.reload();
+}
+
+// ================================================================
+//  PESQUISA GLOBAL
+// ================================================================
+function globalSearch(texto) {
+    texto = texto.toLowerCase().trim();
+    if(!texto) { carregarClientes(); carregarServicos(); carregarPlanos(); carregarCategorias(); return; }
+    const clientes = getData('clientes').filter(c => c.nome.toLowerCase().includes(texto) || (c.telefone&&c.telefone.includes(texto)));
+    const containerCli = document.getElementById('clientesLista');
+    if(clientes.length === 0) containerCli.innerHTML = '<div class="empty">Nenhum cliente</div>';
+    else {
+        containerCli.innerHTML = clientes.map(c => `
+            <div class="list-item"><div class="info"><strong>${c.nome}</strong> ${c.telefone?'<br><span class="text-muted">'+c.telefone+'</span>':''}</div>
+            <div class="actions"><button class="btn btn-sm btn-primary" onclick="abrirFicha('${c.id}')">📄</button></div></div>
+        `).join('');
+    }
+    const servicos = getData('servicos').filter(s => s.nome.toLowerCase().includes(texto));
+    const containerServ = document.getElementById('servicosLista');
+    if(servicos.length === 0) containerServ.innerHTML = '<div class="empty">Nenhum serviço</div>';
+    else {
+        containerServ.innerHTML = servicos.map(s => `
+            <div class="list-item"><div class="info"><strong>${s.nome}</strong> ${formatCurrency(s.preco)}</div></div>
+        `).join('');
+    }
+}
+
+// ================================================================
+//  INICIAR
+// ================================================================
+initLogin();
+</script>
+</body>
+</html>
