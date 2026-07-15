@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>BarberPro</title>
+    <title>Meu Salão</title>
     <link rel="manifest" href="manifest.json">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, -apple-system, sans-serif; }
@@ -17,19 +17,27 @@
         }
         #loginScreen.hidden { display:none; }
         #loginScreen h1 { color:white; font-size:2.2rem; margin-bottom:8px; }
-        #loginScreen p { color:var(--gray); margin-bottom:30px; }
-        .pin-dots { display:flex; gap:15px; margin-bottom:30px; }
+        #loginScreen p { color:var(--gray); margin-bottom:25px; }
+        .pin-dots { display:flex; gap:15px; margin-bottom:25px; }
         .pin-dot { width:20px; height:20px; border-radius:50%; border:2px solid white; background:transparent; }
         .pin-dot.filled { background:white; }
-        .pin-input { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; max-width:280px; }
-        .pin-input button { width:60px; height:60px; border-radius:50%; border:none; font-size:1.5rem; background:#334155; color:white; font-weight:bold; cursor:pointer; transition:0.1s; }
+        .pin-input {
+            display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;
+            max-width:260px; width:100%;
+        }
+        .pin-input button {
+            width:100%; aspect-ratio:1/1; border-radius:50%; border:none;
+            font-size:1.6rem; background:#334155; color:white; font-weight:bold;
+            cursor:pointer; transition:0.1s;
+        }
         .pin-input button:active { transform:scale(0.9); background:var(--accent); }
         .pin-input button.empty { background:transparent; color:var(--gray); pointer-events:none; }
-        .login-options { margin-top:20px; display:flex; gap:20px; }
+        .login-options { margin-top:20px; display:flex; gap:20px; flex-wrap:wrap; justify-content:center; }
         .login-options button { background:transparent; border:1px solid var(--gray); color:white; padding:8px 18px; border-radius:20px; font-size:0.9rem; cursor:pointer; }
+        .login-options button:hover { background:var(--gray); color:var(--primary); }
 
         #app { flex:1; display:flex; flex-direction:column; height:100%; }
-        .header { background:var(--primary); color:white; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:10px; flex-wrap:wrap; }
+        .header { background:var(--primary); color:white; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:10px; flex-wrap:wrap; }
         .header h2 { font-size:1.1rem; font-weight:600; }
         .header-actions { display:flex; gap:8px; align-items:center; flex:1; max-width:300px; }
         .header-actions input { padding:6px 12px; border-radius:20px; border:none; background:#334155; color:white; width:100%; font-size:0.9rem; }
@@ -46,7 +54,7 @@
         }
         .nav-item {
             background:none; border:none; display:flex; flex-direction:column; align-items:center;
-            font-size:0.6rem; color:var(--gray); cursor:pointer; padding:2px 6px; transition:0.2s; min-width:48px;
+            font-size:0.6rem; color:var(--gray); cursor:pointer; padding:2px 6px; transition:0.2s; min-width:44px;
         }
         .nav-item .nav-icon { font-size:1.4rem; line-height:1.2; }
         .nav-item.active { color:var(--primary); font-weight:600; }
@@ -73,12 +81,13 @@
 
         .list-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f1f5f9; flex-wrap:wrap; gap:4px; }
         .list-item:last-child { border-bottom:none; }
-        .list-item .info { flex:1; }
+        .list-item .info { flex:1; min-width:120px; }
         .list-item .actions { display:flex; gap:4px; flex-wrap:wrap; }
         .badge { background:#e2e8f0; padding:2px 8px; border-radius:20px; font-size:0.65rem; font-weight:600; }
         .badge-success { background:#dcfce7; color:#166534; }
         .badge-danger { background:#fee2e2; color:#991b1b; }
         .badge-warning { background:#fef3c7; color:#92400e; }
+        .badge-info { background:#dbeafe; color:#1e40af; }
         .empty { text-align:center; color:var(--gray); padding:16px 0; font-size:0.9rem; }
 
         .flex-row { display:flex; gap:6px; flex-wrap:wrap; }
@@ -95,7 +104,14 @@
         .modal-box { background:white; width:94%; max-width:450px; max-height:85vh; overflow-y:auto; border-radius:24px; padding:20px; }
         .text-muted { color:var(--gray); font-size:0.75rem; }
         .text-center { text-align:center; }
+        .text-danger { color:var(--danger); font-weight:bold; }
+        .text-success { color:var(--success); font-weight:bold; }
         .hidden { display:none !important; }
+        .mt-8 { margin-top:8px; }
+        .mb-8 { margin-bottom:8px; }
+        .vencido { background:#fee2e2 !important; border-left:4px solid var(--danger); }
+        .em-dia { background:#dcfce7 !important; border-left:4px solid var(--success); }
+
         @media print { body * { visibility:hidden; } #printArea, #printArea * { visibility:visible; } #printArea { position:absolute; top:0; left:0; width:100%; background:white; padding:20px; } .bottom-nav, .header, .no-print { display:none !important; } }
     </style>
 </head>
@@ -103,7 +119,7 @@
 
 <!-- TELA DE LOGIN -->
 <div id="loginScreen">
-    <h1>✂️ BarberPro</h1>
+    <h1>✂️ Meu Salão</h1>
     <p>Digite seu PIN de 4 dígitos</p>
     <div class="pin-dots" id="pinDots">
         <div class="pin-dot" data-i="0"></div><div class="pin-dot" data-i="1"></div>
@@ -125,7 +141,7 @@
 <!-- APP PRINCIPAL -->
 <div id="app" style="display:none;">
     <div class="header no-print">
-        <h2 id="barberShopName">✂️ BarberPro</h2>
+        <h2 id="barberShopName">✂️ Meu Salão</h2>
         <div class="header-actions">
             <input type="text" id="globalSearch" placeholder="🔍 Pesquisar..." oninput="globalSearch(this.value)">
         </div>
@@ -151,8 +167,8 @@
             <div class="card">
                 <div class="card-title" id="cliFormTitle">➕ Novo Cliente</div>
                 <input type="text" id="cliNome" placeholder="Nome *">
-                <input type="text" id="cliTelefone" placeholder="Telefone">
-                <input type="text" id="cliCpf" placeholder="CPF">
+                <input type="text" id="cliTelefone" placeholder="Telefone (XX) XXXXX-XXXX" oninput="mascaraTelefone(this)" maxlength="16">
+                <input type="text" id="cliCpf" placeholder="CPF XXX.XXX.XXX-XX" oninput="mascaraCpf(this)" maxlength="14">
                 <input type="date" id="cliNascimento">
                 <input type="text" id="cliEndereco" placeholder="Endereço">
                 <textarea id="cliObs" placeholder="Observações"></textarea>
@@ -163,9 +179,11 @@
                 <div class="card-title">📋 Lista <span id="qtdClientes" class="badge">0</span></div>
                 <div id="clientesLista"><div class="empty">Nenhum cliente</div></div>
             </div>
+            <!-- FICHA DO CLIENTE -->
             <div id="fichaCliente" style="display:none;" class="card">
                 <div class="card-title" id="fichaNome">Cliente</div>
                 <div id="fichaDados"></div>
+                <div id="fichaPlanoInfo" class="mt-8"></div>
                 <hr><div class="card-title">📜 Histórico</div><div id="fichaHistorico"></div>
                 <hr><div class="card-title">📊 Estatísticas</div><div id="fichaStats"></div>
                 <button class="btn btn-sm btn-outline" onclick="fecharFicha()">Fechar</button>
@@ -193,7 +211,7 @@
                 <input type="text" id="servNome" placeholder="Nome *">
                 <input type="text" id="servDesc" placeholder="Descrição">
                 <input type="number" id="servPreco" placeholder="Preço (R$)" step="0.01">
-                <input type="number" id="servTempo" placeholder="Tempo (min)">
+                <input type="number" id="servTempo" placeholder="Duração (minutos) *" value="30">
                 <select id="servCategoria"><option value="">Selecione a Categoria</option></select>
                 <select id="servStatus"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
                 <button class="btn btn-primary" id="servBtnSalvar" onclick="salvarServico()">Salvar</button>
@@ -224,14 +242,18 @@
                 <div id="planosLista"><div class="empty">Nenhum</div></div>
             </div>
             <div class="card">
-                <div class="card-title">🔗 Vincular Plano</div>
+                <div class="card-title">🔗 Vincular/Assinar Plano</div>
                 <select id="vinculoCliente"><option value="">Cliente</option></select>
                 <select id="vinculoPlano"><option value="">Plano</option></select>
                 <input type="date" id="vinculoInicio" value="">
-                <button class="btn btn-success" onclick="vincularPlano()">Vincular</button>
+                <select id="vinculoFormaPagamento">
+                    <option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option>
+                    <option value="Cartão">Cartão</option><option value="Transferência">Transferência</option>
+                </select>
+                <button class="btn btn-success" onclick="vincularPlano()">Vincular Plano</button>
             </div>
             <div class="card">
-                <div class="card-title">📋 Assinaturas</div>
+                <div class="card-title">📋 Assinaturas Ativas</div>
                 <div id="assinaturasLista"><div class="empty">Nenhuma</div></div>
             </div>
         </div>
@@ -267,7 +289,7 @@
                     <input type="number" id="finRecValor" placeholder="Valor (R$)" step="0.01">
                     <input type="text" id="finRecDesc" placeholder="Descrição">
                     <input type="date" id="finRecData" value="">
-                    <select id="finRecForma"><option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option><option value="Cartão">Cartão</option></select>
+                    <select id="finRecForma"><option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option><option value="Cartão">Cartão</option><option value="Transferência">Transferência</option></select>
                     <button class="btn btn-success" id="recBtnSalvar" onclick="salvarReceita()">Salvar</button>
                     <button class="btn btn-outline hidden" id="recBtnCancelar" onclick="cancelarEdicao('receita')">Cancelar</button>
                 </div>
@@ -304,9 +326,13 @@
                 <label>Nome da Barbearia</label><input type="text" id="confNome" onchange="salvarConfig()">
                 <label>PIN (4 dígitos)</label><input type="password" id="confPin" maxlength="4" onchange="salvarConfig()">
                 <button class="btn btn-primary" onclick="exportarBackup()">📥 Exportar Backup</button>
-                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📤 Importar</button>
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📤 Importar Backup</button>
                 <input type="file" id="fileInput" accept=".json" style="display:none;" onchange="importarBackup(event)">
-                <button class="btn btn-danger" onclick="limparTudo()">🗑️ Apagar Tudo</button>
+            </div>
+            <div class="card" style="border:1px solid var(--danger);">
+                <div class="card-title" style="color:var(--danger);">⚠️ Zona Perigosa</div>
+                <p class="text-muted">Isso apagará TODOS os dados (clientes, agendamentos, planos, finanças).</p>
+                <button class="btn btn-danger" onclick="limparTudo()">🗑️ Apagar Todos os Dados</button>
             </div>
             <div class="card">
                 <div class="card-title">👤 Perfil</div>
@@ -331,7 +357,28 @@
     </div>
 </div>
 
-<div id="printArea" style="display:none;"></div>
+<!-- MODAL PARA ATENDIMENTO -->
+<div class="modal-overlay" id="atendimentoModal">
+    <div class="modal-box">
+        <h3 id="atendimentoTitle">✂️ Atendimento</h3>
+        <div id="atendimentoBody">
+            <p><strong>Cliente:</strong> <span id="atendClienteNome"></span></p>
+            <input type="hidden" id="atendClienteId">
+            <select id="atendServico"><option value="">Selecione o Serviço</option></select>
+            <input type="number" id="atendValor" placeholder="Valor (R$)" step="0.01">
+            <select id="atendFormaPagamento">
+                <option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option>
+                <option value="Cartão">Cartão</option><option value="Transferência">Transferência</option>
+            </select>
+            <div id="atendPlanoInfo" class="mt-8"></div>
+            <div class="flex-row mt-8">
+                <button class="btn btn-success" onclick="finalizarAtendimento(true)">✅ Usar Plano</button>
+                <button class="btn btn-primary" onclick="finalizarAtendimento(false)">💰 Pagamento Avulso</button>
+            </div>
+            <button class="btn btn-outline mt-8" onclick="fecharAtendimento()">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <!-- MODAL DE EDIÇÃO GENÉRICO -->
 <div class="modal-overlay" id="modalOverlay">
@@ -345,6 +392,8 @@
     </div>
 </div>
 
+<div id="printArea" style="display:none;"></div>
+
 <script>
 // ================================================================
 //  BANCO DE DADOS
@@ -354,8 +403,38 @@ function setData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
 function genId() { return Date.now().toString(36)+Math.random().toString(36).substr(2,5); }
 function today() { return new Date().toISOString().split('T')[0]; }
 function nowISO() { return new Date().toISOString(); }
-function formatDate(d) { if(!d) return '--'; let dt=new Date(d); return dt.toLocaleDateString('pt-BR')+' '+dt.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+
+function formatDateBR(d) {
+    if(!d) return '--';
+    let dt = new Date(d+'T00:00:00');
+    if(isNaN(dt)) dt = new Date(d);
+    if(isNaN(dt)) return '--';
+    return dt.toLocaleDateString('pt-BR');
+}
+
+function formatDateTimeBR(d) {
+    if(!d) return '--';
+    let dt = new Date(d);
+    if(isNaN(dt)) return '--';
+    return dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+}
+
 function formatCurrency(v) { return 'R$ '+parseFloat(v||0).toFixed(2).replace('.',','); }
+
+function mascaraTelefone(el) {
+    let v = el.value.replace(/\D/g,'');
+    if(v.length <= 2) el.value = v;
+    else if(v.length <= 7) el.value = '('+v.substring(0,2)+') '+v.substring(2);
+    else el.value = '('+v.substring(0,2)+') '+v.substring(2,7)+'-'+v.substring(7,11);
+}
+
+function mascaraCpf(el) {
+    let v = el.value.replace(/\D/g,'');
+    if(v.length <= 3) el.value = v;
+    else if(v.length <= 6) el.value = v.substring(0,3)+'.'+v.substring(3);
+    else if(v.length <= 9) el.value = v.substring(0,3)+'.'+v.substring(3,6)+'.'+v.substring(6);
+    else el.value = v.substring(0,3)+'.'+v.substring(3,6)+'.'+v.substring(6,9)+'-'+v.substring(9,11);
+}
 
 let editContext = { tipo: null, id: null };
 
@@ -374,6 +453,7 @@ function initLogin() {
     document.getElementById('loginError').textContent = '';
 }
 function atualizarDots() { document.querySelectorAll('.pin-dot').forEach((dot,i) => dot.classList.toggle('filled', i < pinCorrente.length)); }
+
 document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
     btn.addEventListener('click', function() {
         if(pinCorrente.length < 4) {
@@ -423,7 +503,7 @@ document.querySelectorAll('.sub-tab').forEach(btn => {
 });
 
 function carregarTudo() {
-    const nome = localStorage.getItem('barberShopName') || '✂️ BarberPro';
+    const nome = localStorage.getItem('barberShopName') || '✂️ Meu Salão';
     document.getElementById('barberShopName').textContent = nome;
     document.getElementById('confNome').value = nome;
     document.getElementById('confPin').value = getPin();
@@ -465,7 +545,8 @@ function atualizarDashboard() {
     else {
         containerAgenda.innerHTML = agHoje.sort((a,b)=>a.hora.localeCompare(b.hora)).map(a => {
             const cliente = getData('clientes').find(c => c.id === a.clienteId);
-            return `<div class="list-item"><span>${a.hora} - ${cliente?cliente.nome:'Cliente'}</span><span class="badge ${a.status==='realizado'?'badge-success':'badge-warning'}">${a.status||'Agendado'}</span></div>`;
+            const statusMap = { 'agendado':'badge-warning', 'realizado':'badge-success', 'adiado':'badge-info', 'cancelado':'badge-danger' };
+            return `<div class="list-item"><span>${a.hora} - ${cliente?cliente.nome:'Cliente'}</span><span class="badge ${statusMap[a.status]||'badge-warning'}">${a.status||'Agendado'}</span></div>`;
         }).join('');
     }
     const tresDias = new Date(); tresDias.setDate(tresDias.getDate()+3);
@@ -476,7 +557,7 @@ function atualizarDashboard() {
     else {
         containerVen.innerHTML = vencimentos.map(a => {
             const cliente = getData('clientes').find(c => c.id === a.clienteId);
-            return `<div class="list-item"><span>${cliente?cliente.nome:'Cliente'}</span><span class="badge badge-danger">Vence ${a.fim}</span></div>`;
+            return `<div class="list-item"><span>${cliente?cliente.nome:'Cliente'}</span><span class="badge badge-danger">Vence ${formatDateBR(a.fim)}</span></div>`;
         }).join('');
     }
     desenharGraficoReceita();
@@ -496,7 +577,7 @@ function desenharGraficoReceita() {
         const d = new Date(); d.setDate(d.getDate()-i);
         const ds = d.toISOString().split('T')[0];
         const total = pagamentos.filter(p => p.data && p.data.startsWith(ds)).reduce((s,p) => s + parseFloat(p.valor||0), 0);
-        dias.push({label: ds.slice(5), value: total});
+        dias.push({label: formatDateBR(ds), value: total});
     }
     const max = Math.max(...dias.map(d=>d.value), 1);
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -518,7 +599,7 @@ function desenharGraficoReceita() {
 window.addEventListener('resize', function() { if(document.getElementById('tab-dashboard').classList.contains('active')) desenharGraficoReceita(); });
 
 // ================================================================
-//  CRUD CLIENTES (Create, Read, Update, Delete)
+//  CRUD CLIENTES
 // ================================================================
 function salvarCliente() {
     const nome = document.getElementById('cliNome').value.trim();
@@ -551,16 +632,29 @@ function carregarClientes() {
     document.getElementById('qtdClientes').textContent = clientes.length;
     const container = document.getElementById('clientesLista');
     if(clientes.length === 0) { container.innerHTML = '<div class="empty">Nenhum cliente</div>'; return; }
-    container.innerHTML = clientes.map(c => `
-        <div class="list-item">
-            <div class="info"><strong>${c.nome}</strong> ${c.telefone ? '<br><span class="text-muted">'+c.telefone+'</span>' : ''}</div>
+    container.innerHTML = clientes.map(c => {
+        // Verificar plano ativo
+        const assinatura = getData('assinaturas').find(a => a.clienteId === c.id && a.status === 'ativo');
+        const plano = assinatura ? getData('planos').find(p => p.id === assinatura.planoId) : null;
+        let statusTexto = '';
+        let statusClass = '';
+        if(assinatura) {
+            const saldo = (assinatura.saldoCortes || 0) + (assinatura.saldoBarbas || 0);
+            if(saldo <= 0) { statusTexto = '⚠️ Cortes Esgotados!'; statusClass = 'text-danger'; }
+            else { statusTexto = `📦 ${plano?plano.nome:'Plano'} (${saldo} restantes)`; statusClass = 'text-success'; }
+        }
+        return `<div class="list-item">
+            <div class="info" onclick="abrirFicha('${c.id}')" style="cursor:pointer;">
+                <strong>${c.nome}</strong> ${c.telefone ? '<br><span class="text-muted">'+c.telefone+'</span>' : ''}
+                ${statusTexto ? '<br><span class="'+statusClass+'">'+statusTexto+'</span>' : ''}
+            </div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarCliente('${c.id}')">✏️</button>
-                <button class="btn btn-sm btn-primary" onclick="abrirFicha('${c.id}')">📄</button>
+                <button class="btn btn-sm btn-success" onclick="abrirAtendimento('${c.id}')">✂️</button>
                 <button class="btn btn-sm btn-danger" onclick="excluirCliente('${c.id}')">✕</button>
             </div>
-        </div>
-    `).join('');
+        </div>`;
+    }).join('');
 }
 
 function editarCliente(id) {
@@ -597,25 +691,204 @@ function abrirFicha(id) {
     if(!cliente) return;
     document.getElementById('fichaCliente').style.display = 'block';
     document.getElementById('fichaNome').textContent = cliente.nome;
+    
     const agendamentos = getData('agendamentos').filter(a => a.clienteId === id).sort((a,b)=>b.data.localeCompare(a.data));
     const pagamentos = getData('pagamentos').filter(p => p.clienteId === id);
-    document.getElementById('fichaDados').innerHTML = `<p><strong>Telefone:</strong> ${cliente.telefone||'--'}</p><p><strong>CPF:</strong> ${cliente.cpf||'--'}</p><p><strong>Nasc:</strong> ${cliente.nascimento||'--'}</p><p><strong>Obs:</strong> ${cliente.obs||'--'}</p>`;
+    const assinatura = getData('assinaturas').find(a => a.clienteId === id && a.status === 'ativo');
+    const plano = assinatura ? getData('planos').find(p => p.id === assinatura.planoId) : null;
+    
+    document.getElementById('fichaDados').innerHTML = `
+        <p><strong>Telefone:</strong> ${cliente.telefone||'--'}</p>
+        <p><strong>CPF:</strong> ${cliente.cpf||'--'}</p>
+        <p><strong>Nasc:</strong> ${cliente.nascimento ? formatDateBR(cliente.nascimento) : '--'}</p>
+        <p><strong>Obs:</strong> ${cliente.obs||'--'}</p>
+    `;
+    
+    // Informações do Plano
+    const planoInfo = document.getElementById('fichaPlanoInfo');
+    if(assinatura && plano) {
+        const saldo = (assinatura.saldoCortes || 0) + (assinatura.saldoBarbas || 0);
+        const statusPlano = assinatura.fim < today() ? 'VENCIDO' : 'Em dia';
+        const statusClass = assinatura.fim < today() ? 'text-danger' : 'text-success';
+        planoInfo.innerHTML = `
+            <div class="card" style="background:#f8fafc;">
+                <p><strong>📦 Plano:</strong> ${plano.nome}</p>
+                <p><strong>Saldo:</strong> ${saldo} cortes restantes ${saldo <= 0 ? '⚠️ <span class="text-danger">ESGOTADO</span>' : ''}</p>
+                <p><strong>Vencimento:</strong> ${formatDateBR(assinatura.fim)}</p>
+                <p><strong>Status:</strong> <span class="${statusClass}">${statusPlano}</span></p>
+                <p><strong>Forma Pagto:</strong> ${assinatura.formaPagamento || '--'}</p>
+                <button class="btn btn-sm btn-accent" onclick="editarAssinatura('${assinatura.id}')">✏️ Alterar Plano</button>
+                <button class="btn btn-sm btn-danger" onclick="cancelarAssinatura('${assinatura.id}')">❌ Cancelar Plano</button>
+            </div>
+        `;
+    } else {
+        planoInfo.innerHTML = `<p class="text-muted">🔹 Cliente sem plano ativo</p>`;
+    }
+    
+    // Histórico
     let historico = [];
-    agendamentos.forEach(a => { const s = getData('servicos').find(ss => ss.id === a.servicoId); historico.push({ data: a.data, desc: s?s.nome:'Serviço', valor: a.valor||0, tipo: 'Atendimento', status: a.status }); });
-    pagamentos.forEach(p => { historico.push({ data: p.data, desc: p.descricao||'Pagamento', valor: p.valor, tipo: 'Pagamento', status: 'pago' }); });
+    agendamentos.forEach(a => {
+        const s = getData('servicos').find(ss => ss.id === a.servicoId);
+        historico.push({ data: a.data, desc: s?s.nome:'Serviço', valor: a.valor||0, tipo: 'Atendimento', status: a.status });
+    });
+    pagamentos.forEach(p => {
+        historico.push({ data: p.data, desc: p.descricao||'Pagamento', valor: p.valor, tipo: 'Pagamento', status: 'pago' });
+    });
     historico.sort((a,b)=>b.data.localeCompare(a.data));
     const containerHist = document.getElementById('fichaHistorico');
     if(historico.length === 0) containerHist.innerHTML = '<div class="empty">Nenhum</div>';
-    else containerHist.innerHTML = historico.slice(0,20).map(h => `<div class="list-item"><span>${formatDate(h.data)} - ${h.desc}</span><span class="badge ${h.tipo==='Pagamento'?'badge-success':'badge-warning'}">${h.tipo} ${formatCurrency(h.valor)}</span></div>`).join('');
+    else containerHist.innerHTML = historico.slice(0,20).map(h => `
+        <div class="list-item">
+            <span>${formatDateTimeBR(h.data)} - ${h.desc}</span>
+            <span class="badge ${h.tipo==='Pagamento'?'badge-success':'badge-warning'}">${h.tipo} ${formatCurrency(h.valor)}</span>
+        </div>
+    `).join('');
+    
+    // Estatísticas
     const totalGasto = pagamentos.reduce((s,p) => s + parseFloat(p.valor||0), 0);
     const visitas = agendamentos.filter(a => a.status === 'realizado').length;
     const ultima = agendamentos.filter(a => a.status === 'realizado').sort((a,b)=>b.data.localeCompare(a.data))[0];
     let mediaDias = '--';
     const datas = agendamentos.filter(a => a.status === 'realizado').map(a => a.data).sort();
     if(datas.length > 1) { let total=0; for(let i=1; i<datas.length; i++) { total += Math.floor((new Date(datas[i]) - new Date(datas[i-1])) / (1000*60*60*24)); } mediaDias = (total/(datas.length-1)).toFixed(1); }
-    document.getElementById('fichaStats').innerHTML = `<p><strong>Total:</strong> ${formatCurrency(totalGasto)}</p><p><strong>Visitas:</strong> ${visitas}</p><p><strong>Última:</strong> ${ultima?formatDate(ultima.data):'--'}</p><p><strong>Média dias:</strong> ${mediaDias}</p>`;
+    document.getElementById('fichaStats').innerHTML = `
+        <p><strong>Total gasto:</strong> ${formatCurrency(totalGasto)}</p>
+        <p><strong>Visitas:</strong> ${visitas}</p>
+        <p><strong>Última:</strong> ${ultima ? formatDateTimeBR(ultima.data) : '--'}</p>
+        <p><strong>Média dias:</strong> ${mediaDias}</p>
+    `;
 }
 function fecharFicha() { document.getElementById('fichaCliente').style.display = 'none'; }
+
+// ================================================================
+//  ATENDIMENTO (BOTÃO ✂️)
+// ================================================================
+let atendimentoClienteId = null;
+
+function abrirAtendimento(clienteId) {
+    const cliente = getData('clientes').find(c => c.id === clienteId);
+    if(!cliente) return;
+    atendimentoClienteId = clienteId;
+    document.getElementById('atendClienteNome').textContent = cliente.nome;
+    document.getElementById('atendClienteId').value = clienteId;
+    
+    // Carregar serviços
+    const servicos = getData('servicos').filter(s => s.status === 'ativo');
+    const selServ = document.getElementById('atendServico');
+    selServ.innerHTML = '<option value="">Selecione o Serviço</option>';
+    servicos.forEach(s => selServ.innerHTML += `<option value="${s.id}" data-preco="${s.preco}" data-tempo="${s.tempo||30}">${s.nome} - ${formatCurrency(s.preco)} (${s.tempo||30}min)</option>`);
+    selServ.onchange = function() {
+        const preco = parseFloat(this.options[this.selectedIndex]?.dataset.preco) || 0;
+        document.getElementById('atendValor').value = preco;
+    };
+    document.getElementById('atendValor').value = '';
+    
+    // Verificar plano
+    const assinatura = getData('assinaturas').find(a => a.clienteId === clienteId && a.status === 'ativo');
+    const plano = assinatura ? getData('planos').find(p => p.id === assinatura.planoId) : null;
+    const planoInfo = document.getElementById('atendPlanoInfo');
+    if(assinatura && plano) {
+        const saldo = (assinatura.saldoCortes || 0) + (assinatura.saldoBarbas || 0);
+        const vencido = assinatura.fim < today();
+        planoInfo.innerHTML = `
+            <div style="background:#f0fdf4;padding:10px;border-radius:8px;margin-top:8px;">
+                <p><strong>📦 Plano:</strong> ${plano.nome} | <strong>Saldo:</strong> ${saldo} cortes</p>
+                <p><strong>Vencimento:</strong> ${formatDateBR(assinatura.fim)} ${vencido ? '⚠️ <span class="text-danger">VENCIDO</span>' : ''}</p>
+                <p class="text-muted" style="font-size:0.8rem;">Clique em "Usar Plano" para abater 1 corte</p>
+            </div>
+        `;
+    } else {
+        planoInfo.innerHTML = `<p class="text-muted">🔹 Cliente sem plano ativo</p>`;
+    }
+    
+    document.getElementById('atendimentoModal').classList.add('open');
+}
+
+function finalizarAtendimento(usarPlano) {
+    const clienteId = document.getElementById('atendClienteId').value;
+    const servicoId = document.getElementById('atendServico').value;
+    const valor = parseFloat(document.getElementById('atendValor').value);
+    const forma = document.getElementById('atendFormaPagamento').value;
+    
+    if(!servicoId) { alert('Selecione o serviço realizado'); return; }
+    if(!usarPlano && (!valor || valor <= 0)) { alert('Digite o valor do serviço'); return; }
+    
+    const servico = getData('servicos').find(s => s.id === servicoId);
+    const hoje = today();
+    const agora = new Date();
+    const hora = agora.getHours().toString().padStart(2,'0') + ':' + agora.getMinutes().toString().padStart(2,'0');
+    
+    // Criar agendamento como realizado
+    const agendamentos = getData('agendamentos');
+    agendamentos.push({
+        id: genId(),
+        clienteId: clienteId || null,
+        servicoId: servicoId,
+        data: hoje,
+        hora: hora,
+        status: 'realizado',
+        valor: usarPlano ? 0 : valor,
+        criadoEm: nowISO()
+    });
+    setData('agendamentos', agendamentos);
+    
+    if(usarPlano) {
+        // Usar plano: abater saldo
+        const assinaturas = getData('assinaturas');
+        const ass = assinaturas.find(a => a.clienteId === clienteId && a.status === 'ativo');
+        if(ass) {
+            if(ass.saldoCortes > 0) ass.saldoCortes -= 1;
+            else if(ass.saldoBarbas > 0) ass.saldoBarbas -= 1;
+            else { alert('Saldo insuficiente!'); return; }
+            setData('assinaturas', assinaturas);
+            // Registrar no caixa como R$0 (já foi pago no plano)
+            const pagamentos = getData('pagamentos');
+            pagamentos.push({
+                id: genId(),
+                clienteId: clienteId,
+                valor: 0,
+                descricao: `Corte via Plano - ${servico?servico.nome:'Serviço'}`,
+                data: hoje,
+                forma: 'Plano',
+                tipo: 'receita',
+                criadoEm: nowISO()
+            });
+            setData('pagamentos', pagamentos);
+            alert(`✅ Corte realizado com sucesso! Saldo restante: ${(ass.saldoCortes||0) + (ass.saldoBarbas||0)} cortes.`);
+        } else {
+            alert('❌ Cliente não possui plano ativo!');
+            return;
+        }
+    } else {
+        // Pagamento avulso
+        if(valor > 0) {
+            const pagamentos = getData('pagamentos');
+            pagamentos.push({
+                id: genId(),
+                clienteId: clienteId || null,
+                valor: valor,
+                descricao: servico ? servico.nome : 'Serviço Avulso',
+                data: hoje,
+                forma: forma,
+                tipo: 'receita',
+                criadoEm: nowISO()
+            });
+            setData('pagamentos', pagamentos);
+            alert(`💰 Pagamento de ${formatCurrency(valor)} registrado com sucesso!`);
+        }
+    }
+    
+    fecharAtendimento();
+    carregarClientes();
+    carregarAgendaDia();
+    carregarReceitas();
+    atualizarDashboard();
+}
+
+function fecharAtendimento() {
+    document.getElementById('atendimentoModal').classList.remove('open');
+    atendimentoClienteId = null;
+}
 
 // ================================================================
 //  CRUD CATEGORIAS
@@ -676,7 +949,7 @@ function salvarServico() {
     const nome = document.getElementById('servNome').value.trim();
     if(!nome) { alert('Nome é obrigatório'); return; }
     const servicos = getData('servicos');
-    const data = { nome, descricao: document.getElementById('servDesc').value.trim(), preco: parseFloat(document.getElementById('servPreco').value)||0, tempo: parseInt(document.getElementById('servTempo').value)||0, categoria: document.getElementById('servCategoria').value, status: document.getElementById('servStatus').value };
+    const data = { nome, descricao: document.getElementById('servDesc').value.trim(), preco: parseFloat(document.getElementById('servPreco').value)||0, tempo: parseInt(document.getElementById('servTempo').value)||30, categoria: document.getElementById('servCategoria').value, status: document.getElementById('servStatus').value };
     if(editContext.tipo === 'servico' && editContext.id) {
         const idx = servicos.findIndex(s => s.id === editContext.id);
         if(idx > -1) { servicos[idx] = { ...servicos[idx], ...data }; setData('servicos', servicos); cancelarEdicao('servico'); }
@@ -684,7 +957,7 @@ function salvarServico() {
         servicos.push({ id: genId(), ...data });
         setData('servicos', servicos);
     }
-    document.getElementById('servNome').value = ''; document.getElementById('servDesc').value = ''; document.getElementById('servPreco').value = ''; document.getElementById('servTempo').value = '';
+    document.getElementById('servNome').value = ''; document.getElementById('servDesc').value = ''; document.getElementById('servPreco').value = ''; document.getElementById('servTempo').value = '30';
     carregarServicos();
     carregarSelectsAgenda();
 }
@@ -695,7 +968,7 @@ function carregarServicos() {
     if(servicos.length === 0) { container.innerHTML = '<div class="empty">Nenhum</div>'; return; }
     container.innerHTML = servicos.map(s => `
         <div class="list-item">
-            <div class="info"><strong>${s.nome}</strong> ${s.categoria?'<span class="badge">'+s.categoria+'</span>':''}<br><span class="text-muted">${formatCurrency(s.preco)} - ${s.tempo}min ${s.status==='ativo'?'':' (inativo)'}</span></div>
+            <div class="info"><strong>${s.nome}</strong> ${s.categoria?'<span class="badge">'+s.categoria+'</span>':''}<br><span class="text-muted">${formatCurrency(s.preco)} - ${s.tempo||30}min ${s.status==='ativo'?'':' (inativo)'}</span></div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarServico('${s.id}')">✏️</button>
                 <button class="btn btn-sm btn-danger" onclick="excluirServico('${s.id}')">✕</button>
@@ -715,7 +988,7 @@ function editarServico(id) {
     document.getElementById('servNome').value = s.nome;
     document.getElementById('servDesc').value = s.descricao||'';
     document.getElementById('servPreco').value = s.preco||'';
-    document.getElementById('servTempo').value = s.tempo||'';
+    document.getElementById('servTempo').value = s.tempo||30;
     document.getElementById('servCategoria').value = s.categoria||'';
     document.getElementById('servStatus').value = s.status||'ativo';
 }
@@ -734,7 +1007,7 @@ function carregarSelectCategorias() {
 }
 
 // ================================================================
-//  CRUD PLANOS
+//  CRUD PLANOS E ASSINATURAS
 // ================================================================
 function salvarPlano() {
     const nome = document.getElementById('planoNome').value.trim();
@@ -796,29 +1069,66 @@ function vincularPlano() {
     const clienteId = document.getElementById('vinculoCliente').value;
     const planoId = document.getElementById('vinculoPlano').value;
     const inicio = document.getElementById('vinculoInicio').value;
+    const formaPagamento = document.getElementById('vinculoFormaPagamento').value;
     if(!clienteId || !planoId || !inicio) { alert('Preencha todos'); return; }
     const plano = getData('planos').find(p => p.id === planoId);
     if(!plano) return;
     const fim = new Date(inicio); fim.setDate(fim.getDate() + plano.validade);
     const assinaturas = getData('assinaturas');
-    assinaturas.push({ id: genId(), clienteId, planoId, inicio, fim: fim.toISOString().split('T')[0], status: 'ativo', saldoCortes: plano.qtdCortes, saldoBarbas: plano.qtdBarbas, criadoEm: nowISO() });
+    assinaturas.push({
+        id: genId(),
+        clienteId,
+        planoId,
+        inicio,
+        fim: fim.toISOString().split('T')[0],
+        status: 'ativo',
+        saldoCortes: plano.qtdCortes,
+        saldoBarbas: plano.qtdBarbas,
+        formaPagamento: formaPagamento,
+        criadoEm: nowISO()
+    });
     setData('assinaturas', assinaturas);
+    
+    // Registrar pagamento do plano
+    const pagamentos = getData('pagamentos');
+    pagamentos.push({
+        id: genId(),
+        clienteId: clienteId,
+        valor: plano.preco,
+        descricao: `Assinatura ${plano.nome}`,
+        data: today(),
+        forma: formaPagamento,
+        tipo: 'receita',
+        criadoEm: nowISO()
+    });
+    setData('pagamentos', pagamentos);
+    
     carregarAssinaturas();
+    carregarPlanos();
+    carregarReceitas();
     atualizarDashboard();
+    alert(`✅ Plano ${plano.nome} vinculado com sucesso! R$ ${plano.preco} registrado no caixa.`);
 }
 
 function carregarAssinaturas() {
-    const assinaturas = getData('assinaturas');
+    const assinaturas = getData('assinaturas').sort((a,b) => a.fim.localeCompare(b.fim));
     const container = document.getElementById('assinaturasLista');
     if(assinaturas.length === 0) { container.innerHTML = '<div class="empty">Nenhuma</div>'; return; }
     container.innerHTML = assinaturas.map(a => {
         const cliente = getData('clientes').find(c => c.id === a.clienteId);
         const plano = getData('planos').find(p => p.id === a.planoId);
-        return `<div class="list-item">
-            <div class="info"><strong>${cliente?cliente.nome:'Cliente'}</strong> - ${plano?plano.nome:'Plano'}<br><span class="text-muted">Vence: ${a.fim} | C:${a.saldoCortes} B:${a.saldoBarbas}</span></div>
+        const vencido = a.fim < today();
+        const saldo = (a.saldoCortes||0) + (a.saldoBarbas||0);
+        const statusClass = a.status === 'ativo' ? (vencido ? 'vencido' : 'em-dia') : '';
+        return `<div class="list-item ${statusClass}" style="${vencido && a.status === 'ativo' ? 'border-left:4px solid var(--danger);' : ''}">
+            <div class="info">
+                <strong>${cliente?cliente.nome:'Cliente'}</strong> - ${plano?plano.nome:'Plano'}
+                <br><span class="text-muted">Vence: ${formatDateBR(a.fim)} | Saldo: ${saldo} cortes | Pagto: ${a.formaPagamento||'--'}</span>
+                ${vencido && a.status === 'ativo' ? '<br><span class="text-danger">⚠️ MENSALIDADE VENCIDA</span>' : ''}
+            </div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarAssinatura('${a.id}')">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirAssinatura('${a.id}')">✕</button>
+                <button class="btn btn-sm btn-danger" onclick="cancelarAssinatura('${a.id}')">❌</button>
                 <span class="badge ${a.status==='ativo'?'badge-success':'badge-danger'}">${a.status}</span>
             </div>
         </div>`;
@@ -829,7 +1139,6 @@ function editarAssinatura(id) {
     const assinaturas = getData('assinaturas');
     const a = assinaturas.find(x => x.id === id);
     if(!a) return;
-    // Usar modal para editar saldo e status
     const clientes = getData('clientes');
     const planos = getData('planos');
     const clienteNome = clientes.find(c=>c.id===a.clienteId)?.nome || 'Cliente';
@@ -842,15 +1151,32 @@ function editarAssinatura(id) {
         <label>Status</label>
         <select id="editAssStatus"><option value="ativo" ${a.status==='ativo'?'selected':''}>Ativo</option><option value="expirado" ${a.status==='expirado'?'selected':''}>Expirado</option></select>
         <label>Data Vencimento</label><input type="date" id="editAssFim" value="${a.fim}">
+        <label>Forma de Pagamento</label>
+        <select id="editAssForma"><option value="Dinheiro" ${a.formaPagamento==='Dinheiro'?'selected':''}>Dinheiro</option><option value="PIX" ${a.formaPagamento==='PIX'?'selected':''}>PIX</option><option value="Cartão" ${a.formaPagamento==='Cartão'?'selected':''}>Cartão</option><option value="Transferência" ${a.formaPagamento==='Transferência'?'selected':''}>Transferência</option></select>
+        <label>Alterar Plano</label>
+        <select id="editAssPlano">
+            <option value="">Manter plano atual</option>
+            ${planos.map(p => `<option value="${p.id}" ${p.id===a.planoId?'selected':''}>${p.nome}</option>`).join('')}
+        </select>
     `;
     document.getElementById('modalConfirmBtn').onclick = function() {
         const ass = getData('assinaturas');
         const idx = ass.findIndex(x => x.id === id);
         if(idx > -1) {
+            const novoPlanoId = document.getElementById('editAssPlano').value;
+            if(novoPlanoId) {
+                const novoPlano = getData('planos').find(p => p.id === novoPlanoId);
+                if(novoPlano) {
+                    ass[idx].planoId = novoPlanoId;
+                    ass[idx].saldoCortes = novoPlano.qtdCortes;
+                    ass[idx].saldoBarbas = novoPlano.qtdBarbas;
+                }
+            }
             ass[idx].saldoCortes = parseInt(document.getElementById('editAssCortes').value)||0;
             ass[idx].saldoBarbas = parseInt(document.getElementById('editAssBarbas').value)||0;
             ass[idx].status = document.getElementById('editAssStatus').value;
             ass[idx].fim = document.getElementById('editAssFim').value;
+            ass[idx].formaPagamento = document.getElementById('editAssForma').value;
             setData('assinaturas', ass);
             carregarAssinaturas();
             atualizarDashboard();
@@ -860,11 +1186,17 @@ function editarAssinatura(id) {
     document.getElementById('modalOverlay').classList.add('open');
 }
 
-function excluirAssinatura(id) {
-    if(!confirm('Excluir assinatura?')) return;
-    setData('assinaturas', getData('assinaturas').filter(a => a.id !== id));
-    carregarAssinaturas();
-    atualizarDashboard();
+function cancelarAssinatura(id) {
+    if(!confirm('Cancelar esta assinatura?')) return;
+    const assinaturas = getData('assinaturas');
+    const idx = assinaturas.findIndex(a => a.id === id);
+    if(idx > -1) {
+        assinaturas[idx].status = 'expirado';
+        setData('assinaturas', assinaturas);
+        carregarAssinaturas();
+        atualizarDashboard();
+        alert('Assinatura cancelada!');
+    }
 }
 
 function carregarSelectsPlanos() {
@@ -879,24 +1211,26 @@ function carregarSelectsPlanos() {
 }
 
 // ================================================================
-//  CRUD AGENDA
+//  CRUD AGENDA (COM VERIFICAÇÃO DE CONFLITO DE HORÁRIO)
 // ================================================================
 function carregarAgendaDia() {
     const data = document.getElementById('agendaData').value || today();
     const agendamentos = getData('agendamentos').filter(a => a.data && a.data.startsWith(data));
-    document.getElementById('agendaTituloDia').textContent = `📆 Agenda - ${data}`;
+    document.getElementById('agendaTituloDia').textContent = `📆 Agenda - ${formatDateBR(data)}`;
     const container = document.getElementById('agendaLista');
     if(agendamentos.length === 0) { container.innerHTML = '<div class="empty">Nenhum</div>'; return; }
+    const statusMap = { 'agendado':'badge-warning', 'realizado':'badge-success', 'adiado':'badge-info', 'cancelado':'badge-danger' };
     container.innerHTML = agendamentos.sort((a,b)=>a.hora.localeCompare(b.hora)).map(a => {
         const cliente = getData('clientes').find(c => c.id === a.clienteId);
         const servico = getData('servicos').find(s => s.id === a.servicoId);
         return `<div class="list-item">
-            <div class="info"><strong>${a.hora}</strong> - ${cliente?cliente.nome:'Cliente'} ${servico?servico.nome:''}</div>
+            <div class="info"><strong>${a.hora}</strong> - ${cliente?cliente.nome:'Cliente'} ${servico?servico.nome:''} (${servico?servico.tempo||30:30}min)</div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarAgendamento('${a.id}')">✏️</button>
                 <button class="btn btn-sm btn-success" onclick="marcarRealizado('${a.id}')">✔</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirAgendamento('${a.id}')">✕</button>
-                <span class="badge ${a.status==='realizado'?'badge-success':'badge-warning'}">${a.status||'Agendado'}</span>
+                <button class="btn btn-sm btn-warning" onclick="marcarAdiado('${a.id}')" style="background:#f59e0b;color:white;">⏳</button>
+                <button class="btn btn-sm btn-danger" onclick="marcarCancelado('${a.id}')">✕</button>
+                <span class="badge ${statusMap[a.status]||'badge-warning'}">${a.status||'Agendado'}</span>
             </div>
         </div>`;
     }).join('');
@@ -910,7 +1244,22 @@ function salvarAgendamento() {
     if(!clienteId || !datetime || !servicoId) { alert('Preencha todos'); return; }
     const data = datetime.split('T')[0];
     const hora = datetime.split('T')[1]?.slice(0,5) || '00:00';
+    const servico = getData('servicos').find(s => s.id === servicoId);
+    const duracao = servico ? (servico.tempo || 30) : 30;
+    
+    // Verificar conflito de horário
     const agendamentos = getData('agendamentos');
+    const conflito = agendamentos.some(a => {
+        if(a.data !== data || a.id === editContext.id) return false;
+        const aHora = a.hora.split(':').map(Number);
+        const aMin = aHora[0]*60 + aHora[1];
+        const nHora = hora.split(':').map(Number);
+        const nMin = nHora[0]*60 + nHora[1];
+        const aDur = getData('servicos').find(s => s.id === a.servicoId)?.tempo || 30;
+        return (nMin < aMin + aDur && nMin + duracao > aMin);
+    });
+    if(conflito) { alert('⚠️ Conflito de horário! Este horário já está ocupado por outro agendamento.'); return; }
+    
     if(editContext.tipo === 'agendamento' && editContext.id) {
         const idx = agendamentos.findIndex(a => a.id === editContext.id);
         if(idx > -1) { agendamentos[idx] = { ...agendamentos[idx], clienteId, data, hora, servicoId }; setData('agendamentos', agendamentos); cancelarEdicao('agendamento'); }
@@ -939,7 +1288,38 @@ function editarAgendamento(id) {
 function marcarRealizado(id) {
     let agendamentos = getData('agendamentos');
     const ag = agendamentos.find(a => a.id === id);
-    if(ag) ag.status = 'realizado';
+    if(ag) {
+        ag.status = 'realizado';
+        // Abrir atendimento para registro de pagamento
+        if(ag.clienteId) {
+            abrirAtendimento(ag.clienteId);
+            // Pré-selecionar serviço
+            if(ag.servicoId) {
+                document.getElementById('atendServico').value = ag.servicoId;
+                const preco = parseFloat(document.getElementById('atendServico').selectedOptions[0]?.dataset.preco) || 0;
+                document.getElementById('atendValor').value = preco;
+            }
+        }
+    }
+    setData('agendamentos', agendamentos);
+    carregarAgendaDia();
+    atualizarDashboard();
+}
+
+function marcarAdiado(id) {
+    let agendamentos = getData('agendamentos');
+    const ag = agendamentos.find(a => a.id === id);
+    if(ag) { ag.status = 'adiado'; }
+    setData('agendamentos', agendamentos);
+    carregarAgendaDia();
+    atualizarDashboard();
+}
+
+function marcarCancelado(id) {
+    if(!confirm('Cancelar este agendamento?')) return;
+    let agendamentos = getData('agendamentos');
+    const ag = agendamentos.find(a => a.id === id);
+    if(ag) { ag.status = 'cancelado'; }
     setData('agendamentos', agendamentos);
     carregarAgendaDia();
     atualizarDashboard();
@@ -963,7 +1343,7 @@ function carregarSelectsAgenda() {
     const selServ = document.getElementById('agendaServicoSelect');
     const valServ = selServ.value;
     selServ.innerHTML = '<option value="">Serviço</option>';
-    servicos.forEach(s => selServ.innerHTML += `<option value="${s.id}">${s.nome} (${formatCurrency(s.preco)})</option>`);
+    servicos.forEach(s => selServ.innerHTML += `<option value="${s.id}">${s.nome} (${formatCurrency(s.preco)}) - ${s.tempo||30}min</option>`);
     selServ.value = valServ;
 }
 
@@ -993,7 +1373,7 @@ function carregarReceitas() {
     container.innerHTML = pagamentos.slice(0,30).map(p => {
         const cliente = p.clienteId ? getData('clientes').find(c => c.id === p.clienteId) : null;
         return `<div class="list-item">
-            <div class="info">${formatDate(p.data)} - ${p.descricao} ${cliente?'('+cliente.nome+')':''}</div>
+            <div class="info">${formatDateTimeBR(p.data)} - ${p.descricao} ${cliente?'('+cliente.nome+')':''}</div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarReceita('${p.id}')">✏️</button>
                 <button class="btn btn-sm btn-danger" onclick="excluirReceita('${p.id}')">✕</button>
@@ -1049,7 +1429,7 @@ function carregarDespesas() {
     if(despesas.length === 0) { container.innerHTML = '<div class="empty">Nenhuma</div>'; return; }
     container.innerHTML = despesas.slice(0,30).map(d => `
         <div class="list-item">
-            <div class="info">${formatDate(d.data)} - ${d.desc} (${d.categoria})</div>
+            <div class="info">${formatDateTimeBR(d.data)} - ${d.desc} (${d.categoria})</div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarDespesa('${d.id}')">✏️</button>
                 <button class="btn btn-sm btn-danger" onclick="excluirDespesa('${d.id}')">✕</button>
@@ -1096,7 +1476,7 @@ function gerarRelatorioFinanceiro() {
 }
 
 // ================================================================
-//  UTILITÁRIOS: CANCELAR EDIÇÃO, SELECTS, BACKUP, CONFIG
+//  UTILITÁRIOS
 // ================================================================
 function cancelarEdicao(tipo) {
     editContext = { tipo: null, id: null };
@@ -1114,10 +1494,9 @@ function cancelarEdicao(tipo) {
         document.getElementById(m.form).textContent = m.text;
         document.getElementById(m.btn).textContent = 'Salvar';
         document.getElementById(m.cancel).classList.add('hidden');
-        // Limpar campos específicos
         if(tipo === 'cliente') { document.getElementById('cliNome').value=''; document.getElementById('cliTelefone').value=''; document.getElementById('cliCpf').value=''; document.getElementById('cliNascimento').value=''; document.getElementById('cliEndereco').value=''; document.getElementById('cliObs').value=''; }
         if(tipo === 'categoria') document.getElementById('catNome').value='';
-        if(tipo === 'servico') { document.getElementById('servNome').value=''; document.getElementById('servDesc').value=''; document.getElementById('servPreco').value=''; document.getElementById('servTempo').value=''; }
+        if(tipo === 'servico') { document.getElementById('servNome').value=''; document.getElementById('servDesc').value=''; document.getElementById('servPreco').value=''; document.getElementById('servTempo').value='30'; }
         if(tipo === 'plano') { document.getElementById('planoNome').value=''; document.getElementById('planoPreco').value=''; document.getElementById('planoValidade').value='30'; document.getElementById('planoQtdCortes').value=''; document.getElementById('planoQtdBarbas').value=''; document.getElementById('planoDesconto').value=''; document.getElementById('planoDesc').value=''; }
         if(tipo === 'agendamento') document.getElementById('agendaDateTime').value='';
         if(tipo === 'receita') { document.getElementById('finRecValor').value=''; document.getElementById('finRecDesc').value=''; }
@@ -1153,7 +1532,7 @@ function exportarBackup() {
     a.href = url; a.download = `backup_salao_${today()}.json`;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    alert('Backup exportado!');
+    alert('Backup exportado! Guarde este arquivo em local seguro.');
 }
 
 function importarBackup(event) {
@@ -1164,7 +1543,7 @@ function importarBackup(event) {
         try {
             const data = JSON.parse(e.target.result);
             if(!data.clientes) { alert('Arquivo inválido'); return; }
-            if(!confirm('Substituir todos os dados?')) return;
+            if(!confirm('Substituir todos os dados atuais?')) return;
             setData('clientes', data.clientes||[]);
             setData('agendamentos', data.agendamentos||[]);
             setData('pagamentos', data.pagamentos||[]);
@@ -1182,7 +1561,7 @@ function importarBackup(event) {
                     localStorage.setItem('perfEmail', data.config.perfil.email||'');
                 }
             }
-            alert('Restaurado!');
+            alert('Dados restaurados com sucesso!');
             carregarTudo();
         } catch(err) { alert('Erro: '+err.message); }
     };
@@ -1196,7 +1575,7 @@ function salvarConfig() {
     if(nome) localStorage.setItem('barberShopName', nome);
     if(pin && pin.length===4 && /^\d{4}$/.test(pin)) setPin(pin);
     else if(pin) alert('PIN deve ter 4 dígitos');
-    document.getElementById('barberShopName').textContent = localStorage.getItem('barberShopName') || '✂️ BarberPro';
+    document.getElementById('barberShopName').textContent = localStorage.getItem('barberShopName') || '✂️ Meu Salão';
 }
 
 function salvarPerfil() {
@@ -1207,10 +1586,12 @@ function salvarPerfil() {
 }
 
 function limparTudo() {
-    if(!confirm('⚠️ Apagar TODOS os dados?')) return;
-    if(!confirm('Última chance! Digite "SIM" no prompt.')) return;
+    if(!confirm('⚠️ ATENÇÃO! Isso vai apagar TODOS os dados permanentemente.')) return;
+    if(!confirm('Última chance! Digite "SIM" no prompt para confirmar.')) return;
+    const confirmacao = prompt('Digite "SIM" para confirmar a exclusão de todos os dados:');
+    if(confirmacao !== 'SIM') { alert('Operação cancelada.'); return; }
     localStorage.clear();
-    alert('Dados apagados. Recarregue.');
+    alert('Todos os dados foram apagados. A página será recarregada.');
     location.reload();
 }
 
