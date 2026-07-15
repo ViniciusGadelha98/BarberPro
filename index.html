@@ -119,7 +119,7 @@
 
 <!-- TELA DE LOGIN -->
 <div id="loginScreen">
-    <h1>✂️  BarberPro</h1>
+    <h1>✂️ BarberPro</h1>
     <p>Digite seu PIN de 4 dígitos</p>
     <div class="pin-dots" id="pinDots">
         <div class="pin-dot" data-i="0"></div><div class="pin-dot" data-i="1"></div>
@@ -131,8 +131,11 @@
         <button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button>
         <button class="empty"></button><button data-v="0">0</button><button id="pinBack">⌫</button>
     </div>
+    <!-- BOTÃO ENTRAR (novo) -->
+    <button id="btnLoginConfirm" style="margin-top:20px; padding:12px 40px; background:var(--accent); color:var(--primary); border:none; border-radius:30px; font-size:1.2rem; font-weight:bold; cursor:pointer; width:auto; display:inline-block;">
+        ✅ Entrar
+    </button>
     <div id="loginError" style="color:#f87171; margin-top:10px;"></div>
-    <!-- Botões removidos! Agora só tem o teclado -->
 </div>
 
 <!-- APP PRINCIPAL -->
@@ -1628,6 +1631,22 @@ function globalSearch(texto) {
 // ================================================================
 //  INICIAR
 // ================================================================
+// Botão "Entrar" para mobile
+document.getElementById('btnLoginConfirm').addEventListener('click', function() {
+    if(pinCorrente.length === 4) {
+        if(pinCorrente === getPin()) {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('app').style.display = 'flex';
+            carregarTudo();
+        } else {
+            document.getElementById('loginError').textContent = 'PIN incorreto!';
+            pinCorrente = '';
+            atualizarDots();
+        }
+    } else {
+        document.getElementById('loginError').textContent = 'Digite os 4 dígitos completos!';
+    }
+});
 initLogin();
 </script>
 </body>
