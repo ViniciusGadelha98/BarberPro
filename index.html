@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Meu Salão</title>
+    <title>Barber Pro</title>
     <link rel="manifest" href="manifest.json">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, -apple-system, sans-serif; }
@@ -131,17 +131,14 @@
         <button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button>
         <button class="empty"></button><button data-v="0">0</button><button id="pinBack">⌫</button>
     </div>
-    <div class="login-options">
-        <button id="btnChangePin">Alterar PIN</button>
-        <button id="btnResetPin">Redefinir</button>
-    </div>
     <div id="loginError" style="color:#f87171; margin-top:10px;"></div>
+    <!-- Botões removidos! Agora só tem o teclado -->
 </div>
 
 <!-- APP PRINCIPAL -->
 <div id="app" style="display:none;">
     <div class="header no-print">
-        <h2 id="barberShopName">✂️ Meu Salão</h2>
+        <h2 id="barberShopName">✂️ Barber Pro</h2>
         <div class="header-actions">
             <input type="text" id="globalSearch" placeholder="🔍 Pesquisar..." oninput="globalSearch(this.value)">
         </div>
@@ -467,11 +464,6 @@ document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
     });
 });
 document.getElementById('pinBack').addEventListener('click', function() { pinCorrente = pinCorrente.slice(0,-1); atualizarDots(); });
-document.getElementById('btnChangePin').addEventListener('click', function() {
-    const novo = prompt('Digite o novo PIN de 4 dígitos:');
-    if(novo && novo.length===4 && /^\d{4}$/.test(novo)) { setPin(novo); alert('PIN alterado!'); initLogin(); } else alert('Inválido');
-});
-document.getElementById('btnResetPin').addEventListener('click', function() { if(confirm('Redefinir para 1234?')) { setPin('1234'); alert('Redefinido'); initLogin(); } });
 
 // ================================================================
 //  NAVEGAÇÃO
@@ -503,7 +495,7 @@ document.querySelectorAll('.sub-tab').forEach(btn => {
 });
 
 function carregarTudo() {
-    const nome = localStorage.getItem('barberShopName') || '✂️ Meu Salão';
+    const nome = localStorage.getItem('barberShopName') || '✂️ Barber Pro';
     document.getElementById('barberShopName').textContent = nome;
     document.getElementById('confNome').value = nome;
     document.getElementById('confPin').value = getPin();
@@ -1571,10 +1563,23 @@ function importarBackup(event) {
 
 function salvarConfig() {
     const nome = document.getElementById('confNome').value.trim();
-    const pin = document.getElementById('confPin').value.trim();
+    const pinNovo = document.getElementById('confPin').value.trim();
     if(nome) localStorage.setItem('barberShopName', nome);
-    if(pin && pin.length===4 && /^\d{4}$/.test(pin)) setPin(pin);
-    else if(pin) alert('PIN deve ter 4 dígitos');
+    if(pinNovo) {
+        if(pinNovo.length !== 4 || !/^\d{4}$/.test(pinNovo)) {
+            alert('O PIN deve ter exatamente 4 dígitos numéricos.');
+            return;
+        }
+        // Pede a confirmação do PIN atual
+        const pinAtual = prompt('Digite seu PIN atual para confirmar a alteração:');
+        if(pinAtual !== getPin()) {
+            alert('PIN atual incorreto! Alteração cancelada.');
+            document.getElementById('confPin').value = getPin(); // restaura o valor
+            return;
+        }
+        setPin(pinNovo);
+        alert('PIN alterado com sucesso!');
+    }
     document.getElementById('barberShopName').textContent = localStorage.getItem('barberShopName') || '✂️ Meu Salão';
 }
 

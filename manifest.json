@@ -1,6 +1,6 @@
 {
-  "name": "Meu Salão - Gestão de Cortes",
-  "short_name": "Meu Salão",
+  "name": "Barber Pro - Gestão de Cortes",
+  "short_name": "Barber Pro",
   "description": "Gerencie clientes, agendamentos e pagamentos offline.",
   "start_url": "/",
   "display": "standalone",
