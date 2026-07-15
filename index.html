@@ -4,106 +4,209 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Barber Pro</title>
+    <!-- ÍCONES PROFISSIONAIS (Font Awesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; font-family: system-ui, -apple-system, sans-serif; }
-        body { background:#f5f7fb; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-        :root { --primary:#1e293b; --primary-light:#334155; --accent:#f59e0b; --success:#22c55e; --danger:#ef4444; --gray:#94a3b8; }
+        /* ========== RESET E VARIÁVEIS ========== */
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        body { background:#f0f2f5; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+        :root { 
+            --primary: #0f172a; 
+            --primary-light: #1e293b; 
+            --accent: #f59e0b; 
+            --success: #10b981; 
+            --danger: #ef4444; 
+            --gray: #94a3b8; 
+            --bg: #f1f5f9;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            --radius: 16px;
+        }
 
+        /* ========== TELA DE LOGIN ========== */
         #loginScreen {
             position:fixed; top:0; left:0; width:100%; height:100%;
             background:var(--primary); display:flex; align-items:center; justify-content:center;
-            z-index:9999; flex-direction:column; padding:20px;
+            z-index:9999; flex-direction:column; padding:24px;
         }
         #loginScreen.hidden { display:none; }
-        #loginScreen h1 { color:white; font-size:2.2rem; margin-bottom:8px; }
-        #loginScreen p { color:var(--gray); margin-bottom:25px; }
-        .pin-dots { display:flex; gap:15px; margin-bottom:25px; }
-        .pin-dot { width:20px; height:20px; border-radius:50%; border:2px solid white; background:transparent; }
-        .pin-dot.filled { background:white; }
+        #loginScreen h1 { 
+            color:white; font-size:2.4rem; font-weight:700; margin-bottom:4px;
+            display:flex; align-items:center; gap:12px;
+        }
+        #loginScreen h1 i { color:var(--accent); font-size:2.2rem; }
+        #loginScreen p { color:var(--gray); margin-bottom:28px; font-size:1rem; }
+        .pin-dots { display:flex; gap:16px; margin-bottom:28px; }
+        .pin-dot { 
+            width:22px; height:22px; border-radius:50%; 
+            border:2px solid rgba(255,255,255,0.4); 
+            background:transparent; 
+            transition:0.2s;
+        }
+        .pin-dot.filled { background:white; border-color:white; }
         .pin-input {
-            display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;
-            max-width:260px; width:100%;
+            display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
+            max-width:280px; width:100%;
         }
         .pin-input button {
             width:100%; aspect-ratio:1/1; border-radius:50%; border:none;
-            font-size:1.6rem; background:#334155; color:white; font-weight:bold;
-            cursor:pointer; transition:0.1s;
+            font-size:1.6rem; background:#334155; color:white; font-weight:600;
+            cursor:pointer; transition:0.15s;
         }
-        .pin-input button:active { transform:scale(0.9); background:var(--accent); }
+        .pin-input button:active { transform:scale(0.92); background:var(--accent); }
         .pin-input button.empty { background:transparent; color:var(--gray); pointer-events:none; }
-        #loginError { color:#f87171; margin-top:10px; font-size:0.9rem; }
+        #btnLoginConfirm {
+            margin-top:24px; padding:14px 48px; background:var(--accent); color:var(--primary);
+            border:none; border-radius:40px; font-size:1.1rem; font-weight:700;
+            cursor:pointer; transition:0.2s; width:auto; display:inline-block;
+        }
+        #btnLoginConfirm:active { transform:scale(0.96); }
+        #loginError { color:#f87171; margin-top:12px; font-size:0.9rem; }
 
+        /* ========== APP ========== */
         #app { flex:1; display:flex; flex-direction:column; height:100%; }
-        .header { background:var(--primary); color:white; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:10px; flex-wrap:wrap; }
-        .header h2 { font-size:1.1rem; font-weight:600; }
-        .header-actions { display:flex; gap:8px; align-items:center; flex:1; max-width:300px; }
-        .header-actions input { padding:6px 12px; border-radius:20px; border:none; background:#334155; color:white; width:100%; font-size:0.9rem; }
-        .header-actions input::placeholder { color:var(--gray); }
 
-        .main-content { flex:1; overflow-y:auto; padding:12px; padding-bottom:75px; }
+        /* CABEÇALHO */
+        .header {
+            background:var(--primary); color:white; padding:16px 20px;
+            display:flex; justify-content:space-between; align-items:center;
+            flex-shrink:0; gap:12px; flex-wrap:wrap;
+        }
+        .header h2 { 
+            font-size:1.2rem; font-weight:700; 
+            display:flex; align-items:center; gap:10px;
+        }
+        .header h2 i { color:var(--accent); }
+        .header-actions { display:flex; gap:10px; align-items:center; flex:1; max-width:320px; }
+        .header-actions input {
+            padding:10px 16px; border-radius:30px; border:none;
+            background:#334155; color:white; width:100%; font-size:0.95rem;
+        }
+        .header-actions input::placeholder { color:var(--gray); }
+        .header-actions input:focus { outline:2px solid var(--accent); }
+
+        /* CONTEÚDO */
+        .main-content { flex:1; overflow-y:auto; padding:16px; padding-bottom:85px; }
         .tab-page { display:none; animation:fade .3s; }
         .tab-page.active { display:block; }
-        @keyframes fade { from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)} }
+        @keyframes fade { from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)} }
 
+        /* NAVEGAÇÃO INFERIOR */
         .bottom-nav {
-            position:fixed; bottom:0; left:0; right:0; background:white; border-top:1px solid #e2e8f0;
-            display:flex; justify-content:space-around; padding:4px 0 8px; z-index:100; overflow-x:auto;
+            position:fixed; bottom:0; left:0; right:0; background:white;
+            border-top:1px solid #e2e8f0;
+            display:flex; justify-content:space-around; padding:8px 0 12px;
+            z-index:100; overflow-x:auto;
         }
         .nav-item {
-            background:none; border:none; display:flex; flex-direction:column; align-items:center;
-            font-size:0.6rem; color:var(--gray); cursor:pointer; padding:2px 6px; transition:0.2s; min-width:44px;
+            background:none; border:none; display:flex; flex-direction:column;
+            align-items:center; font-size:0.6rem; color:var(--gray);
+            cursor:pointer; padding:4px 10px; transition:0.2s; min-width:48px;
+            gap:2px;
         }
-        .nav-item .nav-icon { font-size:1.4rem; line-height:1.2; }
+        .nav-item i { font-size:1.6rem; }
         .nav-item.active { color:var(--primary); font-weight:600; }
-        .nav-item.active .nav-icon { color:var(--accent); }
+        .nav-item.active i { color:var(--accent); }
 
-        .card { background:white; border-radius:16px; padding:14px; margin-bottom:12px; box-shadow:0 2px 8px rgba(0,0,0,0.04); }
-        .card-title { font-weight:600; font-size:0.95rem; margin-bottom:10px; color:var(--primary); display:flex; justify-content:space-between; align-items:center; }
-        .grid-cards { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-        .stat-card { background:#f8fafc; border-radius:12px; padding:10px; text-align:center; }
-        .stat-card .number { font-size:1.3rem; font-weight:700; color:var(--primary); }
-        .stat-card .label { font-size:0.65rem; color:var(--gray); }
+        /* CARDS */
+        .card {
+            background:white; border-radius:var(--radius); padding:18px;
+            margin-bottom:14px; box-shadow:var(--card-shadow);
+        }
+        .card-title {
+            font-weight:600; font-size:1rem; margin-bottom:12px;
+            color:var(--primary); display:flex; justify-content:space-between;
+            align-items:center;
+        }
+        .card-title i { color:var(--accent); margin-right:8px; }
 
-        input, select, textarea, button { width:100%; padding:8px 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:0.9rem; margin-bottom:6px; }
-        input:focus, select:focus, textarea:focus { outline:2px solid var(--accent); border-color:transparent; }
-        textarea { resize:vertical; min-height:50px; }
-        .btn { font-weight:600; border:none; cursor:pointer; transition:0.15s; }
-        .btn:active { transform:scale(0.95); }
+        /* ESTATÍSTICAS */
+        .grid-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+        .stat-card {
+            background:#f8fafc; border-radius:12px; padding:14px;
+            text-align:center; transition:0.2s;
+        }
+        .stat-card .number { 
+            font-size:1.6rem; font-weight:700; color:var(--primary); 
+            display:flex; align-items:center; justify-content:center; gap:6px;
+        }
+        .stat-card .number i { font-size:1.4rem; color:var(--accent); }
+        .stat-card .label { font-size:0.7rem; color:var(--gray); margin-top:4px; }
+
+        /* FORMULÁRIOS */
+        input, select, textarea, .btn {
+            width:100%; padding:12px 14px; border:1px solid #e2e8f0;
+            border-radius:12px; font-size:0.95rem; margin-bottom:8px;
+            transition:0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline:2px solid var(--accent); border-color:transparent;
+        }
+        textarea { resize:vertical; min-height:60px; }
+        .btn {
+            font-weight:600; border:none; cursor:pointer; transition:0.15s;
+            display:inline-flex; align-items:center; justify-content:center;
+            gap:8px; padding:14px;
+        }
+        .btn:active { transform:scale(0.96); }
         .btn-primary { background:var(--primary); color:white; }
         .btn-success { background:var(--success); color:white; }
         .btn-danger { background:var(--danger); color:white; }
         .btn-accent { background:var(--accent); color:var(--primary); }
         .btn-outline { background:transparent; border:1px solid var(--gray); color:var(--primary); }
-        .btn-sm { padding:3px 10px; font-size:0.75rem; width:auto; display:inline-block; }
+        .btn-sm { padding:8px 14px; font-size:0.8rem; width:auto; display:inline-flex; }
 
-        .list-item { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid #f1f5f9; flex-wrap:wrap; gap:4px; }
+        /* LISTAS */
+        .list-item {
+            display:flex; justify-content:space-between; align-items:center;
+            padding:12px 0; border-bottom:1px solid #f1f5f9; flex-wrap:wrap;
+            gap:6px;
+        }
         .list-item:last-child { border-bottom:none; }
         .list-item .info { flex:1; min-width:120px; }
-        .list-item .actions { display:flex; gap:4px; flex-wrap:wrap; }
-        .badge { background:#e2e8f0; padding:2px 8px; border-radius:20px; font-size:0.65rem; font-weight:600; }
+        .list-item .actions { display:flex; gap:6px; flex-wrap:wrap; }
+
+        .badge {
+            background:#e2e8f0; padding:4px 12px; border-radius:30px;
+            font-size:0.7rem; font-weight:600; display:inline-flex;
+            align-items:center; gap:4px;
+        }
         .badge-success { background:#dcfce7; color:#166534; }
         .badge-danger { background:#fee2e2; color:#991b1b; }
         .badge-warning { background:#fef3c7; color:#92400e; }
         .badge-info { background:#dbeafe; color:#1e40af; }
-        .empty { text-align:center; color:var(--gray); padding:16px 0; font-size:0.9rem; }
+        .empty { text-align:center; color:var(--gray); padding:20px 0; font-size:0.9rem; }
 
-        .flex-row { display:flex; gap:6px; flex-wrap:wrap; }
-        .flex-row .btn { flex:1; min-width:60px; }
-        .sub-tabs { display:flex; gap:4px; background:#f1f5f9; border-radius:12px; padding:4px; margin-bottom:12px; flex-wrap:wrap; }
-        .sub-tab { flex:1; text-align:center; padding:5px; border-radius:8px; font-size:0.75rem; font-weight:500; background:transparent; border:none; cursor:pointer; min-width:60px; }
-        .sub-tab.active { background:white; box-shadow:0 1px 4px rgba(0,0,0,0.05); }
+        /* FLEX E UTILITÁRIOS */
+        .flex-row { display:flex; gap:8px; flex-wrap:wrap; }
+        .flex-row .btn { flex:1; min-width:80px; }
+        .sub-tabs {
+            display:flex; gap:6px; background:#f1f5f9;
+            border-radius:14px; padding:6px; margin-bottom:16px;
+            flex-wrap:wrap;
+        }
+        .sub-tab {
+            flex:1; text-align:center; padding:8px 12px; border-radius:10px;
+            font-size:0.8rem; font-weight:500; background:transparent;
+            border:none; cursor:pointer; min-width:60px;
+            transition:0.2s; color:var(--gray);
+        }
+        .sub-tab.active { background:white; box-shadow:0 2px 8px rgba(0,0,0,0.06); color:var(--primary); }
 
+        /* MODAL */
         .modal-overlay {
-            position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5);
-            display:none; align-items:center; justify-content:center; z-index:999;
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.5); display:none; align-items:center;
+            justify-content:center; z-index:999;
         }
         .modal-overlay.open { display:flex; }
-        .modal-box { background:white; width:94%; max-width:450px; max-height:85vh; overflow-y:auto; border-radius:24px; padding:20px; }
-        .text-muted { color:var(--gray); font-size:0.75rem; }
-        .text-center { text-align:center; }
-        .text-danger { color:var(--danger); font-weight:bold; }
-        .text-success { color:var(--success); font-weight:bold; }
+        .modal-box {
+            background:white; width:94%; max-width:450px; max-height:85vh;
+            overflow-y:auto; border-radius:28px; padding:24px;
+        }
+        .text-muted { color:var(--gray); font-size:0.8rem; }
+        .text-danger { color:var(--danger); font-weight:600; }
+        .text-success { color:var(--success); font-weight:600; }
         .hidden { display:none !important; }
         .mt-8 { margin-top:8px; }
         .mb-8 { margin-bottom:8px; }
@@ -115,9 +218,9 @@
 </head>
 <body>
 
-<!-- TELA DE LOGIN -->
+<!-- ==================== TELA DE LOGIN ==================== -->
 <div id="loginScreen">
-    <h1>✂️ BarberPro</h1>
+    <h1><i class="fas fa-cut"></i> BarberPro</h1>
     <p>Digite seu PIN de 4 dígitos</p>
     <div class="pin-dots" id="pinDots">
         <div class="pin-dot" data-i="0"></div><div class="pin-dot" data-i="1"></div>
@@ -127,18 +230,16 @@
         <button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button>
         <button data-v="4">4</button><button data-v="5">5</button><button data-v="6">6</button>
         <button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button>
-        <button class="empty"></button><button data-v="0">0</button><button id="pinBack">⌫</button>
+        <button class="empty"></button><button data-v="0">0</button><button id="pinBack"><i class="fas fa-delete-left"></i></button>
     </div>
-    <button id="btnLoginConfirm" style="margin-top:20px; padding:12px 40px; background:var(--accent); color:var(--primary); border:none; border-radius:30px; font-size:1.2rem; font-weight:bold; cursor:pointer; width:auto; display:inline-block;">
-        ✅ Entrar
-    </button>
-    <div id="loginError" style="color:#f87171; margin-top:10px;"></div>
+    <button id="btnLoginConfirm"><i class="fas fa-arrow-right"></i> Entrar</button>
+    <div id="loginError"></div>
 </div>
 
-<!-- APP PRINCIPAL -->
+<!-- ==================== APP PRINCIPAL ==================== -->
 <div id="app" style="display:none;">
     <div class="header no-print">
-        <h2 id="barberShopName">✂️ Barber Pro</h2>
+        <h2><i class="fas fa-cut"></i> BarberPro</h2>
         <div class="header-actions">
             <input type="text" id="globalSearch" placeholder="🔍 Pesquisar..." oninput="globalSearch(this.value)">
         </div>
@@ -148,54 +249,54 @@
 
         <!-- DASHBOARD -->
         <div id="tab-dashboard" class="tab-page active">
-            <div class="grid-cards" id="dashCards">
-                <div class="stat-card"><div class="number" id="dashFaturamentoHoje">R$0</div><div class="label">💰 Hoje</div></div>
-                <div class="stat-card"><div class="number" id="dashAgendamentosHoje">0</div><div class="label">📅 Agenda</div></div>
-                <div class="stat-card"><div class="number" id="dashCortesHoje">0</div><div class="label">✂️ Cortes</div></div>
-                <div class="stat-card"><div class="number" id="dashPlanosAtivos">0</div><div class="label">⭐ Planos</div></div>
+            <div class="grid-cards">
+                <div class="stat-card"><div class="number"><i class="fas fa-coins"></i> <span id="dashFaturamentoHoje">R$0</span></div><div class="label">💰 Hoje</div></div>
+                <div class="stat-card"><div class="number"><i class="fas fa-calendar-day"></i> <span id="dashAgendamentosHoje">0</span></div><div class="label">📅 Agenda</div></div>
+                <div class="stat-card"><div class="number"><i class="fas fa-cut"></i> <span id="dashCortesHoje">0</span></div><div class="label">✂️ Cortes</div></div>
+                <div class="stat-card"><div class="number"><i class="fas fa-crown"></i> <span id="dashPlanosAtivos">0</span></div><div class="label">⭐ Planos</div></div>
             </div>
-            <div class="card"><div class="card-title">📋 Agenda de Hoje</div><div id="agendaHojeList"><div class="empty">Nenhum</div></div></div>
-            <div class="card"><div class="card-title">⏳ Vencimentos (3 dias)</div><div id="proximosVencimentos"><div class="empty">Nenhum</div></div></div>
-            <div class="card"><div class="card-title">📊 Receita 7 Dias</div><canvas id="graficoReceita" height="80" style="width:100%;"></canvas></div>
+            <div class="card"><div class="card-title"><i class="fas fa-calendar-check"></i> Agenda de Hoje</div><div id="agendaHojeList"><div class="empty">Nenhum</div></div></div>
+            <div class="card"><div class="card-title"><i class="fas fa-clock"></i> Vencimentos (3 dias)</div><div id="proximosVencimentos"><div class="empty">Nenhum</div></div></div>
+            <div class="card"><div class="card-title"><i class="fas fa-chart-simple"></i> Receita 7 Dias</div><canvas id="graficoReceita" height="80" style="width:100%;"></canvas></div>
         </div>
 
         <!-- CLIENTES -->
         <div id="tab-clientes" class="tab-page">
             <div class="card">
-                <div class="card-title" id="cliFormTitle">➕ Novo Cliente</div>
+                <div class="card-title" id="cliFormTitle"><i class="fas fa-user-plus"></i> Novo Cliente</div>
                 <input type="text" id="cliNome" placeholder="Nome *">
                 <input type="text" id="cliTelefone" placeholder="Telefone (XX) XXXXX-XXXX" oninput="mascaraTelefone(this)" maxlength="16">
                 <input type="text" id="cliCpf" placeholder="CPF XXX.XXX.XXX-XX" oninput="mascaraCpf(this)" maxlength="14">
                 <input type="date" id="cliNascimento">
                 <input type="text" id="cliEndereco" placeholder="Endereço">
                 <textarea id="cliObs" placeholder="Observações"></textarea>
-                <button class="btn btn-primary" id="cliBtnSalvar" onclick="salvarCliente()">Salvar Cliente</button>
-                <button class="btn btn-outline hidden" id="cliBtnCancelar" onclick="cancelarEdicao('cliente')">Cancelar</button>
+                <button class="btn btn-primary" id="cliBtnSalvar" onclick="salvarCliente()"><i class="fas fa-save"></i> Salvar Cliente</button>
+                <button class="btn btn-outline hidden" id="cliBtnCancelar" onclick="cancelarEdicao('cliente')"><i class="fas fa-times"></i> Cancelar</button>
             </div>
             <div class="card">
-                <div class="card-title">📋 Lista <span id="qtdClientes" class="badge">0</span></div>
+                <div class="card-title"><i class="fas fa-users"></i> Lista <span id="qtdClientes" class="badge">0</span></div>
                 <div id="clientesLista"><div class="empty">Nenhum cliente</div></div>
             </div>
             <div id="fichaCliente" style="display:none;" class="card">
-                <div class="card-title" id="fichaNome">Cliente</div>
+                <div class="card-title" id="fichaNome"><i class="fas fa-user"></i> Cliente</div>
                 <div id="fichaDados"></div>
                 <div id="fichaPlanoInfo" class="mt-8"></div>
-                <hr><div class="card-title">📜 Histórico</div><div id="fichaHistorico"></div>
-                <hr><div class="card-title">📊 Estatísticas</div><div id="fichaStats"></div>
-                <button class="btn btn-sm btn-outline" onclick="fecharFicha()">Fechar</button>
+                <hr><div class="card-title"><i class="fas fa-history"></i> Histórico</div><div id="fichaHistorico"></div>
+                <hr><div class="card-title"><i class="fas fa-chart-simple"></i> Estatísticas</div><div id="fichaStats"></div>
+                <button class="btn btn-sm btn-outline" onclick="fecharFicha()"><i class="fas fa-close"></i> Fechar</button>
             </div>
         </div>
 
         <!-- CATEGORIAS -->
         <div id="tab-categorias" class="tab-page">
             <div class="card">
-                <div class="card-title" id="catFormTitle">➕ Nova Categoria</div>
+                <div class="card-title" id="catFormTitle"><i class="fas fa-tag"></i> Nova Categoria</div>
                 <input type="text" id="catNome" placeholder="Nome da Categoria *">
-                <button class="btn btn-primary" id="catBtnSalvar" onclick="salvarCategoria()">Salvar</button>
-                <button class="btn btn-outline hidden" id="catBtnCancelar" onclick="cancelarEdicao('categoria')">Cancelar</button>
+                <button class="btn btn-primary" id="catBtnSalvar" onclick="salvarCategoria()"><i class="fas fa-save"></i> Salvar</button>
+                <button class="btn btn-outline hidden" id="catBtnCancelar" onclick="cancelarEdicao('categoria')"><i class="fas fa-times"></i> Cancelar</button>
             </div>
             <div class="card">
-                <div class="card-title">📋 Categorias</div>
+                <div class="card-title"><i class="fas fa-list"></i> Categorias</div>
                 <div id="categoriasLista"><div class="empty">Nenhuma categoria</div></div>
             </div>
         </div>
@@ -203,41 +304,41 @@
         <!-- SERVIÇOS -->
         <div id="tab-servicos" class="tab-page">
             <div class="card">
-                <div class="card-title" id="servFormTitle">✂️ Novo Serviço</div>
+                <div class="card-title" id="servFormTitle"><i class="fas fa-scissors"></i> Novo Serviço</div>
                 <input type="text" id="servNome" placeholder="Nome *">
                 <input type="text" id="servDesc" placeholder="Descrição">
                 <input type="number" id="servPreco" placeholder="Preço (R$)" step="0.01">
                 <input type="number" id="servTempo" placeholder="Duração (minutos) *" value="30">
                 <select id="servCategoria"><option value="">Selecione a Categoria</option></select>
                 <select id="servStatus"><option value="ativo">Ativo</option><option value="inativo">Inativo</option></select>
-                <button class="btn btn-primary" id="servBtnSalvar" onclick="salvarServico()">Salvar</button>
-                <button class="btn btn-outline hidden" id="servBtnCancelar" onclick="cancelarEdicao('servico')">Cancelar</button>
+                <button class="btn btn-primary" id="servBtnSalvar" onclick="salvarServico()"><i class="fas fa-save"></i> Salvar</button>
+                <button class="btn btn-outline hidden" id="servBtnCancelar" onclick="cancelarEdicao('servico')"><i class="fas fa-times"></i> Cancelar</button>
             </div>
             <div class="card">
-                <div class="card-title">📋 Serviços</div>
+                <div class="card-title"><i class="fas fa-list"></i> Serviços</div>
                 <div id="servicosLista"><div class="empty">Nenhum</div></div>
             </div>
         </div>
 
-        <!-- PLANOS (SIMPLIFICADO) -->
+        <!-- PLANOS -->
         <div id="tab-planos" class="tab-page">
             <div class="card">
-                <div class="card-title" id="planoFormTitle">📦 Novo Plano</div>
+                <div class="card-title" id="planoFormTitle"><i class="fas fa-box"></i> Novo Plano</div>
                 <input type="text" id="planoNome" placeholder="Nome * (ex: Bronze, Ouro)">
                 <input type="number" id="planoPreco" placeholder="Preço (R$)" step="0.01">
                 <input type="number" id="planoValidade" placeholder="Validade (dias)" value="30">
                 <input type="number" id="planoQtdCortes" placeholder="Quantidade de Cortes *" value="1">
                 <input type="number" id="planoDesconto" placeholder="Desconto (%)" value="0">
                 <textarea id="planoDesc" placeholder="Descrição (ex: Corte + Barba)"></textarea>
-                <button class="btn btn-primary" id="planoBtnSalvar" onclick="salvarPlano()">Salvar Plano</button>
-                <button class="btn btn-outline hidden" id="planoBtnCancelar" onclick="cancelarEdicao('plano')">Cancelar</button>
+                <button class="btn btn-primary" id="planoBtnSalvar" onclick="salvarPlano()"><i class="fas fa-save"></i> Salvar Plano</button>
+                <button class="btn btn-outline hidden" id="planoBtnCancelar" onclick="cancelarEdicao('plano')"><i class="fas fa-times"></i> Cancelar</button>
             </div>
             <div class="card">
-                <div class="card-title">📋 Planos</div>
+                <div class="card-title"><i class="fas fa-list"></i> Planos</div>
                 <div id="planosLista"><div class="empty">Nenhum</div></div>
             </div>
             <div class="card">
-                <div class="card-title">🔗 Vincular/Assinar Plano</div>
+                <div class="card-title"><i class="fas fa-link"></i> Vincular/Assinar Plano</div>
                 <select id="vinculoCliente"><option value="">Cliente</option></select>
                 <select id="vinculoPlano"><option value="">Plano</option></select>
                 <input type="date" id="vinculoInicio" value="">
@@ -245,66 +346,69 @@
                     <option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option>
                     <option value="Cartão">Cartão</option><option value="Transferência">Transferência</option>
                 </select>
-                <button class="btn btn-success" onclick="vincularPlano()">Vincular Plano</button>
+                <button class="btn btn-success" onclick="vincularPlano()"><i class="fas fa-check"></i> Vincular Plano</button>
             </div>
             <div class="card">
-                <div class="card-title">📋 Assinaturas Ativas</div>
+                <div class="card-title"><i class="fas fa-list-check"></i> Assinaturas Ativas</div>
                 <div id="assinaturasLista"><div class="empty">Nenhuma</div></div>
             </div>
         </div>
 
         <!-- AGENDA -->
         <div id="tab-agenda" class="tab-page">
-            <div class="flex-row"><input type="date" id="agendaData" onchange="carregarAgendaDia()"><button class="btn btn-primary btn-sm" onclick="carregarAgendaDia()">Ver</button></div>
+            <div class="flex-row">
+                <input type="date" id="agendaData" onchange="carregarAgendaDia()">
+                <button class="btn btn-primary btn-sm" onclick="carregarAgendaDia()"><i class="fas fa-search"></i> Ver</button>
+            </div>
             <div class="card">
-                <div class="card-title" id="agendaTituloDia">📆 Agenda</div>
+                <div class="card-title" id="agendaTituloDia"><i class="fas fa-calendar"></i> Agenda</div>
                 <div id="agendaLista"><div class="empty">Nenhum</div></div>
             </div>
             <div class="card">
-                <div class="card-title" id="agendaFormTitle">➕ Agendamento</div>
+                <div class="card-title" id="agendaFormTitle"><i class="fas fa-plus-circle"></i> Agendamento</div>
                 <select id="agendaClienteSelect"><option value="">Cliente</option></select>
                 <input type="datetime-local" id="agendaDateTime">
                 <select id="agendaServicoSelect"><option value="">Serviço</option></select>
-                <button class="btn btn-primary" id="agendaBtnSalvar" onclick="salvarAgendamento()">Agendar</button>
-                <button class="btn btn-outline hidden" id="agendaBtnCancelar" onclick="cancelarEdicao('agendamento')">Cancelar</button>
+                <button class="btn btn-primary" id="agendaBtnSalvar" onclick="salvarAgendamento()"><i class="fas fa-calendar-plus"></i> Agendar</button>
+                <button class="btn btn-outline hidden" id="agendaBtnCancelar" onclick="cancelarEdicao('agendamento')"><i class="fas fa-times"></i> Cancelar</button>
             </div>
         </div>
 
         <!-- FINANCEIRO -->
         <div id="tab-financeiro" class="tab-page">
             <div class="sub-tabs">
-                <button class="sub-tab active" data-sub="finan-receitas">Receitas</button>
-                <button class="sub-tab" data-sub="finan-despesas">Despesas</button>
-                <button class="sub-tab" data-sub="finan-relatorio">Relatório</button>
+                <button class="sub-tab active" data-sub="finan-receitas"><i class="fas fa-arrow-up"></i> Receitas</button>
+                <button class="sub-tab" data-sub="finan-despesas"><i class="fas fa-arrow-down"></i> Despesas</button>
+                <button class="sub-tab" data-sub="finan-relatorio"><i class="fas fa-chart-pie"></i> Relatório</button>
             </div>
             <div id="finan-receitas" class="sub-page">
                 <div class="card">
-                    <div class="card-title" id="recFormTitle">💰 Nova Receita</div>
+                    <div class="card-title" id="recFormTitle"><i class="fas fa-coins"></i> Nova Receita</div>
                     <select id="finRecCliente"><option value="">Cliente</option></select>
                     <input type="number" id="finRecValor" placeholder="Valor (R$)" step="0.01">
                     <input type="text" id="finRecDesc" placeholder="Descrição">
                     <input type="date" id="finRecData" value="">
                     <select id="finRecForma"><option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option><option value="Cartão">Cartão</option><option value="Transferência">Transferência</option></select>
-                    <button class="btn btn-success" id="recBtnSalvar" onclick="salvarReceita()">Salvar</button>
-                    <button class="btn btn-outline hidden" id="recBtnCancelar" onclick="cancelarEdicao('receita')">Cancelar</button>
+                    <button class="btn btn-success" id="recBtnSalvar" onclick="salvarReceita()"><i class="fas fa-save"></i> Salvar</button>
+                    <button class="btn btn-outline hidden" id="recBtnCancelar" onclick="cancelarEdicao('receita')"><i class="fas fa-times"></i> Cancelar</button>
                 </div>
-                <div class="card"><div class="card-title">📋 Receitas</div><div id="receitasLista"><div class="empty">Nenhuma</div></div></div>
+                <div class="card"><div class="card-title"><i class="fas fa-list"></i> Receitas</div><div id="receitasLista"><div class="empty">Nenhuma</div></div></div>
             </div>
             <div id="finan-despesas" class="sub-page" style="display:none;">
                 <div class="card">
-                    <div class="card-title" id="despFormTitle">📉 Nova Despesa</div>
+                    <div class="card-title" id="despFormTitle"><i class="fas fa-money-bill-wave"></i> Nova Despesa</div>
                     <input type="text" id="finDespDesc" placeholder="Descrição *">
                     <input type="number" id="finDespValor" placeholder="Valor (R$)" step="0.01">
                     <input type="date" id="finDespData" value="">
                     <select id="finDespCategoria"><option value="Água">Água</option><option value="Luz">Luz</option><option value="Aluguel">Aluguel</option><option value="Produtos">Produtos</option><option value="Outros">Outros</option></select>
-                    <button class="btn btn-danger" id="despBtnSalvar" onclick="salvarDespesa()">Salvar</button>
-                    <button class="btn btn-outline hidden" id="despBtnCancelar" onclick="cancelarEdicao('despesa')">Cancelar</button>
+                    <button class="btn btn-danger" id="despBtnSalvar" onclick="salvarDespesa()"><i class="fas fa-save"></i> Salvar</button>
+                    <button class="btn btn-outline hidden" id="despBtnCancelar" onclick="cancelarEdicao('despesa')"><i class="fas fa-times"></i> Cancelar</button>
                 </div>
-                <div class="card"><div class="card-title">📋 Despesas</div><div id="despesasLista"><div class="empty">Nenhuma</div></div></div>
+                <div class="card"><div class="card-title"><i class="fas fa-list"></i> Despesas</div><div id="despesasLista"><div class="empty">Nenhuma</div></div></div>
             </div>
             <div id="finan-relatorio" class="sub-page" style="display:none;">
                 <div class="card">
-                    <div class="card-title">📊 Relatório</div>
+                    <div class="card-title"><i class="fas fa-chart-pie"></i> Relatório</div>
                     <select id="finRelPeriodo" onchange="gerarRelatorioFinanceiro()">
                         <option value="hoje">Hoje</option><option value="semana">Semana</option>
                         <option value="mes">Mês</option><option value="ano">Ano</option>
@@ -317,45 +421,45 @@
         <!-- CONFIG -->
         <div id="tab-config" class="tab-page">
             <div class="card">
-                <div class="card-title">⚙️ Configurações</div>
+                <div class="card-title"><i class="fas fa-sliders"></i> Configurações</div>
                 <label>Nome da Barbearia</label><input type="text" id="confNome" onchange="salvarConfig()">
                 <label>PIN (4 dígitos)</label><input type="password" id="confPin" maxlength="4" onchange="salvarConfig()">
-                <button class="btn btn-primary" onclick="exportarBackup()">📥 Exportar Backup</button>
-                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()">📤 Importar Backup</button>
+                <button class="btn btn-primary" onclick="exportarBackup()"><i class="fas fa-download"></i> Exportar Backup</button>
+                <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()"><i class="fas fa-upload"></i> Importar Backup</button>
                 <input type="file" id="fileInput" accept=".json" style="display:none;" onchange="importarBackup(event)">
             </div>
             <div class="card" style="border:1px solid var(--danger);">
-                <div class="card-title" style="color:var(--danger);">⚠️ Zona Perigosa</div>
+                <div class="card-title" style="color:var(--danger);"><i class="fas fa-triangle-exclamation"></i> Zona Perigosa</div>
                 <p class="text-muted">Isso apagará TODOS os dados (clientes, agendamentos, planos, finanças).</p>
-                <button class="btn btn-danger" onclick="limparTudo()">🗑️ Apagar Todos os Dados</button>
+                <button class="btn btn-danger" onclick="limparTudo()"><i class="fas fa-trash"></i> Apagar Todos os Dados</button>
             </div>
             <div class="card">
-                <div class="card-title">👤 Perfil</div>
+                <div class="card-title"><i class="fas fa-user-edit"></i> Perfil</div>
                 <input type="text" id="perfNome" placeholder="Seu nome">
                 <input type="text" id="perfTelefone" placeholder="Telefone">
                 <input type="email" id="perfEmail" placeholder="E-mail">
-                <button class="btn btn-primary" onclick="salvarPerfil()">Salvar</button>
+                <button class="btn btn-primary" onclick="salvarPerfil()"><i class="fas fa-save"></i> Salvar</button>
             </div>
         </div>
     </div>
 
     <!-- RODAPÉ -->
     <div class="bottom-nav no-print">
-        <button class="nav-item active" data-tab="tab-dashboard"><span class="nav-icon">🏠</span>Início</button>
-        <button class="nav-item" data-tab="tab-clientes"><span class="nav-icon">👤</span>Clientes</button>
-        <button class="nav-item" data-tab="tab-categorias"><span class="nav-icon">🏷️</span>Categorias</button>
-        <button class="nav-item" data-tab="tab-servicos"><span class="nav-icon">✂️</span>Serviços</button>
-        <button class="nav-item" data-tab="tab-planos"><span class="nav-icon">📦</span>Planos</button>
-        <button class="nav-item" data-tab="tab-agenda"><span class="nav-icon">📆</span>Agenda</button>
-        <button class="nav-item" data-tab="tab-financeiro"><span class="nav-icon">💰</span>Caixa</button>
-        <button class="nav-item" data-tab="tab-config"><span class="nav-icon">⚙️</span>Config</button>
+        <button class="nav-item active" data-tab="tab-dashboard"><i class="fas fa-home"></i><span>Início</span></button>
+        <button class="nav-item" data-tab="tab-clientes"><i class="fas fa-users"></i><span>Clientes</span></button>
+        <button class="nav-item" data-tab="tab-categorias"><i class="fas fa-tags"></i><span>Categorias</span></button>
+        <button class="nav-item" data-tab="tab-servicos"><i class="fas fa-scissors"></i><span>Serviços</span></button>
+        <button class="nav-item" data-tab="tab-planos"><i class="fas fa-box"></i><span>Planos</span></button>
+        <button class="nav-item" data-tab="tab-agenda"><i class="fas fa-calendar"></i><span>Agenda</span></button>
+        <button class="nav-item" data-tab="tab-financeiro"><i class="fas fa-coins"></i><span>Caixa</span></button>
+        <button class="nav-item" data-tab="tab-config"><i class="fas fa-gear"></i><span>Config</span></button>
     </div>
 </div>
 
-<!-- MODAL PARA ATENDIMENTO -->
+<!-- ==================== MODAIS ==================== -->
 <div class="modal-overlay" id="atendimentoModal">
     <div class="modal-box">
-        <h3 id="atendimentoTitle">✂️ Atendimento</h3>
+        <h3><i class="fas fa-cut"></i> Atendimento</h3>
         <div id="atendimentoBody">
             <p><strong>Cliente:</strong> <span id="atendClienteNome"></span></p>
             <input type="hidden" id="atendClienteId">
@@ -367,28 +471,28 @@
             </select>
             <div id="atendPlanoInfo" class="mt-8"></div>
             <div class="flex-row mt-8">
-                <button class="btn btn-success" onclick="finalizarAtendimento(true)">✅ Usar Plano</button>
-                <button class="btn btn-primary" onclick="finalizarAtendimento(false)">💰 Pagamento Avulso</button>
+                <button class="btn btn-success" onclick="finalizarAtendimento(true)"><i class="fas fa-check-circle"></i> Usar Plano</button>
+                <button class="btn btn-primary" onclick="finalizarAtendimento(false)"><i class="fas fa-money-bill"></i> Pagamento Avulso</button>
             </div>
-            <button class="btn btn-outline mt-8" onclick="fecharAtendimento()">Cancelar</button>
+            <button class="btn btn-outline mt-8" onclick="fecharAtendimento()"><i class="fas fa-times"></i> Cancelar</button>
         </div>
     </div>
 </div>
 
-<!-- MODAL DE EDIÇÃO GENÉRICO -->
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal-box">
-        <h3 id="modalTitle">Editar</h3>
+        <h3 id="modalTitle"><i class="fas fa-edit"></i> Editar</h3>
         <div id="modalBody"></div>
         <div class="flex-row" style="margin-top:10px;">
-            <button class="btn btn-outline" onclick="fecharModal()">Cancelar</button>
-            <button class="btn btn-primary" id="modalConfirmBtn" onclick="fecharModal()">Salvar</button>
+            <button class="btn btn-outline" onclick="fecharModal()"><i class="fas fa-times"></i> Cancelar</button>
+            <button class="btn btn-primary" id="modalConfirmBtn" onclick="fecharModal()"><i class="fas fa-save"></i> Salvar</button>
         </div>
     </div>
 </div>
 
 <div id="printArea" style="display:none;"></div>
 
+<!-- ==================== JAVASCRIPT (MESMO CÓDIGO FUNCIONAL) ==================== -->
 <script>
 // ================================================================
 //  BANCO DE DADOS
@@ -654,9 +758,9 @@ function carregarClientes() {
                 ${statusTexto ? '<br><span class="'+statusClass+'">'+statusTexto+'</span>' : ''}
             </div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarCliente('${c.id}')">✏️</button>
-                <button class="btn btn-sm btn-success" onclick="abrirAtendimento('${c.id}')">✂️</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirCliente('${c.id}')">✕</button>
+                <button class="btn btn-sm btn-accent" onclick="editarCliente('${c.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-success" onclick="abrirAtendimento('${c.id}')"><i class="fas fa-cut"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirCliente('${c.id}')"><i class="fas fa-trash"></i></button>
             </div>
         </div>`;
     }).join('');
@@ -668,7 +772,7 @@ function editarCliente(id) {
     if(!c) return;
     editContext = { tipo: 'cliente', id };
     document.getElementById('cliFormTitle').textContent = '✏️ Editando Cliente';
-    document.getElementById('cliBtnSalvar').textContent = 'Atualizar Cliente';
+    document.getElementById('cliBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar Cliente';
     document.getElementById('cliBtnCancelar').classList.remove('hidden');
     document.getElementById('cliNome').value = c.nome;
     document.getElementById('cliTelefone').value = c.telefone || '';
@@ -721,8 +825,8 @@ function abrirFicha(id) {
                 <p><strong>Vencimento:</strong> ${formatDateBR(assinatura.fim)}</p>
                 <p><strong>Status:</strong> <span class="${statusClass}">${statusPlano}</span></p>
                 <p><strong>Forma Pagto:</strong> ${assinatura.formaPagamento || '--'}</p>
-                <button class="btn btn-sm btn-accent" onclick="editarAssinatura('${assinatura.id}')">✏️ Alterar Plano</button>
-                <button class="btn btn-sm btn-danger" onclick="cancelarAssinatura('${assinatura.id}')">❌ Cancelar Plano</button>
+                <button class="btn btn-sm btn-accent" onclick="editarAssinatura('${assinatura.id}')"><i class="fas fa-pen"></i> Alterar Plano</button>
+                <button class="btn btn-sm btn-danger" onclick="cancelarAssinatura('${assinatura.id}')"><i class="fas fa-ban"></i> Cancelar Plano</button>
             </div>
         `;
     } else {
@@ -763,7 +867,7 @@ function abrirFicha(id) {
 function fecharFicha() { document.getElementById('fichaCliente').style.display = 'none'; }
 
 // ================================================================
-//  ATENDIMENTO (BOTÃO ✂️)
+//  ATENDIMENTO
 // ================================================================
 let atendimentoClienteId = null;
 
@@ -818,7 +922,6 @@ function finalizarAtendimento(usarPlano) {
     const agora = new Date();
     const hora = agora.getHours().toString().padStart(2,'0') + ':' + agora.getMinutes().toString().padStart(2,'0');
     
-    // Cria agendamento como "realizado" (já libera a agenda)
     const agendamentos = getData('agendamentos');
     agendamentos.push({
         id: genId(),
@@ -891,7 +994,7 @@ function fecharAtendimento() {
 }
 
 // ================================================================
-//  CRUD CATEGORIAS
+//  CATEGORIAS
 // ================================================================
 function salvarCategoria() {
     const nome = document.getElementById('catNome').value.trim();
@@ -915,10 +1018,10 @@ function carregarCategorias() {
     if(categorias.length === 0) { container.innerHTML = '<div class="empty">Nenhuma categoria</div>'; return; }
     container.innerHTML = categorias.map(c => `
         <div class="list-item">
-            <span>🏷️ ${c.nome}</span>
+            <span><i class="fas fa-tag"></i> ${c.nome}</span>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarCategoria('${c.id}')">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirCategoria('${c.id}')">✕</button>
+                <button class="btn btn-sm btn-accent" onclick="editarCategoria('${c.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirCategoria('${c.id}')"><i class="fas fa-trash"></i></button>
             </div>
         </div>
     `).join('');
@@ -930,7 +1033,7 @@ function editarCategoria(id) {
     if(!c) return;
     editContext = { tipo: 'categoria', id };
     document.getElementById('catFormTitle').textContent = '✏️ Editando Categoria';
-    document.getElementById('catBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('catBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
     document.getElementById('catBtnCancelar').classList.remove('hidden');
     document.getElementById('catNome').value = c.nome;
 }
@@ -943,7 +1046,7 @@ function excluirCategoria(id) {
 }
 
 // ================================================================
-//  CRUD SERVIÇOS
+//  SERVIÇOS
 // ================================================================
 function salvarServico() {
     const nome = document.getElementById('servNome').value.trim();
@@ -970,8 +1073,8 @@ function carregarServicos() {
         <div class="list-item">
             <div class="info"><strong>${s.nome}</strong> ${s.categoria?'<span class="badge">'+s.categoria+'</span>':''}<br><span class="text-muted">${formatCurrency(s.preco)} - ${s.tempo||30}min ${s.status==='ativo'?'':' (inativo)'}</span></div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarServico('${s.id}')">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirServico('${s.id}')">✕</button>
+                <button class="btn btn-sm btn-accent" onclick="editarServico('${s.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirServico('${s.id}')"><i class="fas fa-trash"></i></button>
             </div>
         </div>
     `).join('');
@@ -983,7 +1086,7 @@ function editarServico(id) {
     if(!s) return;
     editContext = { tipo: 'servico', id };
     document.getElementById('servFormTitle').textContent = '✏️ Editando Serviço';
-    document.getElementById('servBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('servBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
     document.getElementById('servBtnCancelar').classList.remove('hidden');
     document.getElementById('servNome').value = s.nome;
     document.getElementById('servDesc').value = s.descricao||'';
@@ -1007,7 +1110,7 @@ function carregarSelectCategorias() {
 }
 
 // ================================================================
-//  CRUD PLANOS E ASSINATURAS (SIMPLIFICADO)
+//  PLANOS
 // ================================================================
 function salvarPlano() {
     const nome = document.getElementById('planoNome').value.trim();
@@ -1048,8 +1151,8 @@ function carregarPlanos() {
         <div class="list-item">
             <div class="info"><strong>${p.nome}</strong> ${formatCurrency(p.preco)} (${p.validade}d)<br><span class="text-muted">Cortes: ${p.qtdCortes}</span></div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarPlano('${p.id}')">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirPlano('${p.id}')">✕</button>
+                <button class="btn btn-sm btn-accent" onclick="editarPlano('${p.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirPlano('${p.id}')"><i class="fas fa-trash"></i></button>
             </div>
         </div>
     `).join('');
@@ -1061,7 +1164,7 @@ function editarPlano(id) {
     if(!p) return;
     editContext = { tipo: 'plano', id };
     document.getElementById('planoFormTitle').textContent = '✏️ Editando Plano';
-    document.getElementById('planoBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('planoBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
     document.getElementById('planoBtnCancelar').classList.remove('hidden');
     document.getElementById('planoNome').value = p.nome;
     document.getElementById('planoPreco').value = p.preco||'';
@@ -1138,8 +1241,8 @@ function carregarAssinaturas() {
                 ${vencido && a.status === 'ativo' ? '<br><span class="text-danger">⚠️ MENSALIDADE VENCIDA</span>' : ''}
             </div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarAssinatura('${a.id}')">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="cancelarAssinatura('${a.id}')">❌</button>
+                <button class="btn btn-sm btn-accent" onclick="editarAssinatura('${a.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="cancelarAssinatura('${a.id}')"><i class="fas fa-ban"></i></button>
                 <span class="badge ${a.status==='ativo'?'badge-success':'badge-danger'}">${a.status}</span>
             </div>
         </div>`;
@@ -1219,7 +1322,7 @@ function carregarSelectsPlanos() {
 }
 
 // ================================================================
-//  CRUD AGENDA (COM VERIFICAÇÃO DE CONFLITO)
+//  AGENDA
 // ================================================================
 function carregarAgendaDia() {
     const data = document.getElementById('agendaData').value || today();
@@ -1234,10 +1337,10 @@ function carregarAgendaDia() {
         return `<div class="list-item">
             <div class="info"><strong>${a.hora}</strong> - ${cliente?cliente.nome:'Cliente'} ${servico?servico.nome:''} (${servico?servico.tempo||30:30}min)</div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarAgendamento('${a.id}')">✏️</button>
-                <button class="btn btn-sm btn-success" onclick="marcarRealizado('${a.id}')">✔</button>
-                <button class="btn btn-sm btn-warning" onclick="marcarAdiado('${a.id}')" style="background:#f59e0b;color:white;">⏳</button>
-                <button class="btn btn-sm btn-danger" onclick="marcarCancelado('${a.id}')">✕</button>
+                <button class="btn btn-sm btn-accent" onclick="editarAgendamento('${a.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-success" onclick="marcarRealizado('${a.id}')"><i class="fas fa-check"></i></button>
+                <button class="btn btn-sm btn-warning" onclick="marcarAdiado('${a.id}')" style="background:#f59e0b;color:white;"><i class="fas fa-clock"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="marcarCancelado('${a.id}')"><i class="fas fa-ban"></i></button>
                 <span class="badge ${statusMap[a.status]||'badge-warning'}">${a.status||'Agendado'}</span>
             </div>
         </div>`;
@@ -1285,7 +1388,7 @@ function editarAgendamento(id) {
     if(!a) return;
     editContext = { tipo: 'agendamento', id };
     document.getElementById('agendaFormTitle').textContent = '✏️ Editando Agendamento';
-    document.getElementById('agendaBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('agendaBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
     document.getElementById('agendaBtnCancelar').classList.remove('hidden');
     document.getElementById('agendaClienteSelect').value = a.clienteId;
     document.getElementById('agendaDateTime').value = a.data + 'T' + a.hora;
@@ -1353,7 +1456,7 @@ function carregarSelectsAgenda() {
 }
 
 // ================================================================
-//  CRUD RECEITAS
+//  RECEITAS
 // ================================================================
 function salvarReceita() {
     const valor = parseFloat(document.getElementById('finRecValor').value);
@@ -1380,8 +1483,8 @@ function carregarReceitas() {
         return `<div class="list-item">
             <div class="info">${formatDateTimeBR(p.data)} - ${p.descricao} ${cliente?'('+cliente.nome+')':''}</div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarReceita('${p.id}')">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirReceita('${p.id}')">✕</button>
+                <button class="btn btn-sm btn-accent" onclick="editarReceita('${p.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirReceita('${p.id}')"><i class="fas fa-trash"></i></button>
                 <span class="badge badge-success">${formatCurrency(p.valor)}</span>
             </div>
         </div>`;
@@ -1394,7 +1497,7 @@ function editarReceita(id) {
     if(!p) return;
     editContext = { tipo: 'receita', id };
     document.getElementById('recFormTitle').textContent = '✏️ Editando Receita';
-    document.getElementById('recBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('recBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
     document.getElementById('recBtnCancelar').classList.remove('hidden');
     document.getElementById('finRecCliente').value = p.clienteId||'';
     document.getElementById('finRecValor').value = p.valor||'';
@@ -1411,7 +1514,7 @@ function excluirReceita(id) {
 }
 
 // ================================================================
-//  CRUD DESPESAS
+//  DESPESAS
 // ================================================================
 function salvarDespesa() {
     const desc = document.getElementById('finDespDesc').value.trim();
@@ -1436,8 +1539,8 @@ function carregarDespesas() {
         <div class="list-item">
             <div class="info">${formatDateTimeBR(d.data)} - ${d.desc} (${d.categoria})</div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarDespesa('${d.id}')">✏️</button>
-                <button class="btn btn-sm btn-danger" onclick="excluirDespesa('${d.id}')">✕</button>
+                <button class="btn btn-sm btn-accent" onclick="editarDespesa('${d.id}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirDespesa('${d.id}')"><i class="fas fa-trash"></i></button>
                 <span class="badge badge-danger">${formatCurrency(d.valor)}</span>
             </div>
         </div>
@@ -1450,7 +1553,7 @@ function editarDespesa(id) {
     if(!d) return;
     editContext = { tipo: 'despesa', id };
     document.getElementById('despFormTitle').textContent = '✏️ Editando Despesa';
-    document.getElementById('despBtnSalvar').textContent = 'Atualizar';
+    document.getElementById('despBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
     document.getElementById('despBtnCancelar').classList.remove('hidden');
     document.getElementById('finDespDesc').value = d.desc||'';
     document.getElementById('finDespValor').value = d.valor||'';
@@ -1486,18 +1589,18 @@ function gerarRelatorioFinanceiro() {
 function cancelarEdicao(tipo) {
     editContext = { tipo: null, id: null };
     const map = {
-        cliente: { form: 'cliFormTitle', btn: 'cliBtnSalvar', cancel: 'cliBtnCancelar', text: '➕ Novo Cliente' },
-        categoria: { form: 'catFormTitle', btn: 'catBtnSalvar', cancel: 'catBtnCancelar', text: '➕ Nova Categoria' },
-        servico: { form: 'servFormTitle', btn: 'servBtnSalvar', cancel: 'servBtnCancelar', text: '✂️ Novo Serviço' },
-        plano: { form: 'planoFormTitle', btn: 'planoBtnSalvar', cancel: 'planoBtnCancelar', text: '📦 Novo Plano' },
-        agendamento: { form: 'agendaFormTitle', btn: 'agendaBtnSalvar', cancel: 'agendaBtnCancelar', text: '➕ Agendamento' },
-        receita: { form: 'recFormTitle', btn: 'recBtnSalvar', cancel: 'recBtnCancelar', text: '💰 Nova Receita' },
-        despesa: { form: 'despFormTitle', btn: 'despBtnSalvar', cancel: 'despBtnCancelar', text: '📉 Nova Despesa' }
+        cliente: { form: 'cliFormTitle', btn: 'cliBtnSalvar', cancel: 'cliBtnCancelar', text: '<i class="fas fa-user-plus"></i> Novo Cliente' },
+        categoria: { form: 'catFormTitle', btn: 'catBtnSalvar', cancel: 'catBtnCancelar', text: '<i class="fas fa-tag"></i> Nova Categoria' },
+        servico: { form: 'servFormTitle', btn: 'servBtnSalvar', cancel: 'servBtnCancelar', text: '<i class="fas fa-scissors"></i> Novo Serviço' },
+        plano: { form: 'planoFormTitle', btn: 'planoBtnSalvar', cancel: 'planoBtnCancelar', text: '<i class="fas fa-box"></i> Novo Plano' },
+        agendamento: { form: 'agendaFormTitle', btn: 'agendaBtnSalvar', cancel: 'agendaBtnCancelar', text: '<i class="fas fa-plus-circle"></i> Agendamento' },
+        receita: { form: 'recFormTitle', btn: 'recBtnSalvar', cancel: 'recBtnCancelar', text: '<i class="fas fa-coins"></i> Nova Receita' },
+        despesa: { form: 'despFormTitle', btn: 'despBtnSalvar', cancel: 'despBtnCancelar', text: '<i class="fas fa-money-bill-wave"></i> Nova Despesa' }
     };
     const m = map[tipo];
     if(m) {
-        document.getElementById(m.form).textContent = m.text;
-        document.getElementById(m.btn).textContent = 'Salvar';
+        document.getElementById(m.form).innerHTML = m.text;
+        document.getElementById(m.btn).innerHTML = '<i class="fas fa-save"></i> Salvar';
         document.getElementById(m.cancel).classList.add('hidden');
         if(tipo === 'cliente') { document.getElementById('cliNome').value=''; document.getElementById('cliTelefone').value=''; document.getElementById('cliCpf').value=''; document.getElementById('cliNascimento').value=''; document.getElementById('cliEndereco').value=''; document.getElementById('cliObs').value=''; }
         if(tipo === 'categoria') document.getElementById('catNome').value='';
@@ -1520,7 +1623,7 @@ function carregarSelectsClientes() {
 function fecharModal() { document.getElementById('modalOverlay').classList.remove('open'); }
 
 // ================================================================
-//  BACKUP
+//  BACKUP E CONFIG
 // ================================================================
 function exportarBackup() {
     const data = {
@@ -1624,7 +1727,7 @@ function globalSearch(texto) {
     else {
         containerCli.innerHTML = clientes.map(c => `
             <div class="list-item"><div class="info"><strong>${c.nome}</strong> ${c.telefone?'<br><span class="text-muted">'+c.telefone+'</span>':''}</div>
-            <div class="actions"><button class="btn btn-sm btn-primary" onclick="abrirFicha('${c.id}')">📄</button></div></div>
+            <div class="actions"><button class="btn btn-sm btn-primary" onclick="abrirFicha('${c.id}')"><i class="fas fa-eye"></i></button></div></div>
         `).join('');
     }
     const servicos = getData('servicos').filter(s => s.nome.toLowerCase().includes(texto));
