@@ -32,9 +32,7 @@
         }
         .pin-input button:active { transform:scale(0.9); background:var(--accent); }
         .pin-input button.empty { background:transparent; color:var(--gray); pointer-events:none; }
-        .login-options { margin-top:20px; display:flex; gap:20px; flex-wrap:wrap; justify-content:center; }
-        .login-options button { background:transparent; border:1px solid var(--gray); color:white; padding:8px 18px; border-radius:20px; font-size:0.9rem; cursor:pointer; }
-        .login-options button:hover { background:var(--gray); color:var(--primary); }
+        #loginError { color:#f87171; margin-top:10px; font-size:0.9rem; }
 
         #app { flex:1; display:flex; flex-direction:column; height:100%; }
         .header { background:var(--primary); color:white; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:10px; flex-wrap:wrap; }
@@ -131,7 +129,6 @@
         <button data-v="7">7</button><button data-v="8">8</button><button data-v="9">9</button>
         <button class="empty"></button><button data-v="0">0</button><button id="pinBack">⌫</button>
     </div>
-    <!-- BOTÃO ENTRAR (novo) -->
     <button id="btnLoginConfirm" style="margin-top:20px; padding:12px 40px; background:var(--accent); color:var(--primary); border:none; border-radius:30px; font-size:1.2rem; font-weight:bold; cursor:pointer; width:auto; display:inline-block;">
         ✅ Entrar
     </button>
@@ -179,7 +176,6 @@
                 <div class="card-title">📋 Lista <span id="qtdClientes" class="badge">0</span></div>
                 <div id="clientesLista"><div class="empty">Nenhum cliente</div></div>
             </div>
-            <!-- FICHA DO CLIENTE -->
             <div id="fichaCliente" style="display:none;" class="card">
                 <div class="card-title" id="fichaNome">Cliente</div>
                 <div id="fichaDados"></div>
@@ -223,18 +219,17 @@
             </div>
         </div>
 
-        <!-- PLANOS -->
+        <!-- PLANOS (SIMPLIFICADO) -->
         <div id="tab-planos" class="tab-page">
             <div class="card">
                 <div class="card-title" id="planoFormTitle">📦 Novo Plano</div>
-                <input type="text" id="planoNome" placeholder="Nome *">
+                <input type="text" id="planoNome" placeholder="Nome * (ex: Bronze, Ouro)">
                 <input type="number" id="planoPreco" placeholder="Preço (R$)" step="0.01">
                 <input type="number" id="planoValidade" placeholder="Validade (dias)" value="30">
-                <input type="number" id="planoQtdCortes" placeholder="Qtd Cortes" value="0">
-                <input type="number" id="planoQtdBarbas" placeholder="Qtd Barbas" value="0">
+                <input type="number" id="planoQtdCortes" placeholder="Quantidade de Cortes *" value="1">
                 <input type="number" id="planoDesconto" placeholder="Desconto (%)" value="0">
-                <textarea id="planoDesc" placeholder="Descrição"></textarea>
-                <button class="btn btn-primary" id="planoBtnSalvar" onclick="salvarPlano()">Salvar</button>
+                <textarea id="planoDesc" placeholder="Descrição (ex: Corte + Barba)"></textarea>
+                <button class="btn btn-primary" id="planoBtnSalvar" onclick="salvarPlano()">Salvar Plano</button>
                 <button class="btn btn-outline hidden" id="planoBtnCancelar" onclick="cancelarEdicao('plano')">Cancelar</button>
             </div>
             <div class="card">
@@ -468,6 +463,22 @@ document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
 });
 document.getElementById('pinBack').addEventListener('click', function() { pinCorrente = pinCorrente.slice(0,-1); atualizarDots(); });
 
+document.getElementById('btnLoginConfirm').addEventListener('click', function() {
+    if(pinCorrente.length === 4) {
+        if(pinCorrente === getPin()) {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('app').style.display = 'flex';
+            carregarTudo();
+        } else {
+            document.getElementById('loginError').textContent = 'PIN incorreto!';
+            pinCorrente = '';
+            atualizarDots();
+        }
+    } else {
+        document.getElementById('loginError').textContent = 'Digite os 4 dígitos completos!';
+    }
+});
+
 // ================================================================
 //  NAVEGAÇÃO
 // ================================================================
@@ -628,13 +639,12 @@ function carregarClientes() {
     const container = document.getElementById('clientesLista');
     if(clientes.length === 0) { container.innerHTML = '<div class="empty">Nenhum cliente</div>'; return; }
     container.innerHTML = clientes.map(c => {
-        // Verificar plano ativo
         const assinatura = getData('assinaturas').find(a => a.clienteId === c.id && a.status === 'ativo');
         const plano = assinatura ? getData('planos').find(p => p.id === assinatura.planoId) : null;
         let statusTexto = '';
         let statusClass = '';
         if(assinatura) {
-            const saldo = (assinatura.saldoCortes || 0) + (assinatura.saldoBarbas || 0);
+            const saldo = assinatura.saldoCortes || 0;
             if(saldo <= 0) { statusTexto = '⚠️ Cortes Esgotados!'; statusClass = 'text-danger'; }
             else { statusTexto = `📦 ${plano?plano.nome:'Plano'} (${saldo} restantes)`; statusClass = 'text-success'; }
         }
@@ -699,10 +709,9 @@ function abrirFicha(id) {
         <p><strong>Obs:</strong> ${cliente.obs||'--'}</p>
     `;
     
-    // Informações do Plano
     const planoInfo = document.getElementById('fichaPlanoInfo');
     if(assinatura && plano) {
-        const saldo = (assinatura.saldoCortes || 0) + (assinatura.saldoBarbas || 0);
+        const saldo = assinatura.saldoCortes || 0;
         const statusPlano = assinatura.fim < today() ? 'VENCIDO' : 'Em dia';
         const statusClass = assinatura.fim < today() ? 'text-danger' : 'text-success';
         planoInfo.innerHTML = `
@@ -720,7 +729,6 @@ function abrirFicha(id) {
         planoInfo.innerHTML = `<p class="text-muted">🔹 Cliente sem plano ativo</p>`;
     }
     
-    // Histórico
     let historico = [];
     agendamentos.forEach(a => {
         const s = getData('servicos').find(ss => ss.id === a.servicoId);
@@ -739,7 +747,6 @@ function abrirFicha(id) {
         </div>
     `).join('');
     
-    // Estatísticas
     const totalGasto = pagamentos.reduce((s,p) => s + parseFloat(p.valor||0), 0);
     const visitas = agendamentos.filter(a => a.status === 'realizado').length;
     const ultima = agendamentos.filter(a => a.status === 'realizado').sort((a,b)=>b.data.localeCompare(a.data))[0];
@@ -767,7 +774,6 @@ function abrirAtendimento(clienteId) {
     document.getElementById('atendClienteNome').textContent = cliente.nome;
     document.getElementById('atendClienteId').value = clienteId;
     
-    // Carregar serviços
     const servicos = getData('servicos').filter(s => s.status === 'ativo');
     const selServ = document.getElementById('atendServico');
     selServ.innerHTML = '<option value="">Selecione o Serviço</option>';
@@ -778,12 +784,11 @@ function abrirAtendimento(clienteId) {
     };
     document.getElementById('atendValor').value = '';
     
-    // Verificar plano
     const assinatura = getData('assinaturas').find(a => a.clienteId === clienteId && a.status === 'ativo');
     const plano = assinatura ? getData('planos').find(p => p.id === assinatura.planoId) : null;
     const planoInfo = document.getElementById('atendPlanoInfo');
     if(assinatura && plano) {
-        const saldo = (assinatura.saldoCortes || 0) + (assinatura.saldoBarbas || 0);
+        const saldo = assinatura.saldoCortes || 0;
         const vencido = assinatura.fim < today();
         planoInfo.innerHTML = `
             <div style="background:#f0fdf4;padding:10px;border-radius:8px;margin-top:8px;">
@@ -813,7 +818,7 @@ function finalizarAtendimento(usarPlano) {
     const agora = new Date();
     const hora = agora.getHours().toString().padStart(2,'0') + ':' + agora.getMinutes().toString().padStart(2,'0');
     
-    // Criar agendamento como realizado
+    // Cria agendamento como "realizado" (já libera a agenda)
     const agendamentos = getData('agendamentos');
     agendamentos.push({
         id: genId(),
@@ -828,34 +833,34 @@ function finalizarAtendimento(usarPlano) {
     setData('agendamentos', agendamentos);
     
     if(usarPlano) {
-        // Usar plano: abater saldo
         const assinaturas = getData('assinaturas');
         const ass = assinaturas.find(a => a.clienteId === clienteId && a.status === 'ativo');
         if(ass) {
-            if(ass.saldoCortes > 0) ass.saldoCortes -= 1;
-            else if(ass.saldoBarbas > 0) ass.saldoBarbas -= 1;
-            else { alert('Saldo insuficiente!'); return; }
-            setData('assinaturas', assinaturas);
-            // Registrar no caixa como R$0 (já foi pago no plano)
-            const pagamentos = getData('pagamentos');
-            pagamentos.push({
-                id: genId(),
-                clienteId: clienteId,
-                valor: 0,
-                descricao: `Corte via Plano - ${servico?servico.nome:'Serviço'}`,
-                data: hoje,
-                forma: 'Plano',
-                tipo: 'receita',
-                criadoEm: nowISO()
-            });
-            setData('pagamentos', pagamentos);
-            alert(`✅ Corte realizado com sucesso! Saldo restante: ${(ass.saldoCortes||0) + (ass.saldoBarbas||0)} cortes.`);
+            if(ass.saldoCortes > 0) {
+                ass.saldoCortes -= 1;
+                setData('assinaturas', assinaturas);
+                const pagamentos = getData('pagamentos');
+                pagamentos.push({
+                    id: genId(),
+                    clienteId: clienteId,
+                    valor: 0,
+                    descricao: `Corte via Plano - ${servico?servico.nome:'Serviço'}`,
+                    data: hoje,
+                    forma: 'Plano',
+                    tipo: 'receita',
+                    criadoEm: nowISO()
+                });
+                setData('pagamentos', pagamentos);
+                alert(`✅ Corte realizado com sucesso! Saldo restante: ${ass.saldoCortes} cortes.`);
+            } else {
+                alert('❌ Saldo insuficiente! O cliente não tem mais cortes disponíveis.');
+                return;
+            }
         } else {
             alert('❌ Cliente não possui plano ativo!');
             return;
         }
     } else {
-        // Pagamento avulso
         if(valor > 0) {
             const pagamentos = getData('pagamentos');
             pagamentos.push({
@@ -1002,13 +1007,22 @@ function carregarSelectCategorias() {
 }
 
 // ================================================================
-//  CRUD PLANOS E ASSINATURAS
+//  CRUD PLANOS E ASSINATURAS (SIMPLIFICADO)
 // ================================================================
 function salvarPlano() {
     const nome = document.getElementById('planoNome').value.trim();
     if(!nome) { alert('Nome é obrigatório'); return; }
+    const qtdCortes = parseInt(document.getElementById('planoQtdCortes').value) || 0;
+    if(qtdCortes <= 0) { alert('A quantidade de cortes deve ser maior que 0'); return; }
     const planos = getData('planos');
-    const data = { nome, preco: parseFloat(document.getElementById('planoPreco').value)||0, validade: parseInt(document.getElementById('planoValidade').value)||30, qtdCortes: parseInt(document.getElementById('planoQtdCortes').value)||0, qtdBarbas: parseInt(document.getElementById('planoQtdBarbas').value)||0, desconto: parseFloat(document.getElementById('planoDesconto').value)||0, descricao: document.getElementById('planoDesc').value.trim() };
+    const data = { 
+        nome, 
+        preco: parseFloat(document.getElementById('planoPreco').value)||0, 
+        validade: parseInt(document.getElementById('planoValidade').value)||30, 
+        qtdCortes: qtdCortes,
+        desconto: parseFloat(document.getElementById('planoDesconto').value)||0, 
+        descricao: document.getElementById('planoDesc').value.trim() 
+    };
     if(editContext.tipo === 'plano' && editContext.id) {
         const idx = planos.findIndex(p => p.id === editContext.id);
         if(idx > -1) { planos[idx] = { ...planos[idx], ...data }; setData('planos', planos); cancelarEdicao('plano'); }
@@ -1016,7 +1030,12 @@ function salvarPlano() {
         planos.push({ id: genId(), ...data });
         setData('planos', planos);
     }
-    document.getElementById('planoNome').value = ''; document.getElementById('planoPreco').value = ''; document.getElementById('planoValidade').value = '30'; document.getElementById('planoQtdCortes').value = ''; document.getElementById('planoQtdBarbas').value = ''; document.getElementById('planoDesconto').value = ''; document.getElementById('planoDesc').value = '';
+    document.getElementById('planoNome').value = ''; 
+    document.getElementById('planoPreco').value = ''; 
+    document.getElementById('planoValidade').value = '30'; 
+    document.getElementById('planoQtdCortes').value = ''; 
+    document.getElementById('planoDesconto').value = ''; 
+    document.getElementById('planoDesc').value = '';
     carregarPlanos();
     carregarSelectsPlanos();
 }
@@ -1027,7 +1046,7 @@ function carregarPlanos() {
     if(planos.length === 0) { container.innerHTML = '<div class="empty">Nenhum</div>'; return; }
     container.innerHTML = planos.map(p => `
         <div class="list-item">
-            <div class="info"><strong>${p.nome}</strong> ${formatCurrency(p.preco)} (${p.validade}d)<br><span class="text-muted">Cortes: ${p.qtdCortes} | Barbas: ${p.qtdBarbas}</span></div>
+            <div class="info"><strong>${p.nome}</strong> ${formatCurrency(p.preco)} (${p.validade}d)<br><span class="text-muted">Cortes: ${p.qtdCortes}</span></div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarPlano('${p.id}')">✏️</button>
                 <button class="btn btn-sm btn-danger" onclick="excluirPlano('${p.id}')">✕</button>
@@ -1048,7 +1067,6 @@ function editarPlano(id) {
     document.getElementById('planoPreco').value = p.preco||'';
     document.getElementById('planoValidade').value = p.validade||30;
     document.getElementById('planoQtdCortes').value = p.qtdCortes||0;
-    document.getElementById('planoQtdBarbas').value = p.qtdBarbas||0;
     document.getElementById('planoDesconto').value = p.desconto||0;
     document.getElementById('planoDesc').value = p.descricao||'';
 }
@@ -1078,13 +1096,11 @@ function vincularPlano() {
         fim: fim.toISOString().split('T')[0],
         status: 'ativo',
         saldoCortes: plano.qtdCortes,
-        saldoBarbas: plano.qtdBarbas,
         formaPagamento: formaPagamento,
         criadoEm: nowISO()
     });
     setData('assinaturas', assinaturas);
     
-    // Registrar pagamento do plano
     const pagamentos = getData('pagamentos');
     pagamentos.push({
         id: genId(),
@@ -1113,7 +1129,7 @@ function carregarAssinaturas() {
         const cliente = getData('clientes').find(c => c.id === a.clienteId);
         const plano = getData('planos').find(p => p.id === a.planoId);
         const vencido = a.fim < today();
-        const saldo = (a.saldoCortes||0) + (a.saldoBarbas||0);
+        const saldo = a.saldoCortes || 0;
         const statusClass = a.status === 'ativo' ? (vencido ? 'vencido' : 'em-dia') : '';
         return `<div class="list-item ${statusClass}" style="${vencido && a.status === 'ativo' ? 'border-left:4px solid var(--danger);' : ''}">
             <div class="info">
@@ -1142,7 +1158,6 @@ function editarAssinatura(id) {
     document.getElementById('modalBody').innerHTML = `
         <p><strong>Plano:</strong> ${planoNome}</p>
         <label>Saldo Cortes</label><input type="number" id="editAssCortes" value="${a.saldoCortes||0}">
-        <label>Saldo Barbas</label><input type="number" id="editAssBarbas" value="${a.saldoBarbas||0}">
         <label>Status</label>
         <select id="editAssStatus"><option value="ativo" ${a.status==='ativo'?'selected':''}>Ativo</option><option value="expirado" ${a.status==='expirado'?'selected':''}>Expirado</option></select>
         <label>Data Vencimento</label><input type="date" id="editAssFim" value="${a.fim}">
@@ -1164,11 +1179,9 @@ function editarAssinatura(id) {
                 if(novoPlano) {
                     ass[idx].planoId = novoPlanoId;
                     ass[idx].saldoCortes = novoPlano.qtdCortes;
-                    ass[idx].saldoBarbas = novoPlano.qtdBarbas;
                 }
             }
             ass[idx].saldoCortes = parseInt(document.getElementById('editAssCortes').value)||0;
-            ass[idx].saldoBarbas = parseInt(document.getElementById('editAssBarbas').value)||0;
             ass[idx].status = document.getElementById('editAssStatus').value;
             ass[idx].fim = document.getElementById('editAssFim').value;
             ass[idx].formaPagamento = document.getElementById('editAssForma').value;
@@ -1206,7 +1219,7 @@ function carregarSelectsPlanos() {
 }
 
 // ================================================================
-//  CRUD AGENDA (COM VERIFICAÇÃO DE CONFLITO DE HORÁRIO)
+//  CRUD AGENDA (COM VERIFICAÇÃO DE CONFLITO)
 // ================================================================
 function carregarAgendaDia() {
     const data = document.getElementById('agendaData').value || today();
@@ -1242,7 +1255,6 @@ function salvarAgendamento() {
     const servico = getData('servicos').find(s => s.id === servicoId);
     const duracao = servico ? (servico.tempo || 30) : 30;
     
-    // Verificar conflito de horário
     const agendamentos = getData('agendamentos');
     const conflito = agendamentos.some(a => {
         if(a.data !== data || a.id === editContext.id) return false;
@@ -1285,10 +1297,8 @@ function marcarRealizado(id) {
     const ag = agendamentos.find(a => a.id === id);
     if(ag) {
         ag.status = 'realizado';
-        // Abrir atendimento para registro de pagamento
         if(ag.clienteId) {
             abrirAtendimento(ag.clienteId);
-            // Pré-selecionar serviço
             if(ag.servicoId) {
                 document.getElementById('atendServico').value = ag.servicoId;
                 const preco = parseFloat(document.getElementById('atendServico').selectedOptions[0]?.dataset.preco) || 0;
@@ -1492,7 +1502,7 @@ function cancelarEdicao(tipo) {
         if(tipo === 'cliente') { document.getElementById('cliNome').value=''; document.getElementById('cliTelefone').value=''; document.getElementById('cliCpf').value=''; document.getElementById('cliNascimento').value=''; document.getElementById('cliEndereco').value=''; document.getElementById('cliObs').value=''; }
         if(tipo === 'categoria') document.getElementById('catNome').value='';
         if(tipo === 'servico') { document.getElementById('servNome').value=''; document.getElementById('servDesc').value=''; document.getElementById('servPreco').value=''; document.getElementById('servTempo').value='30'; }
-        if(tipo === 'plano') { document.getElementById('planoNome').value=''; document.getElementById('planoPreco').value=''; document.getElementById('planoValidade').value='30'; document.getElementById('planoQtdCortes').value=''; document.getElementById('planoQtdBarbas').value=''; document.getElementById('planoDesconto').value=''; document.getElementById('planoDesc').value=''; }
+        if(tipo === 'plano') { document.getElementById('planoNome').value=''; document.getElementById('planoPreco').value=''; document.getElementById('planoValidade').value='30'; document.getElementById('planoQtdCortes').value=''; document.getElementById('planoDesconto').value=''; document.getElementById('planoDesc').value=''; }
         if(tipo === 'agendamento') document.getElementById('agendaDateTime').value='';
         if(tipo === 'receita') { document.getElementById('finRecValor').value=''; document.getElementById('finRecDesc').value=''; }
         if(tipo === 'despesa') { document.getElementById('finDespDesc').value=''; document.getElementById('finDespValor').value=''; }
@@ -1573,11 +1583,10 @@ function salvarConfig() {
             alert('O PIN deve ter exatamente 4 dígitos numéricos.');
             return;
         }
-        // Pede a confirmação do PIN atual
         const pinAtual = prompt('Digite seu PIN atual para confirmar a alteração:');
         if(pinAtual !== getPin()) {
             alert('PIN atual incorreto! Alteração cancelada.');
-            document.getElementById('confPin').value = getPin(); // restaura o valor
+            document.getElementById('confPin').value = getPin();
             return;
         }
         setPin(pinNovo);
@@ -1631,23 +1640,7 @@ function globalSearch(texto) {
 // ================================================================
 //  INICIAR
 // ================================================================
-// Botão "Entrar" para mobile
-document.getElementById('btnLoginConfirm').addEventListener('click', function() {
-    if(pinCorrente.length === 4) {
-        if(pinCorrente === getPin()) {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('app').style.display = 'flex';
-            carregarTudo();
-        } else {
-            document.getElementById('loginError').textContent = 'PIN incorreto!';
-            pinCorrente = '';
-            atualizarDots();
-        }
-    } else {
-        document.getElementById('loginError').textContent = 'Digite os 4 dígitos completos!';
-    }
-});
 initLogin();
 </script>
 </body>
-</html>                           
+</html>
