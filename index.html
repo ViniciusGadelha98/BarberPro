@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Barber Pro</title>
-    <!-- ÍCONES PROFISSIONAIS (Font Awesome) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="manifest" href="manifest.json">
     <style>
@@ -30,124 +29,55 @@
             z-index:9999; flex-direction:column; padding:24px;
         }
         #loginScreen.hidden { display:none; }
-        #loginScreen h1 { 
-            color:white; font-size:2.4rem; font-weight:700; margin-bottom:4px;
-            display:flex; align-items:center; gap:12px;
-        }
+        #loginScreen h1 { color:white; font-size:2.4rem; font-weight:700; display:flex; align-items:center; gap:12px; }
         #loginScreen h1 i { color:var(--accent); font-size:2.2rem; }
         #loginScreen p { color:var(--gray); margin-bottom:28px; font-size:1rem; }
         .pin-dots { display:flex; gap:16px; margin-bottom:28px; }
-        .pin-dot { 
-            width:22px; height:22px; border-radius:50%; 
-            border:2px solid rgba(255,255,255,0.4); 
-            background:transparent; 
-            transition:0.2s;
-        }
+        .pin-dot { width:22px; height:22px; border-radius:50%; border:2px solid rgba(255,255,255,0.4); background:transparent; transition:0.2s; }
         .pin-dot.filled { background:white; border-color:white; }
-        .pin-input {
-            display:grid; grid-template-columns:repeat(3, 1fr); gap:12px;
-            max-width:280px; width:100%;
-        }
-        .pin-input button {
-            width:100%; aspect-ratio:1/1; border-radius:50%; border:none;
-            font-size:1.6rem; background:#334155; color:white; font-weight:600;
-            cursor:pointer; transition:0.15s;
-        }
+        .pin-input { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; max-width:280px; width:100%; }
+        .pin-input button { width:100%; aspect-ratio:1/1; border-radius:50%; border:none; font-size:1.6rem; background:#334155; color:white; font-weight:600; cursor:pointer; transition:0.15s; }
         .pin-input button:active { transform:scale(0.92); background:var(--accent); }
         .pin-input button.empty { background:transparent; color:var(--gray); pointer-events:none; }
-        #btnLoginConfirm {
-            margin-top:24px; padding:14px 48px; background:var(--accent); color:var(--primary);
-            border:none; border-radius:40px; font-size:1.1rem; font-weight:700;
-            cursor:pointer; transition:0.2s; width:auto; display:inline-block;
-        }
+        #btnLoginConfirm { margin-top:24px; padding:14px 48px; background:var(--accent); color:var(--primary); border:none; border-radius:40px; font-size:1.1rem; font-weight:700; cursor:pointer; transition:0.2s; width:auto; display:inline-block; }
         #btnLoginConfirm:active { transform:scale(0.96); }
         #loginError { color:#f87171; margin-top:12px; font-size:0.9rem; }
 
         /* ========== APP ========== */
         #app { flex:1; display:flex; flex-direction:column; height:100%; }
-
-        /* CABEÇALHO */
-        .header {
-            background:var(--primary); color:white; padding:16px 20px;
-            display:flex; justify-content:space-between; align-items:center;
-            flex-shrink:0; gap:12px; flex-wrap:wrap;
-        }
-        .header h2 { 
-            font-size:1.2rem; font-weight:700; 
-            display:flex; align-items:center; gap:10px;
-        }
+        .header { background:var(--primary); color:white; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:12px; flex-wrap:wrap; }
+        .header h2 { font-size:1.2rem; font-weight:700; display:flex; align-items:center; gap:10px; }
         .header h2 i { color:var(--accent); }
         .header-actions { display:flex; gap:10px; align-items:center; flex:1; max-width:320px; }
-        .header-actions input {
-            padding:10px 16px; border-radius:30px; border:none;
-            background:#334155; color:white; width:100%; font-size:0.95rem;
-        }
+        .header-actions input { padding:10px 16px; border-radius:30px; border:none; background:#334155; color:white; width:100%; font-size:0.95rem; }
         .header-actions input::placeholder { color:var(--gray); }
         .header-actions input:focus { outline:2px solid var(--accent); }
 
-        /* CONTEÚDO */
         .main-content { flex:1; overflow-y:auto; padding:16px; padding-bottom:85px; }
         .tab-page { display:none; animation:fade .3s; }
         .tab-page.active { display:block; }
         @keyframes fade { from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)} }
 
-        /* NAVEGAÇÃO INFERIOR */
-        .bottom-nav {
-            position:fixed; bottom:0; left:0; right:0; background:white;
-            border-top:1px solid #e2e8f0;
-            display:flex; justify-content:space-around; padding:8px 0 12px;
-            z-index:100; overflow-x:auto;
-        }
-        .nav-item {
-            background:none; border:none; display:flex; flex-direction:column;
-            align-items:center; font-size:0.6rem; color:var(--gray);
-            cursor:pointer; padding:4px 10px; transition:0.2s; min-width:48px;
-            gap:2px;
-        }
+        .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:white; border-top:1px solid #e2e8f0; display:flex; justify-content:space-around; padding:8px 0 12px; z-index:100; overflow-x:auto; }
+        .nav-item { background:none; border:none; display:flex; flex-direction:column; align-items:center; font-size:0.6rem; color:var(--gray); cursor:pointer; padding:4px 10px; transition:0.2s; min-width:48px; gap:2px; }
         .nav-item i { font-size:1.6rem; }
         .nav-item.active { color:var(--primary); font-weight:600; }
         .nav-item.active i { color:var(--accent); }
 
-        /* CARDS */
-        .card {
-            background:white; border-radius:var(--radius); padding:18px;
-            margin-bottom:14px; box-shadow:var(--card-shadow);
-        }
-        .card-title {
-            font-weight:600; font-size:1rem; margin-bottom:12px;
-            color:var(--primary); display:flex; justify-content:space-between;
-            align-items:center;
-        }
+        .card { background:white; border-radius:var(--radius); padding:18px; margin-bottom:14px; box-shadow:var(--card-shadow); }
+        .card-title { font-weight:600; font-size:1rem; margin-bottom:12px; color:var(--primary); display:flex; justify-content:space-between; align-items:center; }
         .card-title i { color:var(--accent); margin-right:8px; }
 
-        /* ESTATÍSTICAS */
         .grid-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-        .stat-card {
-            background:#f8fafc; border-radius:12px; padding:14px;
-            text-align:center; transition:0.2s;
-        }
-        .stat-card .number { 
-            font-size:1.6rem; font-weight:700; color:var(--primary); 
-            display:flex; align-items:center; justify-content:center; gap:6px;
-        }
+        .stat-card { background:#f8fafc; border-radius:12px; padding:14px; text-align:center; }
+        .stat-card .number { font-size:1.6rem; font-weight:700; color:var(--primary); display:flex; align-items:center; justify-content:center; gap:6px; }
         .stat-card .number i { font-size:1.4rem; color:var(--accent); }
         .stat-card .label { font-size:0.7rem; color:var(--gray); margin-top:4px; }
 
-        /* FORMULÁRIOS */
-        input, select, textarea, .btn {
-            width:100%; padding:12px 14px; border:1px solid #e2e8f0;
-            border-radius:12px; font-size:0.95rem; margin-bottom:8px;
-            transition:0.2s;
-        }
-        input:focus, select:focus, textarea:focus {
-            outline:2px solid var(--accent); border-color:transparent;
-        }
+        input, select, textarea, .btn { width:100%; padding:12px 14px; border:1px solid #e2e8f0; border-radius:12px; font-size:0.95rem; margin-bottom:8px; transition:0.2s; }
+        input:focus, select:focus, textarea:focus { outline:2px solid var(--accent); border-color:transparent; }
         textarea { resize:vertical; min-height:60px; }
-        .btn {
-            font-weight:600; border:none; cursor:pointer; transition:0.15s;
-            display:inline-flex; align-items:center; justify-content:center;
-            gap:8px; padding:14px;
-        }
+        .btn { font-weight:600; border:none; cursor:pointer; transition:0.15s; display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px; }
         .btn:active { transform:scale(0.96); }
         .btn-primary { background:var(--primary); color:white; }
         .btn-success { background:var(--success); color:white; }
@@ -156,69 +86,41 @@
         .btn-outline { background:transparent; border:1px solid var(--gray); color:var(--primary); }
         .btn-sm { padding:8px 14px; font-size:0.8rem; width:auto; display:inline-flex; }
 
-        /* LISTAS */
-        .list-item {
-            display:flex; justify-content:space-between; align-items:center;
-            padding:12px 0; border-bottom:1px solid #f1f5f9; flex-wrap:wrap;
-            gap:6px;
-        }
+        .list-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9; flex-wrap:wrap; gap:6px; }
         .list-item:last-child { border-bottom:none; }
         .list-item .info { flex:1; min-width:120px; }
         .list-item .actions { display:flex; gap:6px; flex-wrap:wrap; }
 
-        .badge {
-            background:#e2e8f0; padding:4px 12px; border-radius:30px;
-            font-size:0.7rem; font-weight:600; display:inline-flex;
-            align-items:center; gap:4px;
-        }
+        .badge { background:#e2e8f0; padding:4px 12px; border-radius:30px; font-size:0.7rem; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
         .badge-success { background:#dcfce7; color:#166534; }
         .badge-danger { background:#fee2e2; color:#991b1b; }
         .badge-warning { background:#fef3c7; color:#92400e; }
         .badge-info { background:#dbeafe; color:#1e40af; }
         .empty { text-align:center; color:var(--gray); padding:20px 0; font-size:0.9rem; }
 
-        /* FLEX E UTILITÁRIOS */
         .flex-row { display:flex; gap:8px; flex-wrap:wrap; }
         .flex-row .btn { flex:1; min-width:80px; }
-        .sub-tabs {
-            display:flex; gap:6px; background:#f1f5f9;
-            border-radius:14px; padding:6px; margin-bottom:16px;
-            flex-wrap:wrap;
-        }
-        .sub-tab {
-            flex:1; text-align:center; padding:8px 12px; border-radius:10px;
-            font-size:0.8rem; font-weight:500; background:transparent;
-            border:none; cursor:pointer; min-width:60px;
-            transition:0.2s; color:var(--gray);
-        }
+        .sub-tabs { display:flex; gap:6px; background:#f1f5f9; border-radius:14px; padding:6px; margin-bottom:16px; flex-wrap:wrap; }
+        .sub-tab { flex:1; text-align:center; padding:8px 12px; border-radius:10px; font-size:0.8rem; font-weight:500; background:transparent; border:none; cursor:pointer; min-width:60px; transition:0.2s; color:var(--gray); }
         .sub-tab.active { background:white; box-shadow:0 2px 8px rgba(0,0,0,0.06); color:var(--primary); }
 
-        /* MODAL */
-        .modal-overlay {
-            position:fixed; top:0; left:0; width:100%; height:100%;
-            background:rgba(0,0,0,0.5); display:none; align-items:center;
-            justify-content:center; z-index:999;
-        }
+        .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:999; }
         .modal-overlay.open { display:flex; }
-        .modal-box {
-            background:white; width:94%; max-width:450px; max-height:85vh;
-            overflow-y:auto; border-radius:28px; padding:24px;
-        }
+        .modal-box { background:white; width:94%; max-width:450px; max-height:85vh; overflow-y:auto; border-radius:28px; padding:24px; }
         .text-muted { color:var(--gray); font-size:0.8rem; }
         .text-danger { color:var(--danger); font-weight:600; }
         .text-success { color:var(--success); font-weight:600; }
         .hidden { display:none !important; }
         .mt-8 { margin-top:8px; }
         .mb-8 { margin-bottom:8px; }
-        .vencido { background:#fee2e2 !important; border-left:4px solid var(--danger); }
-        .em-dia { background:#dcfce7 !important; border-left:4px solid var(--success); }
+        .credits { background:var(--accent); color:var(--primary); padding:2px 10px; border-radius:30px; font-weight:700; font-size:0.8rem; display:inline-block; }
 
         @media print { body * { visibility:hidden; } #printArea, #printArea * { visibility:visible; } #printArea { position:absolute; top:0; left:0; width:100%; background:white; padding:20px; } .bottom-nav, .header, .no-print { display:none !important; } }
     </style>
 </head>
 <body>
 
-<!-- ==================== TELA DE LOGIN ==================== -->
+<!-- TELA DE LOGIN -->
 <div id="loginScreen">
     <h1><i class="fas fa-cut"></i> BarberPro</h1>
     <p>Digite seu PIN de 4 dígitos</p>
@@ -236,7 +138,7 @@
     <div id="loginError"></div>
 </div>
 
-<!-- ==================== APP PRINCIPAL ==================== -->
+<!-- APP PRINCIPAL -->
 <div id="app" style="display:none;">
     <div class="header no-print">
         <h2><i class="fas fa-cut"></i> BarberPro</h2>
@@ -253,10 +155,10 @@
                 <div class="stat-card"><div class="number"><i class="fas fa-coins"></i> <span id="dashFaturamentoHoje">R$0</span></div><div class="label">💰 Hoje</div></div>
                 <div class="stat-card"><div class="number"><i class="fas fa-calendar-day"></i> <span id="dashAgendamentosHoje">0</span></div><div class="label">📅 Agenda</div></div>
                 <div class="stat-card"><div class="number"><i class="fas fa-cut"></i> <span id="dashCortesHoje">0</span></div><div class="label">✂️ Cortes</div></div>
-                <div class="stat-card"><div class="number"><i class="fas fa-crown"></i> <span id="dashPlanosAtivos">0</span></div><div class="label">⭐ Planos</div></div>
+                <div class="stat-card"><div class="number"><i class="fas fa-crown"></i> <span id="dashPlanosAtivos">0</span></div><div class="label">⭐ Créditos</div></div>
             </div>
             <div class="card"><div class="card-title"><i class="fas fa-calendar-check"></i> Agenda de Hoje</div><div id="agendaHojeList"><div class="empty">Nenhum</div></div></div>
-            <div class="card"><div class="card-title"><i class="fas fa-clock"></i> Vencimentos (3 dias)</div><div id="proximosVencimentos"><div class="empty">Nenhum</div></div></div>
+            <div class="card"><div class="card-title"><i class="fas fa-clock"></i> Vencimentos</div><div id="proximosVencimentos"><div class="empty">Sistema de créditos sem validade</div></div></div>
             <div class="card"><div class="card-title"><i class="fas fa-chart-simple"></i> Receita 7 Dias</div><canvas id="graficoReceita" height="80" style="width:100%;"></canvas></div>
         </div>
 
@@ -280,7 +182,7 @@
             <div id="fichaCliente" style="display:none;" class="card">
                 <div class="card-title" id="fichaNome"><i class="fas fa-user"></i> Cliente</div>
                 <div id="fichaDados"></div>
-                <div id="fichaPlanoInfo" class="mt-8"></div>
+                <div id="fichaCredito" class="mt-8"></div>
                 <hr><div class="card-title"><i class="fas fa-history"></i> Histórico</div><div id="fichaHistorico"></div>
                 <hr><div class="card-title"><i class="fas fa-chart-simple"></i> Estatísticas</div><div id="fichaStats"></div>
                 <button class="btn btn-sm btn-outline" onclick="fecharFicha()"><i class="fas fa-close"></i> Fechar</button>
@@ -324,33 +226,31 @@
         <div id="tab-planos" class="tab-page">
             <div class="card">
                 <div class="card-title" id="planoFormTitle"><i class="fas fa-box"></i> Novo Plano</div>
-                <input type="text" id="planoNome" placeholder="Nome * (ex: Bronze, Ouro)">
+                <input type="text" id="planoNome" placeholder="Nome * (ex: Pacote 3 Cortes)">
                 <input type="number" id="planoPreco" placeholder="Preço (R$)" step="0.01">
-                <input type="number" id="planoValidade" placeholder="Validade (dias)" value="30">
                 <input type="number" id="planoQtdCortes" placeholder="Quantidade de Cortes *" value="1">
                 <input type="number" id="planoDesconto" placeholder="Desconto (%)" value="0">
-                <textarea id="planoDesc" placeholder="Descrição (ex: Corte + Barba)"></textarea>
+                <textarea id="planoDesc" placeholder="Descrição (opcional)"></textarea>
                 <button class="btn btn-primary" id="planoBtnSalvar" onclick="salvarPlano()"><i class="fas fa-save"></i> Salvar Plano</button>
                 <button class="btn btn-outline hidden" id="planoBtnCancelar" onclick="cancelarEdicao('plano')"><i class="fas fa-times"></i> Cancelar</button>
             </div>
             <div class="card">
-                <div class="card-title"><i class="fas fa-list"></i> Planos</div>
+                <div class="card-title"><i class="fas fa-list"></i> Planos Disponíveis</div>
                 <div id="planosLista"><div class="empty">Nenhum</div></div>
             </div>
             <div class="card">
-                <div class="card-title"><i class="fas fa-link"></i> Vincular/Assinar Plano</div>
+                <div class="card-title"><i class="fas fa-shopping-cart"></i> Comprar Plano (Adicionar Créditos)</div>
                 <select id="vinculoCliente"><option value="">Cliente</option></select>
                 <select id="vinculoPlano"><option value="">Plano</option></select>
-                <input type="date" id="vinculoInicio" value="">
                 <select id="vinculoFormaPagamento">
                     <option value="Dinheiro">Dinheiro</option><option value="PIX">PIX</option>
                     <option value="Cartão">Cartão</option><option value="Transferência">Transferência</option>
                 </select>
-                <button class="btn btn-success" onclick="vincularPlano()"><i class="fas fa-check"></i> Vincular Plano</button>
+                <button class="btn btn-success" onclick="vincularPlano()"><i class="fas fa-check"></i> Comprar Plano</button>
             </div>
             <div class="card">
-                <div class="card-title"><i class="fas fa-list-check"></i> Assinaturas Ativas</div>
-                <div id="assinaturasLista"><div class="empty">Nenhuma</div></div>
+                <div class="card-title"><i class="fas fa-history"></i> Histórico de Compras</div>
+                <div id="historicoCompras"><div class="empty">Nenhuma compra registrada</div></div>
             </div>
         </div>
 
@@ -456,7 +356,7 @@
     </div>
 </div>
 
-<!-- ==================== MODAIS ==================== -->
+<!-- MODAIS -->
 <div class="modal-overlay" id="atendimentoModal">
     <div class="modal-box">
         <h3><i class="fas fa-cut"></i> Atendimento</h3>
@@ -492,53 +392,59 @@
 
 <div id="printArea" style="display:none;"></div>
 
-<!-- ==================== JAVASCRIPT (MESMO CÓDIGO FUNCIONAL) ==================== -->
 <script>
 // ================================================================
-//  BANCO DE DADOS
+//  ⚠️ CONFIGURAÇÃO OBRIGATÓRIA: preencha com seus dados do Supabase
 // ================================================================
-function getData(key) { try { return JSON.parse(localStorage.getItem(key)) || []; } catch { return []; } }
-function setData(key, data) { localStorage.setItem(key, JSON.stringify(data)); }
-function genId() { return Date.now().toString(36)+Math.random().toString(36).substr(2,5); }
+const SUPABASE_URL = 'https://yywmylgsmcwrfmzkmmoz.supabase.co';     // ← cole sua URL aqui
+const SUPABASE_ANON_KEY = 'sb_publishable_hGOH6BoUMcRC2av-xAD26Q_YJRFQFY0';           // ← cole sua chave aqui
+
+// ================================================================
+//  BIBLIOTECA SUPABASE (carregada via CDN)
+// ================================================================
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ================================================================
+//  FUNÇÕES AUXILIARES
+// ================================================================
+function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
 function today() { return new Date().toISOString().split('T')[0]; }
 function nowISO() { return new Date().toISOString(); }
 
 function formatDateBR(d) {
-    if(!d) return '--';
-    let dt = new Date(d+'T00:00:00');
-    if(isNaN(dt)) dt = new Date(d);
-    if(isNaN(dt)) return '--';
+    if (!d) return '--';
+    let dt = new Date(d + 'T00:00:00');
+    if (isNaN(dt)) dt = new Date(d);
+    if (isNaN(dt)) return '--';
     return dt.toLocaleDateString('pt-BR');
 }
 
 function formatDateTimeBR(d) {
-    if(!d) return '--';
+    if (!d) return '--';
     let dt = new Date(d);
-    if(isNaN(dt)) return '--';
-    return dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+    if (isNaN(dt)) return '--';
+    return dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-function formatCurrency(v) { return 'R$ '+parseFloat(v||0).toFixed(2).replace('.',','); }
+function formatCurrency(v) { return 'R$ ' + parseFloat(v || 0).toFixed(2).replace('.', ','); }
 
 function mascaraTelefone(el) {
-    let v = el.value.replace(/\D/g,'');
-    if(v.length <= 2) el.value = v;
-    else if(v.length <= 7) el.value = '('+v.substring(0,2)+') '+v.substring(2);
-    else el.value = '('+v.substring(0,2)+') '+v.substring(2,7)+'-'+v.substring(7,11);
+    let v = el.value.replace(/\D/g, '');
+    if (v.length <= 2) el.value = v;
+    else if (v.length <= 7) el.value = '(' + v.substring(0, 2) + ') ' + v.substring(2);
+    else el.value = '(' + v.substring(0, 2) + ') ' + v.substring(2, 7) + '-' + v.substring(7, 11);
 }
 
 function mascaraCpf(el) {
-    let v = el.value.replace(/\D/g,'');
-    if(v.length <= 3) el.value = v;
-    else if(v.length <= 6) el.value = v.substring(0,3)+'.'+v.substring(3);
-    else if(v.length <= 9) el.value = v.substring(0,3)+'.'+v.substring(3,6)+'.'+v.substring(6);
-    else el.value = v.substring(0,3)+'.'+v.substring(3,6)+'.'+v.substring(6,9)+'-'+v.substring(9,11);
+    let v = el.value.replace(/\D/g, '');
+    if (v.length <= 3) el.value = v;
+    else if (v.length <= 6) el.value = v.substring(0, 3) + '.' + v.substring(3);
+    else if (v.length <= 9) el.value = v.substring(0, 3) + '.' + v.substring(3, 6) + '.' + v.substring(6);
+    else el.value = v.substring(0, 3) + '.' + v.substring(3, 6) + '.' + v.substring(6, 9) + '-' + v.substring(9, 11);
 }
 
-let editContext = { tipo: null, id: null };
-
 // ================================================================
-//  PIN
+//  PIN – continua no localStorage
 // ================================================================
 let pinCorrente = '';
 function getPin() { return localStorage.getItem('appPin') || '1234'; }
@@ -551,25 +457,39 @@ function initLogin() {
     atualizarDots();
     document.getElementById('loginError').textContent = '';
 }
-function atualizarDots() { document.querySelectorAll('.pin-dot').forEach((dot,i) => dot.classList.toggle('filled', i < pinCorrente.length)); }
+
+function atualizarDots() {
+    document.querySelectorAll('.pin-dot').forEach((dot, i) => dot.classList.toggle('filled', i < pinCorrente.length));
+}
 
 document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
-    btn.addEventListener('click', function() {
-        if(pinCorrente.length < 4) {
+    btn.addEventListener('click', function () {
+        if (pinCorrente.length < 4) {
             pinCorrente += this.dataset.v;
             atualizarDots();
-            if(pinCorrente.length === 4) {
-                if(pinCorrente === getPin()) { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('app').style.display = 'flex'; carregarTudo(); }
-                else { document.getElementById('loginError').textContent = 'PIN incorreto!'; pinCorrente = ''; atualizarDots(); }
+            if (pinCorrente.length === 4) {
+                if (pinCorrente === getPin()) {
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('app').style.display = 'flex';
+                    carregarTudo();
+                } else {
+                    document.getElementById('loginError').textContent = 'PIN incorreto!';
+                    pinCorrente = '';
+                    atualizarDots();
+                }
             }
         }
     });
 });
-document.getElementById('pinBack').addEventListener('click', function() { pinCorrente = pinCorrente.slice(0,-1); atualizarDots(); });
 
-document.getElementById('btnLoginConfirm').addEventListener('click', function() {
-    if(pinCorrente.length === 4) {
-        if(pinCorrente === getPin()) {
+document.getElementById('pinBack').addEventListener('click', function () {
+    pinCorrente = pinCorrente.slice(0, -1);
+    atualizarDots();
+});
+
+document.getElementById('btnLoginConfirm').addEventListener('click', function () {
+    if (pinCorrente.length === 4) {
+        if (pinCorrente === getPin()) {
             document.getElementById('loginScreen').classList.add('hidden');
             document.getElementById('app').style.display = 'flex';
             carregarTudo();
@@ -586,176 +506,133 @@ document.getElementById('btnLoginConfirm').addEventListener('click', function() 
 // ================================================================
 //  NAVEGAÇÃO
 // ================================================================
+let editContext = { tipo: null, id: null };
+
 document.querySelectorAll('.nav-item').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
-        document.querySelectorAll('.tab-page').forEach(p=>p.classList.remove('active'));
+        document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
         document.getElementById(this.dataset.tab).classList.add('active');
         const tab = this.dataset.tab;
-        if(tab === 'tab-agenda') { document.getElementById('agendaData').value = today(); carregarAgendaDia(); }
-        if(tab === 'tab-clientes') carregarClientes();
-        if(tab === 'tab-categorias') carregarCategorias();
-        if(tab === 'tab-servicos') { carregarServicos(); carregarSelectCategorias(); }
-        if(tab === 'tab-planos') { carregarPlanos(); carregarAssinaturas(); carregarSelectsPlanos(); }
-        if(tab === 'tab-financeiro') { carregarReceitas(); carregarDespesas(); }
-        if(tab === 'tab-dashboard') atualizarDashboard();
-    });
-});
-document.querySelectorAll('.sub-tab').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.sub-tab').forEach(b=>b.classList.remove('active'));
-        this.classList.add('active');
-        document.querySelectorAll('.sub-page').forEach(p=>p.style.display='none');
-        document.getElementById(this.dataset.sub).style.display = 'block';
-        if(this.dataset.sub === 'finan-relatorio') gerarRelatorioFinanceiro();
+        if (tab === 'tab-agenda') { document.getElementById('agendaData').value = today(); carregarAgendaDia(); }
+        if (tab === 'tab-clientes') carregarClientes();
+        if (tab === 'tab-categorias') carregarCategorias();
+        if (tab === 'tab-servicos') { carregarServicos(); carregarSelectCategorias(); }
+        if (tab === 'tab-planos') { carregarPlanos(); carregarHistoricoCompras(); carregarSelectsPlanos(); }
+        if (tab === 'tab-financeiro') { carregarReceitas(); carregarDespesas(); }
+        if (tab === 'tab-dashboard') atualizarDashboard();
     });
 });
 
-function carregarTudo() {
+document.querySelectorAll('.sub-tab').forEach(btn => {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        document.querySelectorAll('.sub-page').forEach(p => p.style.display = 'none');
+        document.getElementById(this.dataset.sub).style.display = 'block';
+        if (this.dataset.sub === 'finan-relatorio') gerarRelatorioFinanceiro();
+    });
+});
+
+async function carregarTudo() {
     const nome = localStorage.getItem('barberShopName') || '✂️ Barber Pro';
     document.getElementById('barberShopName').textContent = nome;
     document.getElementById('confNome').value = nome;
     document.getElementById('confPin').value = getPin();
-    ['perfNome','perfTelefone','perfEmail'].forEach(id => document.getElementById(id).value = localStorage.getItem(id) || '');
+    ['perfNome', 'perfTelefone', 'perfEmail'].forEach(id => document.getElementById(id).value = localStorage.getItem(id) || '');
     document.getElementById('agendaData').value = today();
     document.getElementById('finRecData').value = today();
     document.getElementById('finDespData').value = today();
-    document.getElementById('vinculoInicio').value = today();
-    carregarCategorias();
-    carregarSelectCategorias();
-    carregarClientes();
-    carregarServicos();
-    carregarPlanos();
-    carregarAssinaturas();
-    carregarSelectsPlanos();
-    carregarAgendaDia();
-    carregarReceitas();
-    carregarDespesas();
-    carregarSelectsClientes();
-    atualizarDashboard();
+
+    await carregarCategorias();
+    await carregarSelectCategorias();
+    await carregarClientes();
+    await carregarServicos();
+    await carregarPlanos();
+    await carregarHistoricoCompras();
+    await carregarSelectsPlanos();
+    await carregarAgendaDia();
+    await carregarReceitas();
+    await carregarDespesas();
+    await carregarSelectsClientes();
+    await atualizarDashboard();
 }
 
 // ================================================================
-//  DASHBOARD
+//  📌 CRUD CLIENTES (SUPABASE)
 // ================================================================
-function atualizarDashboard() {
-    const hoje = today();
-    const agendamentos = getData('agendamentos');
-    const pagamentos = getData('pagamentos');
-    const assinaturas = getData('assinaturas');
-    let fatHoje = pagamentos.filter(p => p.data && p.data.startsWith(hoje)).reduce((s,p) => s + parseFloat(p.valor||0), 0);
-    document.getElementById('dashFaturamentoHoje').textContent = formatCurrency(fatHoje);
-    const agHoje = agendamentos.filter(a => a.data && a.data.startsWith(hoje));
-    document.getElementById('dashAgendamentosHoje').textContent = agHoje.length;
-    document.getElementById('dashCortesHoje').textContent = agendamentos.filter(a => a.data && a.data.startsWith(hoje) && a.status === 'realizado').length;
-    document.getElementById('dashPlanosAtivos').textContent = assinaturas.filter(a => a.fim && a.fim >= hoje && a.status === 'ativo').length;
-    const containerAgenda = document.getElementById('agendaHojeList');
-    if(agHoje.length === 0) containerAgenda.innerHTML = '<div class="empty">Nenhum</div>';
-    else {
-        containerAgenda.innerHTML = agHoje.sort((a,b)=>a.hora.localeCompare(b.hora)).map(a => {
-            const cliente = getData('clientes').find(c => c.id === a.clienteId);
-            const statusMap = { 'agendado':'badge-warning', 'realizado':'badge-success', 'adiado':'badge-info', 'cancelado':'badge-danger' };
-            return `<div class="list-item"><span>${a.hora} - ${cliente?cliente.nome:'Cliente'}</span><span class="badge ${statusMap[a.status]||'badge-warning'}">${a.status||'Agendado'}</span></div>`;
-        }).join('');
-    }
-    const tresDias = new Date(); tresDias.setDate(tresDias.getDate()+3);
-    const tresDiasStr = tresDias.toISOString().split('T')[0];
-    const vencimentos = assinaturas.filter(a => a.fim && a.fim >= hoje && a.fim <= tresDiasStr && a.status === 'ativo');
-    const containerVen = document.getElementById('proximosVencimentos');
-    if(vencimentos.length === 0) containerVen.innerHTML = '<div class="empty">Nenhum</div>';
-    else {
-        containerVen.innerHTML = vencimentos.map(a => {
-            const cliente = getData('clientes').find(c => c.id === a.clienteId);
-            return `<div class="list-item"><span>${cliente?cliente.nome:'Cliente'}</span><span class="badge badge-danger">Vence ${formatDateBR(a.fim)}</span></div>`;
-        }).join('');
-    }
-    desenharGraficoReceita();
-}
-
-function desenharGraficoReceita() {
-    const canvas = document.getElementById('graficoReceita');
-    const ctx = canvas.getContext('2d');
-    const width = canvas.parentElement.clientWidth - 32;
-    canvas.width = width * (devicePixelRatio || 1);
-    canvas.height = 80 * (devicePixelRatio || 1);
-    canvas.style.width = width + 'px';
-    canvas.style.height = '80px';
-    const pagamentos = getData('pagamentos');
-    const dias = [];
-    for(let i=6; i>=0; i--) {
-        const d = new Date(); d.setDate(d.getDate()-i);
-        const ds = d.toISOString().split('T')[0];
-        const total = pagamentos.filter(p => p.data && p.data.startsWith(ds)).reduce((s,p) => s + parseFloat(p.valor||0), 0);
-        dias.push({label: formatDateBR(ds), value: total});
-    }
-    const max = Math.max(...dias.map(d=>d.value), 1);
-    ctx.clearRect(0,0,canvas.width,canvas.height);
-    const barW = canvas.width / dias.length * 0.6;
-    const gap = canvas.width / dias.length * 0.4;
-    const scale = (canvas.height - 20) / max;
-    dias.forEach((d,i) => {
-        const x = i * (barW + gap) + gap/2;
-        const h = d.value * scale;
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(x, canvas.height - h - 10, barW, h);
-        ctx.fillStyle = '#94a3b8';
-        ctx.font = '9px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(d.label, x+barW/2, canvas.height-2);
-        if(d.value > 0) { ctx.fillStyle = '#1e293b'; ctx.fillText(formatCurrency(d.value), x+barW/2, canvas.height - h - 14); }
-    });
-}
-window.addEventListener('resize', function() { if(document.getElementById('tab-dashboard').classList.contains('active')) desenharGraficoReceita(); });
-
-// ================================================================
-//  CRUD CLIENTES
-// ================================================================
-function salvarCliente() {
+async function salvarCliente() {
     const nome = document.getElementById('cliNome').value.trim();
-    if(!nome) { alert('Nome é obrigatório'); return; }
-    const clientes = getData('clientes');
-    if(editContext.tipo === 'cliente' && editContext.id) {
-        const idx = clientes.findIndex(c => c.id === editContext.id);
-        if(idx > -1) {
-            clientes[idx] = { ...clientes[idx], nome, telefone: document.getElementById('cliTelefone').value.trim(), cpf: document.getElementById('cliCpf').value.trim(), nascimento: document.getElementById('cliNascimento').value, endereco: document.getElementById('cliEndereco').value.trim(), obs: document.getElementById('cliObs').value.trim() };
-            setData('clientes', clientes);
-            cancelarEdicao('cliente');
-        }
-    } else {
-        clientes.push({ id: genId(), nome, telefone: document.getElementById('cliTelefone').value.trim(), cpf: document.getElementById('cliCpf').value.trim(), nascimento: document.getElementById('cliNascimento').value, endereco: document.getElementById('cliEndereco').value.trim(), obs: document.getElementById('cliObs').value.trim(), dataCadastro: nowISO() });
-        setData('clientes', clientes);
+    if (!nome) { alert('Nome é obrigatório'); return; }
+
+    const cliente = {
+        id: editContext.tipo === 'cliente' && editContext.id ? editContext.id : genId(),
+        nome: nome,
+        telefone: document.getElementById('cliTelefone').value.trim(),
+        cpf: document.getElementById('cliCpf').value.trim(),
+        nascimento: document.getElementById('cliNascimento').value,
+        endereco: document.getElementById('cliEndereco').value.trim(),
+        obs: document.getElementById('cliObs').value.trim(),
+        creditos: 0,
+        data_cadastro: nowISO()
+    };
+
+    const { error } = await supabase
+        .from('clientes')
+        .upsert(cliente, { onConflict: 'id' });
+
+    if (error) {
+        alert('Erro ao salvar: ' + error.message);
+        return;
     }
+
     document.getElementById('cliNome').value = '';
     document.getElementById('cliTelefone').value = '';
     document.getElementById('cliCpf').value = '';
     document.getElementById('cliNascimento').value = '';
     document.getElementById('cliEndereco').value = '';
     document.getElementById('cliObs').value = '';
-    carregarClientes();
-    carregarSelectsClientes();
-    atualizarDashboard();
+
+    editContext = { tipo: null, id: null };
+    document.getElementById('cliFormTitle').innerHTML = '<i class="fas fa-user-plus"></i> Novo Cliente';
+    document.getElementById('cliBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Salvar Cliente';
+    document.getElementById('cliBtnCancelar').classList.add('hidden');
+
+    await carregarClientes();
+    await carregarSelectsClientes();
+    await atualizarDashboard();
+    alert('Cliente salvo com sucesso na nuvem!');
 }
 
-function carregarClientes() {
-    const clientes = getData('clientes');
+async function carregarClientes() {
+    const { data: clientes, error } = await supabase
+        .from('clientes')
+        .select('*')
+        .order('nome', { ascending: true });
+
+    if (error) {
+        console.error('Erro ao buscar clientes:', error);
+        return;
+    }
+
     document.getElementById('qtdClientes').textContent = clientes.length;
     const container = document.getElementById('clientesLista');
-    if(clientes.length === 0) { container.innerHTML = '<div class="empty">Nenhum cliente</div>'; return; }
+
+    if (clientes.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhum cliente</div>';
+        return;
+    }
+
     container.innerHTML = clientes.map(c => {
-        const assinatura = getData('assinaturas').find(a => a.clienteId === c.id && a.status === 'ativo');
-        const plano = assinatura ? getData('planos').find(p => p.id === assinatura.planoId) : null;
-        let statusTexto = '';
-        let statusClass = '';
-        if(assinatura) {
-            const saldo = assinatura.saldoCortes || 0;
-            if(saldo <= 0) { statusTexto = '⚠️ Cortes Esgotados!'; statusClass = 'text-danger'; }
-            else { statusTexto = `📦 ${plano?plano.nome:'Plano'} (${saldo} restantes)`; statusClass = 'text-success'; }
-        }
-        return `<div class="list-item">
+        const creditos = c.creditos || 0;
+        const statusTexto = creditos > 0 ? `📦 ${creditos} cortes` : '⚠️ Sem créditos';
+        const statusClass = creditos > 0 ? 'text-success' : 'text-danger';
+        return `
+        <div class="list-item">
             <div class="info" onclick="abrirFicha('${c.id}')" style="cursor:pointer;">
                 <strong>${c.nome}</strong> ${c.telefone ? '<br><span class="text-muted">'+c.telefone+'</span>' : ''}
-                ${statusTexto ? '<br><span class="'+statusClass+'">'+statusTexto+'</span>' : ''}
+                <br><span class="${statusClass}">${statusTexto}</span>
             </div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarCliente('${c.id}')"><i class="fas fa-pen"></i></button>
@@ -767,96 +644,134 @@ function carregarClientes() {
 }
 
 function editarCliente(id) {
-    const clientes = getData('clientes');
-    const c = clientes.find(x => x.id === id);
-    if(!c) return;
-    editContext = { tipo: 'cliente', id };
-    document.getElementById('cliFormTitle').textContent = '✏️ Editando Cliente';
-    document.getElementById('cliBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar Cliente';
-    document.getElementById('cliBtnCancelar').classList.remove('hidden');
-    document.getElementById('cliNome').value = c.nome;
-    document.getElementById('cliTelefone').value = c.telefone || '';
-    document.getElementById('cliCpf').value = c.cpf || '';
-    document.getElementById('cliNascimento').value = c.nascimento || '';
-    document.getElementById('cliEndereco').value = c.endereco || '';
-    document.getElementById('cliObs').value = c.obs || '';
-    document.getElementById('tab-clientes').scrollIntoView({behavior:'smooth'});
+    // Buscar dados atuais e preencher o formulário
+    supabase
+        .from('clientes')
+        .select('*')
+        .eq('id', id)
+        .single()
+        .then(({ data, error }) => {
+            if (error) { alert('Erro ao buscar cliente'); return; }
+            editContext = { tipo: 'cliente', id: id };
+            document.getElementById('cliFormTitle').innerHTML = '<i class="fas fa-pen"></i> Editando Cliente';
+            document.getElementById('cliBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Atualizar Cliente';
+            document.getElementById('cliBtnCancelar').classList.remove('hidden');
+            document.getElementById('cliNome').value = data.nome;
+            document.getElementById('cliTelefone').value = data.telefone || '';
+            document.getElementById('cliCpf').value = data.cpf || '';
+            document.getElementById('cliNascimento').value = data.nascimento || '';
+            document.getElementById('cliEndereco').value = data.endereco || '';
+            document.getElementById('cliObs').value = data.obs || '';
+            document.getElementById('tab-clientes').scrollIntoView({ behavior: 'smooth' });
+        });
 }
 
-function excluirCliente(id) {
-    if(!confirm('Excluir cliente e todos os dados?')) return;
-    let clientes = getData('clientes').filter(c => c.id !== id);
-    setData('clientes', clientes);
-    setData('agendamentos', getData('agendamentos').filter(a => a.clienteId !== id));
-    setData('pagamentos', getData('pagamentos').filter(p => p.clienteId !== id));
-    setData('assinaturas', getData('assinaturas').filter(a => a.clienteId !== id));
-    carregarClientes();
-    carregarSelectsClientes();
-    atualizarDashboard();
+async function excluirCliente(id) {
+    if (!confirm('Excluir cliente e todos os dados?')) return;
+
+    const { error } = await supabase
+        .from('clientes')
+        .delete()
+        .eq('id', id);
+
+    if (error) {
+        alert('Erro ao excluir: ' + error.message);
+        return;
+    }
+
+    await supabase.from('agendamentos').delete().eq('cliente_id', id);
+    await supabase.from('pagamentos').delete().eq('cliente_id', id);
+    await supabase.from('compras').delete().eq('cliente_id', id);
+
+    await carregarClientes();
+    await carregarSelectsClientes();
+    await atualizarDashboard();
+    alert('Cliente excluído!');
 }
 
-function abrirFicha(id) {
-    const cliente = getData('clientes').find(c => c.id === id);
-    if(!cliente) return;
+// ================================================================
+//  📌 FICHA DO CLIENTE
+// ================================================================
+async function abrirFicha(id) {
+    const { data: cliente, error } = await supabase
+        .from('clientes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+    if (error || !cliente) { alert('Cliente não encontrado'); return; }
+
     document.getElementById('fichaCliente').style.display = 'block';
-    document.getElementById('fichaNome').textContent = cliente.nome;
-    
-    const agendamentos = getData('agendamentos').filter(a => a.clienteId === id).sort((a,b)=>b.data.localeCompare(a.data));
-    const pagamentos = getData('pagamentos').filter(p => p.clienteId === id);
-    const assinatura = getData('assinaturas').find(a => a.clienteId === id && a.status === 'ativo');
-    const plano = assinatura ? getData('planos').find(p => p.id === assinatura.planoId) : null;
-    
+    document.getElementById('fichaNome').innerHTML = `<i class="fas fa-user"></i> ${cliente.nome}`;
+
+    // Buscar agendamentos e pagamentos
+    const { data: agendamentos } = await supabase
+        .from('agendamentos')
+        .select('*')
+        .eq('cliente_id', id)
+        .order('data', { ascending: false });
+
+    const { data: pagamentos } = await supabase
+        .from('pagamentos')
+        .select('*')
+        .eq('cliente_id', id)
+        .order('data', { ascending: false });
+
+    const creditos = cliente.creditos || 0;
+
     document.getElementById('fichaDados').innerHTML = `
         <p><strong>Telefone:</strong> ${cliente.telefone||'--'}</p>
         <p><strong>CPF:</strong> ${cliente.cpf||'--'}</p>
         <p><strong>Nasc:</strong> ${cliente.nascimento ? formatDateBR(cliente.nascimento) : '--'}</p>
         <p><strong>Obs:</strong> ${cliente.obs||'--'}</p>
     `;
-    
-    const planoInfo = document.getElementById('fichaPlanoInfo');
-    if(assinatura && plano) {
-        const saldo = assinatura.saldoCortes || 0;
-        const statusPlano = assinatura.fim < today() ? 'VENCIDO' : 'Em dia';
-        const statusClass = assinatura.fim < today() ? 'text-danger' : 'text-success';
-        planoInfo.innerHTML = `
-            <div class="card" style="background:#f8fafc;">
-                <p><strong>📦 Plano:</strong> ${plano.nome}</p>
-                <p><strong>Saldo:</strong> ${saldo} cortes restantes ${saldo <= 0 ? '⚠️ <span class="text-danger">ESGOTADO</span>' : ''}</p>
-                <p><strong>Vencimento:</strong> ${formatDateBR(assinatura.fim)}</p>
-                <p><strong>Status:</strong> <span class="${statusClass}">${statusPlano}</span></p>
-                <p><strong>Forma Pagto:</strong> ${assinatura.formaPagamento || '--'}</p>
-                <button class="btn btn-sm btn-accent" onclick="editarAssinatura('${assinatura.id}')"><i class="fas fa-pen"></i> Alterar Plano</button>
-                <button class="btn btn-sm btn-danger" onclick="cancelarAssinatura('${assinatura.id}')"><i class="fas fa-ban"></i> Cancelar Plano</button>
-            </div>
-        `;
-    } else {
-        planoInfo.innerHTML = `<p class="text-muted">🔹 Cliente sem plano ativo</p>`;
-    }
-    
-    let historico = [];
-    agendamentos.forEach(a => {
-        const s = getData('servicos').find(ss => ss.id === a.servicoId);
-        historico.push({ data: a.data, desc: s?s.nome:'Serviço', valor: a.valor||0, tipo: 'Atendimento', status: a.status });
-    });
-    pagamentos.forEach(p => {
-        historico.push({ data: p.data, desc: p.descricao||'Pagamento', valor: p.valor, tipo: 'Pagamento', status: 'pago' });
-    });
-    historico.sort((a,b)=>b.data.localeCompare(a.data));
-    const containerHist = document.getElementById('fichaHistorico');
-    if(historico.length === 0) containerHist.innerHTML = '<div class="empty">Nenhum</div>';
-    else containerHist.innerHTML = historico.slice(0,20).map(h => `
-        <div class="list-item">
-            <span>${formatDateTimeBR(h.data)} - ${h.desc}</span>
-            <span class="badge ${h.tipo==='Pagamento'?'badge-success':'badge-warning'}">${h.tipo} ${formatCurrency(h.valor)}</span>
+
+    document.getElementById('fichaCredito').innerHTML = `
+        <div class="card" style="background:#f8fafc;">
+            <p><strong>💳 Créditos disponíveis:</strong> <span class="credits">${creditos}</span> cortes</p>
         </div>
-    `).join('');
-    
-    const totalGasto = pagamentos.reduce((s,p) => s + parseFloat(p.valor||0), 0);
-    const visitas = agendamentos.filter(a => a.status === 'realizado').length;
-    const ultima = agendamentos.filter(a => a.status === 'realizado').sort((a,b)=>b.data.localeCompare(a.data))[0];
+    `;
+
+    let historico = [];
+    if (agendamentos) {
+        agendamentos.forEach(a => {
+            historico.push({ data: a.data, desc: 'Atendimento', valor: a.valor || 0, tipo: 'Atendimento', status: a.status });
+        });
+    }
+    if (pagamentos) {
+        pagamentos.forEach(p => {
+            historico.push({ data: p.data, desc: p.descricao || 'Pagamento', valor: p.valor, tipo: 'Pagamento', status: 'pago' });
+        });
+    }
+    historico.sort((a, b) => b.data.localeCompare(a.data));
+
+    const containerHist = document.getElementById('fichaHistorico');
+    if (historico.length === 0) containerHist.innerHTML = '<div class="empty">Nenhum</div>';
+    else {
+        containerHist.innerHTML = historico.slice(0, 20).map(h => `
+            <div class="list-item">
+                <span>${formatDateTimeBR(h.data)} - ${h.desc}</span>
+                <span class="badge ${h.tipo==='Pagamento'?'badge-success':'badge-warning'}">${h.tipo} ${formatCurrency(h.valor)}</span>
+            </div>
+        `).join('');
+    }
+
+    const totalGasto = pagamentos ? pagamentos.reduce((s, p) => s + parseFloat(p.valor || 0), 0) : 0;
+    const visitas = agendamentos ? agendamentos.filter(a => a.status === 'realizado').length : 0;
+    const ultima = agendamentos ? agendamentos.filter(a => a.status === 'realizado').sort((a, b) => b.data.localeCompare(a.data))[0] : null;
+
     let mediaDias = '--';
-    const datas = agendamentos.filter(a => a.status === 'realizado').map(a => a.data).sort();
-    if(datas.length > 1) { let total=0; for(let i=1; i<datas.length; i++) { total += Math.floor((new Date(datas[i]) - new Date(datas[i-1])) / (1000*60*60*24)); } mediaDias = (total/(datas.length-1)).toFixed(1); }
+    if (agendamentos) {
+        const datas = agendamentos.filter(a => a.status === 'realizado').map(a => a.data).sort();
+        if (datas.length > 1) {
+            let total = 0;
+            for (let i = 1; i < datas.length; i++) {
+                total += Math.floor((new Date(datas[i]) - new Date(datas[i - 1])) / (1000 * 60 * 60 * 24));
+            }
+            mediaDias = (total / (datas.length - 1)).toFixed(1);
+        }
+    }
+
     document.getElementById('fichaStats').innerHTML = `
         <p><strong>Total gasto:</strong> ${formatCurrency(totalGasto)}</p>
         <p><strong>Visitas:</strong> ${visitas}</p>
@@ -864,128 +779,164 @@ function abrirFicha(id) {
         <p><strong>Média dias:</strong> ${mediaDias}</p>
     `;
 }
-function fecharFicha() { document.getElementById('fichaCliente').style.display = 'none'; }
+
+function fecharFicha() {
+    document.getElementById('fichaCliente').style.display = 'none';
+}
 
 // ================================================================
-//  ATENDIMENTO
+//  📌 ATENDIMENTO
 // ================================================================
 let atendimentoClienteId = null;
 
-function abrirAtendimento(clienteId) {
-    const cliente = getData('clientes').find(c => c.id === clienteId);
-    if(!cliente) return;
+async function abrirAtendimento(clienteId) {
+    const { data: cliente, error } = await supabase
+        .from('clientes')
+        .select('*')
+        .eq('id', clienteId)
+        .single();
+
+    if (error || !cliente) { alert('Cliente não encontrado'); return; }
+
     atendimentoClienteId = clienteId;
     document.getElementById('atendClienteNome').textContent = cliente.nome;
     document.getElementById('atendClienteId').value = clienteId;
-    
-    const servicos = getData('servicos').filter(s => s.status === 'ativo');
+
+    const { data: servicos } = await supabase
+        .from('servicos')
+        .select('*')
+        .eq('status', 'ativo');
+
     const selServ = document.getElementById('atendServico');
     selServ.innerHTML = '<option value="">Selecione o Serviço</option>';
-    servicos.forEach(s => selServ.innerHTML += `<option value="${s.id}" data-preco="${s.preco}" data-tempo="${s.tempo||30}">${s.nome} - ${formatCurrency(s.preco)} (${s.tempo||30}min)</option>`);
-    selServ.onchange = function() {
+    if (servicos) {
+        servicos.forEach(s => {
+            selServ.innerHTML += `<option value="${s.id}" data-preco="${s.preco}" data-tempo="${s.tempo||30}">${s.nome} - ${formatCurrency(s.preco)} (${s.tempo||30}min)</option>`;
+        });
+    }
+    selServ.onchange = function () {
         const preco = parseFloat(this.options[this.selectedIndex]?.dataset.preco) || 0;
         document.getElementById('atendValor').value = preco;
     };
     document.getElementById('atendValor').value = '';
-    
-    const assinatura = getData('assinaturas').find(a => a.clienteId === clienteId && a.status === 'ativo');
-    const plano = assinatura ? getData('planos').find(p => p.id === assinatura.planoId) : null;
+
+    const creditos = cliente.creditos || 0;
     const planoInfo = document.getElementById('atendPlanoInfo');
-    if(assinatura && plano) {
-        const saldo = assinatura.saldoCortes || 0;
-        const vencido = assinatura.fim < today();
+    if (creditos > 0) {
         planoInfo.innerHTML = `
             <div style="background:#f0fdf4;padding:10px;border-radius:8px;margin-top:8px;">
-                <p><strong>📦 Plano:</strong> ${plano.nome} | <strong>Saldo:</strong> ${saldo} cortes</p>
-                <p><strong>Vencimento:</strong> ${formatDateBR(assinatura.fim)} ${vencido ? '⚠️ <span class="text-danger">VENCIDO</span>' : ''}</p>
-                <p class="text-muted" style="font-size:0.8rem;">Clique em "Usar Plano" para abater 1 corte</p>
+                <p><strong>💳 Créditos disponíveis:</strong> ${creditos} cortes</p>
+                <p class="text-muted" style="font-size:0.8rem;">Clique em "Usar Plano" para descontar 1 crédito</p>
             </div>
         `;
     } else {
-        planoInfo.innerHTML = `<p class="text-muted">🔹 Cliente sem plano ativo</p>`;
+        planoInfo.innerHTML = `<p class="text-muted">🔹 Cliente sem créditos. Use "Pagamento Avulso".</p>`;
     }
-    
+
     document.getElementById('atendimentoModal').classList.add('open');
 }
 
-function finalizarAtendimento(usarPlano) {
+async function finalizarAtendimento(usarPlano) {
     const clienteId = document.getElementById('atendClienteId').value;
     const servicoId = document.getElementById('atendServico').value;
     const valor = parseFloat(document.getElementById('atendValor').value);
     const forma = document.getElementById('atendFormaPagamento').value;
-    
-    if(!servicoId) { alert('Selecione o serviço realizado'); return; }
-    if(!usarPlano && (!valor || valor <= 0)) { alert('Digite o valor do serviço'); return; }
-    
-    const servico = getData('servicos').find(s => s.id === servicoId);
+
+    if (!servicoId) { alert('Selecione o serviço realizado'); return; }
+    if (!usarPlano && (!valor || valor <= 0)) { alert('Digite o valor do serviço'); return; }
+
+    const { data: servico } = await supabase
+        .from('servicos')
+        .select('*')
+        .eq('id', servicoId)
+        .single();
+
     const hoje = today();
     const agora = new Date();
-    const hora = agora.getHours().toString().padStart(2,'0') + ':' + agora.getMinutes().toString().padStart(2,'0');
-    
-    const agendamentos = getData('agendamentos');
-    agendamentos.push({
+    const hora = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
+
+    // Criar agendamento como realizado
+    const agendamento = {
         id: genId(),
-        clienteId: clienteId || null,
-        servicoId: servicoId,
+        cliente_id: clienteId || null,
+        servico_id: servicoId,
         data: hoje,
         hora: hora,
         status: 'realizado',
         valor: usarPlano ? 0 : valor,
-        criadoEm: nowISO()
-    });
-    setData('agendamentos', agendamentos);
-    
-    if(usarPlano) {
-        const assinaturas = getData('assinaturas');
-        const ass = assinaturas.find(a => a.clienteId === clienteId && a.status === 'ativo');
-        if(ass) {
-            if(ass.saldoCortes > 0) {
-                ass.saldoCortes -= 1;
-                setData('assinaturas', assinaturas);
-                const pagamentos = getData('pagamentos');
-                pagamentos.push({
-                    id: genId(),
-                    clienteId: clienteId,
-                    valor: 0,
-                    descricao: `Corte via Plano - ${servico?servico.nome:'Serviço'}`,
-                    data: hoje,
-                    forma: 'Plano',
-                    tipo: 'receita',
-                    criadoEm: nowISO()
-                });
-                setData('pagamentos', pagamentos);
-                alert(`✅ Corte realizado com sucesso! Saldo restante: ${ass.saldoCortes} cortes.`);
-            } else {
-                alert('❌ Saldo insuficiente! O cliente não tem mais cortes disponíveis.');
-                return;
-            }
+        criado_em: nowISO()
+    };
+
+    const { error: agError } = await supabase
+        .from('agendamentos')
+        .insert([agendamento]);
+
+    if (agError) { alert('Erro ao registrar atendimento: ' + agError.message); return; }
+
+    if (usarPlano) {
+        // Buscar cliente e descontar crédito
+        const { data: cliente, error: cliError } = await supabase
+            .from('clientes')
+            .select('*')
+            .eq('id', clienteId)
+            .single();
+
+        if (cliError || !cliente) { alert('Cliente não encontrado'); return; }
+
+        if (cliente.creditos > 0) {
+            const novosCreditos = cliente.creditos - 1;
+            const { error: updError } = await supabase
+                .from('clientes')
+                .update({ creditos: novosCreditos })
+                .eq('id', clienteId);
+
+            if (updError) { alert('Erro ao atualizar créditos'); return; }
+
+            // Registrar pagamento com valor 0
+            const pagamento = {
+                id: genId(),
+                cliente_id: clienteId,
+                valor: 0,
+                descricao: `Corte via Crédito - ${servico ? servico.nome : 'Serviço'}`,
+                data: hoje,
+                forma: 'Crédito',
+                tipo: 'receita',
+                criado_em: nowISO()
+            };
+            await supabase.from('pagamentos').insert([pagamento]);
+
+            alert(`✅ Corte realizado! Créditos restantes: ${novosCreditos}`);
         } else {
-            alert('❌ Cliente não possui plano ativo!');
+            alert('❌ Saldo insuficiente! Clique em "Pagamento Avulso".');
             return;
         }
     } else {
-        if(valor > 0) {
-            const pagamentos = getData('pagamentos');
-            pagamentos.push({
+        // Pagamento avulso
+        if (valor > 0) {
+            const pagamento = {
                 id: genId(),
-                clienteId: clienteId || null,
+                cliente_id: clienteId || null,
                 valor: valor,
                 descricao: servico ? servico.nome : 'Serviço Avulso',
                 data: hoje,
                 forma: forma,
                 tipo: 'receita',
-                criadoEm: nowISO()
-            });
-            setData('pagamentos', pagamentos);
+                criado_em: nowISO()
+            };
+            const { error: pagError } = await supabase
+                .from('pagamentos')
+                .insert([pagamento]);
+
+            if (pagError) { alert('Erro ao registrar pagamento: ' + pagError.message); return; }
             alert(`💰 Pagamento de ${formatCurrency(valor)} registrado com sucesso!`);
         }
     }
-    
+
     fecharAtendimento();
-    carregarClientes();
-    carregarAgendaDia();
-    carregarReceitas();
-    atualizarDashboard();
+    await carregarClientes();
+    await carregarAgendaDia();
+    await carregarReceitas();
+    await atualizarDashboard();
 }
 
 function fecharAtendimento() {
@@ -994,28 +945,46 @@ function fecharAtendimento() {
 }
 
 // ================================================================
-//  CATEGORIAS
+//  📌 CATEGORIAS (SUPABASE)
 // ================================================================
-function salvarCategoria() {
+async function salvarCategoria() {
     const nome = document.getElementById('catNome').value.trim();
-    if(!nome) { alert('Nome é obrigatório'); return; }
-    const categorias = getData('categorias');
-    if(editContext.tipo === 'categoria' && editContext.id) {
-        const idx = categorias.findIndex(c => c.id === editContext.id);
-        if(idx > -1) { categorias[idx].nome = nome; setData('categorias', categorias); cancelarEdicao('categoria'); }
-    } else {
-        categorias.push({ id: genId(), nome });
-        setData('categorias', categorias);
-    }
+    if (!nome) { alert('Nome é obrigatório'); return; }
+
+    const categoria = {
+        id: editContext.tipo === 'categoria' && editContext.id ? editContext.id : genId(),
+        nome: nome
+    };
+
+    const { error } = await supabase
+        .from('categorias')
+        .upsert(categoria, { onConflict: 'id' });
+
+    if (error) { alert('Erro ao salvar: ' + error.message); return; }
+
     document.getElementById('catNome').value = '';
-    carregarCategorias();
-    carregarSelectCategorias();
+    editContext = { tipo: null, id: null };
+    document.getElementById('catFormTitle').innerHTML = '<i class="fas fa-tag"></i> Nova Categoria';
+    document.getElementById('catBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Salvar';
+    document.getElementById('catBtnCancelar').classList.add('hidden');
+
+    await carregarCategorias();
+    await carregarSelectCategorias();
 }
 
-function carregarCategorias() {
-    const categorias = getData('categorias');
+async function carregarCategorias() {
+    const { data: categorias, error } = await supabase
+        .from('categorias')
+        .select('*')
+        .order('nome', { ascending: true });
+
+    if (error) { console.error(error); return; }
+
     const container = document.getElementById('categoriasLista');
-    if(categorias.length === 0) { container.innerHTML = '<div class="empty">Nenhuma categoria</div>'; return; }
+    if (!categorias || categorias.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhuma categoria</div>';
+        return;
+    }
     container.innerHTML = categorias.map(c => `
         <div class="list-item">
             <span><i class="fas fa-tag"></i> ${c.nome}</span>
@@ -1028,50 +997,90 @@ function carregarCategorias() {
 }
 
 function editarCategoria(id) {
-    const categorias = getData('categorias');
-    const c = categorias.find(x => x.id === id);
-    if(!c) return;
-    editContext = { tipo: 'categoria', id };
-    document.getElementById('catFormTitle').textContent = '✏️ Editando Categoria';
-    document.getElementById('catBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
-    document.getElementById('catBtnCancelar').classList.remove('hidden');
-    document.getElementById('catNome').value = c.nome;
+    supabase.from('categorias').select('*').eq('id', id).single()
+        .then(({ data, error }) => {
+            if (error) { alert('Erro ao buscar'); return; }
+            editContext = { tipo: 'categoria', id: id };
+            document.getElementById('catFormTitle').innerHTML = '<i class="fas fa-pen"></i> Editando Categoria';
+            document.getElementById('catBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Atualizar';
+            document.getElementById('catBtnCancelar').classList.remove('hidden');
+            document.getElementById('catNome').value = data.nome;
+        });
 }
 
-function excluirCategoria(id) {
-    if(!confirm('Excluir categoria?')) return;
-    setData('categorias', getData('categorias').filter(c => c.id !== id));
-    carregarCategorias();
-    carregarSelectCategorias();
+async function excluirCategoria(id) {
+    if (!confirm('Excluir categoria?')) return;
+    const { error } = await supabase.from('categorias').delete().eq('id', id);
+    if (error) { alert('Erro ao excluir'); return; }
+    await carregarCategorias();
+    await carregarSelectCategorias();
 }
 
-// ================================================================
-//  SERVIÇOS
-// ================================================================
-function salvarServico() {
-    const nome = document.getElementById('servNome').value.trim();
-    if(!nome) { alert('Nome é obrigatório'); return; }
-    const servicos = getData('servicos');
-    const data = { nome, descricao: document.getElementById('servDesc').value.trim(), preco: parseFloat(document.getElementById('servPreco').value)||0, tempo: parseInt(document.getElementById('servTempo').value)||30, categoria: document.getElementById('servCategoria').value, status: document.getElementById('servStatus').value };
-    if(editContext.tipo === 'servico' && editContext.id) {
-        const idx = servicos.findIndex(s => s.id === editContext.id);
-        if(idx > -1) { servicos[idx] = { ...servicos[idx], ...data }; setData('servicos', servicos); cancelarEdicao('servico'); }
-    } else {
-        servicos.push({ id: genId(), ...data });
-        setData('servicos', servicos);
+async function carregarSelectCategorias() {
+    const { data: categorias } = await supabase
+        .from('categorias')
+        .select('*')
+        .order('nome', { ascending: true });
+
+    const sel = document.getElementById('servCategoria');
+    sel.innerHTML = '<option value="">Selecione a Categoria</option>';
+    if (categorias) {
+        categorias.forEach(c => sel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
     }
-    document.getElementById('servNome').value = ''; document.getElementById('servDesc').value = ''; document.getElementById('servPreco').value = ''; document.getElementById('servTempo').value = '30';
-    carregarServicos();
-    carregarSelectsAgenda();
 }
 
-function carregarServicos() {
-    const servicos = getData('servicos');
+// ================================================================
+//  📌 SERVIÇOS (SUPABASE)
+// ================================================================
+async function salvarServico() {
+    const nome = document.getElementById('servNome').value.trim();
+    if (!nome) { alert('Nome é obrigatório'); return; }
+
+    const servico = {
+        id: editContext.tipo === 'servico' && editContext.id ? editContext.id : genId(),
+        nome: nome,
+        descricao: document.getElementById('servDesc').value.trim(),
+        preco: parseFloat(document.getElementById('servPreco').value) || 0,
+        tempo: parseInt(document.getElementById('servTempo').value) || 30,
+        categoria: document.getElementById('servCategoria').value,
+        status: document.getElementById('servStatus').value
+    };
+
+    const { error } = await supabase
+        .from('servicos')
+        .upsert(servico, { onConflict: 'id' });
+
+    if (error) { alert('Erro ao salvar: ' + error.message); return; }
+
+    document.getElementById('servNome').value = '';
+    document.getElementById('servDesc').value = '';
+    document.getElementById('servPreco').value = '';
+    document.getElementById('servTempo').value = '30';
+    editContext = { tipo: null, id: null };
+    document.getElementById('servFormTitle').innerHTML = '<i class="fas fa-scissors"></i> Novo Serviço';
+    document.getElementById('servBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Salvar';
+    document.getElementById('servBtnCancelar').classList.add('hidden');
+
+    await carregarServicos();
+    await carregarSelectsAgenda();
+}
+
+async function carregarServicos() {
+    const { data: servicos, error } = await supabase
+        .from('servicos')
+        .select('*')
+        .order('nome', { ascending: true });
+
+    if (error) { console.error(error); return; }
+
     const container = document.getElementById('servicosLista');
-    if(servicos.length === 0) { container.innerHTML = '<div class="empty">Nenhum</div>'; return; }
+    if (!servicos || servicos.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhum</div>';
+        return;
+    }
     container.innerHTML = servicos.map(s => `
         <div class="list-item">
-            <div class="info"><strong>${s.nome}</strong> ${s.categoria?'<span class="badge">'+s.categoria+'</span>':''}<br><span class="text-muted">${formatCurrency(s.preco)} - ${s.tempo||30}min ${s.status==='ativo'?'':' (inativo)'}</span></div>
+            <div class="info"><strong>${s.nome}</strong> ${s.categoria ? '<span class="badge">'+s.categoria+'</span>' : ''}<br><span class="text-muted">${formatCurrency(s.preco)} - ${s.tempo||30}min ${s.status==='ativo'?'':' (inativo)'}</span></div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarServico('${s.id}')"><i class="fas fa-pen"></i></button>
                 <button class="btn btn-sm btn-danger" onclick="excluirServico('${s.id}')"><i class="fas fa-trash"></i></button>
@@ -1081,75 +1090,83 @@ function carregarServicos() {
 }
 
 function editarServico(id) {
-    const servicos = getData('servicos');
-    const s = servicos.find(x => x.id === id);
-    if(!s) return;
-    editContext = { tipo: 'servico', id };
-    document.getElementById('servFormTitle').textContent = '✏️ Editando Serviço';
-    document.getElementById('servBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
-    document.getElementById('servBtnCancelar').classList.remove('hidden');
-    document.getElementById('servNome').value = s.nome;
-    document.getElementById('servDesc').value = s.descricao||'';
-    document.getElementById('servPreco').value = s.preco||'';
-    document.getElementById('servTempo').value = s.tempo||30;
-    document.getElementById('servCategoria').value = s.categoria||'';
-    document.getElementById('servStatus').value = s.status||'ativo';
+    supabase.from('servicos').select('*').eq('id', id).single()
+        .then(({ data, error }) => {
+            if (error) { alert('Erro ao buscar'); return; }
+            editContext = { tipo: 'servico', id: id };
+            document.getElementById('servFormTitle').innerHTML = '<i class="fas fa-pen"></i> Editando Serviço';
+            document.getElementById('servBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Atualizar';
+            document.getElementById('servBtnCancelar').classList.remove('hidden');
+            document.getElementById('servNome').value = data.nome;
+            document.getElementById('servDesc').value = data.descricao || '';
+            document.getElementById('servPreco').value = data.preco || '';
+            document.getElementById('servTempo').value = data.tempo || 30;
+            document.getElementById('servCategoria').value = data.categoria || '';
+            document.getElementById('servStatus').value = data.status || 'ativo';
+        });
 }
 
-function excluirServico(id) {
-    if(!confirm('Excluir serviço?')) return;
-    setData('servicos', getData('servicos').filter(s => s.id !== id));
-    carregarServicos();
-}
-
-function carregarSelectCategorias() {
-    const categorias = getData('categorias');
-    const sel = document.getElementById('servCategoria');
-    sel.innerHTML = '<option value="">Selecione a Categoria</option>';
-    categorias.forEach(c => sel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
+async function excluirServico(id) {
+    if (!confirm('Excluir serviço?')) return;
+    const { error } = await supabase.from('servicos').delete().eq('id', id);
+    if (error) { alert('Erro ao excluir'); return; }
+    await carregarServicos();
 }
 
 // ================================================================
-//  PLANOS
+//  📌 PLANOS (SUPABASE)
 // ================================================================
-function salvarPlano() {
+async function salvarPlano() {
     const nome = document.getElementById('planoNome').value.trim();
-    if(!nome) { alert('Nome é obrigatório'); return; }
-    const qtdCortes = parseInt(document.getElementById('planoQtdCortes').value) || 0;
-    if(qtdCortes <= 0) { alert('A quantidade de cortes deve ser maior que 0'); return; }
-    const planos = getData('planos');
-    const data = { 
-        nome, 
-        preco: parseFloat(document.getElementById('planoPreco').value)||0, 
-        validade: parseInt(document.getElementById('planoValidade').value)||30, 
-        qtdCortes: qtdCortes,
-        desconto: parseFloat(document.getElementById('planoDesconto').value)||0, 
-        descricao: document.getElementById('planoDesc').value.trim() 
+    if (!nome) { alert('Nome é obrigatório'); return; }
+    const qtd = parseInt(document.getElementById('planoQtdCortes').value) || 0;
+    if (qtd <= 0) { alert('A quantidade de cortes deve ser maior que 0'); return; }
+
+    const plano = {
+        id: editContext.tipo === 'plano' && editContext.id ? editContext.id : genId(),
+        nome: nome,
+        preco: parseFloat(document.getElementById('planoPreco').value) || 0,
+        qtd_cortes: qtd,
+        desconto: parseFloat(document.getElementById('planoDesconto').value) || 0,
+        descricao: document.getElementById('planoDesc').value.trim()
     };
-    if(editContext.tipo === 'plano' && editContext.id) {
-        const idx = planos.findIndex(p => p.id === editContext.id);
-        if(idx > -1) { planos[idx] = { ...planos[idx], ...data }; setData('planos', planos); cancelarEdicao('plano'); }
-    } else {
-        planos.push({ id: genId(), ...data });
-        setData('planos', planos);
-    }
-    document.getElementById('planoNome').value = ''; 
-    document.getElementById('planoPreco').value = ''; 
-    document.getElementById('planoValidade').value = '30'; 
-    document.getElementById('planoQtdCortes').value = ''; 
-    document.getElementById('planoDesconto').value = ''; 
+
+    const { error } = await supabase
+        .from('planos')
+        .upsert(plano, { onConflict: 'id' });
+
+    if (error) { alert('Erro ao salvar: ' + error.message); return; }
+
+    document.getElementById('planoNome').value = '';
+    document.getElementById('planoPreco').value = '';
+    document.getElementById('planoQtdCortes').value = '';
+    document.getElementById('planoDesconto').value = '';
     document.getElementById('planoDesc').value = '';
-    carregarPlanos();
-    carregarSelectsPlanos();
+    editContext = { tipo: null, id: null };
+    document.getElementById('planoFormTitle').innerHTML = '<i class="fas fa-box"></i> Novo Plano';
+    document.getElementById('planoBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Salvar Plano';
+    document.getElementById('planoBtnCancelar').classList.add('hidden');
+
+    await carregarPlanos();
+    await carregarSelectsPlanos();
 }
 
-function carregarPlanos() {
-    const planos = getData('planos');
+async function carregarPlanos() {
+    const { data: planos, error } = await supabase
+        .from('planos')
+        .select('*')
+        .order('nome', { ascending: true });
+
+    if (error) { console.error(error); return; }
+
     const container = document.getElementById('planosLista');
-    if(planos.length === 0) { container.innerHTML = '<div class="empty">Nenhum</div>'; return; }
+    if (!planos || planos.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhum</div>';
+        return;
+    }
     container.innerHTML = planos.map(p => `
         <div class="list-item">
-            <div class="info"><strong>${p.nome}</strong> ${formatCurrency(p.preco)} (${p.validade}d)<br><span class="text-muted">Cortes: ${p.qtdCortes}</span></div>
+            <div class="info"><strong>${p.nome}</strong> ${formatCurrency(p.preco)}<br><span class="text-muted">${p.qtd_cortes} cortes</span></div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarPlano('${p.id}')"><i class="fas fa-pen"></i></button>
                 <button class="btn btn-sm btn-danger" onclick="excluirPlano('${p.id}')"><i class="fas fa-trash"></i></button>
@@ -1159,329 +1176,419 @@ function carregarPlanos() {
 }
 
 function editarPlano(id) {
-    const planos = getData('planos');
-    const p = planos.find(x => x.id === id);
-    if(!p) return;
-    editContext = { tipo: 'plano', id };
-    document.getElementById('planoFormTitle').textContent = '✏️ Editando Plano';
-    document.getElementById('planoBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
-    document.getElementById('planoBtnCancelar').classList.remove('hidden');
-    document.getElementById('planoNome').value = p.nome;
-    document.getElementById('planoPreco').value = p.preco||'';
-    document.getElementById('planoValidade').value = p.validade||30;
-    document.getElementById('planoQtdCortes').value = p.qtdCortes||0;
-    document.getElementById('planoDesconto').value = p.desconto||0;
-    document.getElementById('planoDesc').value = p.descricao||'';
+    supabase.from('planos').select('*').eq('id', id).single()
+        .then(({ data, error }) => {
+            if (error) { alert('Erro ao buscar'); return; }
+            editContext = { tipo: 'plano', id: id };
+            document.getElementById('planoFormTitle').innerHTML = '<i class="fas fa-pen"></i> Editando Plano';
+            document.getElementById('planoBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Atualizar';
+            document.getElementById('planoBtnCancelar').classList.remove('hidden');
+            document.getElementById('planoNome').value = data.nome;
+            document.getElementById('planoPreco').value = data.preco || '';
+            document.getElementById('planoQtdCortes').value = data.qtd_cortes || 0;
+            document.getElementById('planoDesconto').value = data.desconto || 0;
+            document.getElementById('planoDesc').value = data.descricao || '';
+        });
 }
 
-function excluirPlano(id) {
-    if(!confirm('Excluir plano?')) return;
-    setData('planos', getData('planos').filter(p => p.id !== id));
-    carregarPlanos();
-    carregarSelectsPlanos();
+async function excluirPlano(id) {
+    if (!confirm('Excluir plano?')) return;
+    const { error } = await supabase.from('planos').delete().eq('id', id);
+    if (error) { alert('Erro ao excluir'); return; }
+    await carregarPlanos();
+    await carregarSelectsPlanos();
 }
 
-function vincularPlano() {
+// ================================================================
+//  📌 COMPRAR PLANO (ADICIONAR CRÉDITOS)
+// ================================================================
+async function vincularPlano() {
     const clienteId = document.getElementById('vinculoCliente').value;
     const planoId = document.getElementById('vinculoPlano').value;
-    const inicio = document.getElementById('vinculoInicio').value;
     const formaPagamento = document.getElementById('vinculoFormaPagamento').value;
-    if(!clienteId || !planoId || !inicio) { alert('Preencha todos'); return; }
-    const plano = getData('planos').find(p => p.id === planoId);
-    if(!plano) return;
-    const fim = new Date(inicio); fim.setDate(fim.getDate() + plano.validade);
-    const assinaturas = getData('assinaturas');
-    assinaturas.push({
+    if (!clienteId || !planoId) { alert('Selecione cliente e plano'); return; }
+
+    const { data: plano, error: pError } = await supabase
+        .from('planos')
+        .select('*')
+        .eq('id', planoId)
+        .single();
+
+    if (pError || !plano) { alert('Plano não encontrado'); return; }
+
+    // Buscar cliente para atualizar créditos
+    const { data: cliente, error: cError } = await supabase
+        .from('clientes')
+        .select('*')
+        .eq('id', clienteId)
+        .single();
+
+    if (cError || !cliente) { alert('Cliente não encontrado'); return; }
+
+    const novosCreditos = (cliente.creditos || 0) + plano.qtd_cortes;
+
+    // Atualizar créditos do cliente
+    const { error: updError } = await supabase
+        .from('clientes')
+        .update({ creditos: novosCreditos })
+        .eq('id', clienteId);
+
+    if (updError) { alert('Erro ao atualizar créditos: ' + updError.message); return; }
+
+    // Registrar compra
+    const compra = {
         id: genId(),
-        clienteId,
-        planoId,
-        inicio,
-        fim: fim.toISOString().split('T')[0],
-        status: 'ativo',
-        saldoCortes: plano.qtdCortes,
-        formaPagamento: formaPagamento,
-        criadoEm: nowISO()
-    });
-    setData('assinaturas', assinaturas);
-    
-    const pagamentos = getData('pagamentos');
-    pagamentos.push({
-        id: genId(),
-        clienteId: clienteId,
+        cliente_id: clienteId,
+        plano_id: planoId,
+        nome_plano: plano.nome,
+        qtd: plano.qtd_cortes,
         valor: plano.preco,
-        descricao: `Assinatura ${plano.nome}`,
+        forma_pagamento: formaPagamento,
+        data: today(),
+        criado_em: nowISO()
+    };
+    await supabase.from('compras').insert([compra]);
+
+    // Registrar pagamento no caixa
+    const pagamento = {
+        id: genId(),
+        cliente_id: clienteId,
+        valor: plano.preco,
+        descricao: `Compra de ${plano.qtd_cortes} créditos - ${plano.nome}`,
         data: today(),
         forma: formaPagamento,
         tipo: 'receita',
-        criadoEm: nowISO()
-    });
-    setData('pagamentos', pagamentos);
-    
-    carregarAssinaturas();
-    carregarPlanos();
-    carregarReceitas();
-    atualizarDashboard();
-    alert(`✅ Plano ${plano.nome} vinculado com sucesso! R$ ${plano.preco} registrado no caixa.`);
-}
-
-function carregarAssinaturas() {
-    const assinaturas = getData('assinaturas').sort((a,b) => a.fim.localeCompare(b.fim));
-    const container = document.getElementById('assinaturasLista');
-    if(assinaturas.length === 0) { container.innerHTML = '<div class="empty">Nenhuma</div>'; return; }
-    container.innerHTML = assinaturas.map(a => {
-        const cliente = getData('clientes').find(c => c.id === a.clienteId);
-        const plano = getData('planos').find(p => p.id === a.planoId);
-        const vencido = a.fim < today();
-        const saldo = a.saldoCortes || 0;
-        const statusClass = a.status === 'ativo' ? (vencido ? 'vencido' : 'em-dia') : '';
-        return `<div class="list-item ${statusClass}" style="${vencido && a.status === 'ativo' ? 'border-left:4px solid var(--danger);' : ''}">
-            <div class="info">
-                <strong>${cliente?cliente.nome:'Cliente'}</strong> - ${plano?plano.nome:'Plano'}
-                <br><span class="text-muted">Vence: ${formatDateBR(a.fim)} | Saldo: ${saldo} cortes | Pagto: ${a.formaPagamento||'--'}</span>
-                ${vencido && a.status === 'ativo' ? '<br><span class="text-danger">⚠️ MENSALIDADE VENCIDA</span>' : ''}
-            </div>
-            <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarAssinatura('${a.id}')"><i class="fas fa-pen"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="cancelarAssinatura('${a.id}')"><i class="fas fa-ban"></i></button>
-                <span class="badge ${a.status==='ativo'?'badge-success':'badge-danger'}">${a.status}</span>
-            </div>
-        </div>`;
-    }).join('');
-}
-
-function editarAssinatura(id) {
-    const assinaturas = getData('assinaturas');
-    const a = assinaturas.find(x => x.id === id);
-    if(!a) return;
-    const clientes = getData('clientes');
-    const planos = getData('planos');
-    const clienteNome = clientes.find(c=>c.id===a.clienteId)?.nome || 'Cliente';
-    const planoNome = planos.find(p=>p.id===a.planoId)?.nome || 'Plano';
-    document.getElementById('modalTitle').textContent = `✏️ Editando Assinatura - ${clienteNome}`;
-    document.getElementById('modalBody').innerHTML = `
-        <p><strong>Plano:</strong> ${planoNome}</p>
-        <label>Saldo Cortes</label><input type="number" id="editAssCortes" value="${a.saldoCortes||0}">
-        <label>Status</label>
-        <select id="editAssStatus"><option value="ativo" ${a.status==='ativo'?'selected':''}>Ativo</option><option value="expirado" ${a.status==='expirado'?'selected':''}>Expirado</option></select>
-        <label>Data Vencimento</label><input type="date" id="editAssFim" value="${a.fim}">
-        <label>Forma de Pagamento</label>
-        <select id="editAssForma"><option value="Dinheiro" ${a.formaPagamento==='Dinheiro'?'selected':''}>Dinheiro</option><option value="PIX" ${a.formaPagamento==='PIX'?'selected':''}>PIX</option><option value="Cartão" ${a.formaPagamento==='Cartão'?'selected':''}>Cartão</option><option value="Transferência" ${a.formaPagamento==='Transferência'?'selected':''}>Transferência</option></select>
-        <label>Alterar Plano</label>
-        <select id="editAssPlano">
-            <option value="">Manter plano atual</option>
-            ${planos.map(p => `<option value="${p.id}" ${p.id===a.planoId?'selected':''}>${p.nome}</option>`).join('')}
-        </select>
-    `;
-    document.getElementById('modalConfirmBtn').onclick = function() {
-        const ass = getData('assinaturas');
-        const idx = ass.findIndex(x => x.id === id);
-        if(idx > -1) {
-            const novoPlanoId = document.getElementById('editAssPlano').value;
-            if(novoPlanoId) {
-                const novoPlano = getData('planos').find(p => p.id === novoPlanoId);
-                if(novoPlano) {
-                    ass[idx].planoId = novoPlanoId;
-                    ass[idx].saldoCortes = novoPlano.qtdCortes;
-                }
-            }
-            ass[idx].saldoCortes = parseInt(document.getElementById('editAssCortes').value)||0;
-            ass[idx].status = document.getElementById('editAssStatus').value;
-            ass[idx].fim = document.getElementById('editAssFim').value;
-            ass[idx].formaPagamento = document.getElementById('editAssForma').value;
-            setData('assinaturas', ass);
-            carregarAssinaturas();
-            atualizarDashboard();
-            fecharModal();
-        }
+        criado_em: nowISO()
     };
-    document.getElementById('modalOverlay').classList.add('open');
+    await supabase.from('pagamentos').insert([pagamento]);
+
+    await carregarClientes();
+    await carregarSelectsPlanos();
+    await carregarHistoricoCompras();
+    await carregarReceitas();
+    await atualizarDashboard();
+    alert(`✅ ${plano.qtd_cortes} créditos adicionados a ${cliente.nome}! Saldo atual: ${novosCreditos}`);
 }
 
-function cancelarAssinatura(id) {
-    if(!confirm('Cancelar esta assinatura?')) return;
-    const assinaturas = getData('assinaturas');
-    const idx = assinaturas.findIndex(a => a.id === id);
-    if(idx > -1) {
-        assinaturas[idx].status = 'expirado';
-        setData('assinaturas', assinaturas);
-        carregarAssinaturas();
-        atualizarDashboard();
-        alert('Assinatura cancelada!');
+async function carregarHistoricoCompras() {
+    const { data: compras, error } = await supabase
+        .from('compras')
+        .select('*')
+        .order('data', { ascending: false });
+
+    if (error) { console.error(error); return; }
+
+    const container = document.getElementById('historicoCompras');
+    if (!compras || compras.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhuma compra registrada</div>';
+        return;
+    }
+
+    const clientesMap = {};
+    const { data: clientes } = await supabase.from('clientes').select('id, nome');
+    if (clientes) {
+        clientes.forEach(c => clientesMap[c.id] = c.nome);
+    }
+
+    container.innerHTML = compras.slice(0, 30).map(c => `
+        <div class="list-item">
+            <div class="info">
+                <strong>${clientesMap[c.cliente_id] || 'Cliente removido'}</strong><br>
+                <span class="text-muted">${c.nome_plano} - ${c.qtd} cortes - ${formatCurrency(c.valor)} - ${formatDateBR(c.data)}</span>
+            </div>
+            <span class="badge badge-success">${c.forma_pagamento}</span>
+        </div>
+    `).join('');
+}
+
+async function carregarSelectsPlanos() {
+    const { data: clientes } = await supabase.from('clientes').select('id, nome').order('nome');
+    const selCli = document.getElementById('vinculoCliente');
+    selCli.innerHTML = '<option value="">Cliente</option>';
+    if (clientes) {
+        clientes.forEach(c => selCli.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+    }
+
+    const { data: planos } = await supabase.from('planos').select('id, nome, qtd_cortes').order('nome');
+    const selPlano = document.getElementById('vinculoPlano');
+    selPlano.innerHTML = '<option value="">Plano</option>';
+    if (planos) {
+        planos.forEach(p => selPlano.innerHTML += `<option value="${p.id}">${p.nome} (${p.qtd_cortes} cortes)</option>`);
     }
 }
 
-function carregarSelectsPlanos() {
-    const clientes = getData('clientes');
-    const selCli = document.getElementById('vinculoCliente');
-    selCli.innerHTML = '<option value="">Cliente</option>';
-    clientes.forEach(c => selCli.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
-    const planos = getData('planos');
-    const selPlano = document.getElementById('vinculoPlano');
-    selPlano.innerHTML = '<option value="">Plano</option>';
-    planos.forEach(p => selPlano.innerHTML += `<option value="${p.id}">${p.nome}</option>`);
-}
-
 // ================================================================
-//  AGENDA
+//  📌 AGENDA (SUPABASE)
 // ================================================================
-function carregarAgendaDia() {
+async function carregarAgendaDia() {
     const data = document.getElementById('agendaData').value || today();
-    const agendamentos = getData('agendamentos').filter(a => a.data && a.data.startsWith(data));
-    document.getElementById('agendaTituloDia').textContent = `📆 Agenda - ${formatDateBR(data)}`;
+    const { data: agendamentos, error } = await supabase
+        .from('agendamentos')
+        .select('*')
+        .eq('data', data)
+        .order('hora', { ascending: true });
+
+    if (error) { console.error(error); return; }
+
+    document.getElementById('agendaTituloDia').innerHTML = `<i class="fas fa-calendar"></i> Agenda - ${formatDateBR(data)}`;
     const container = document.getElementById('agendaLista');
-    if(agendamentos.length === 0) { container.innerHTML = '<div class="empty">Nenhum</div>'; return; }
-    const statusMap = { 'agendado':'badge-warning', 'realizado':'badge-success', 'adiado':'badge-info', 'cancelado':'badge-danger' };
-    container.innerHTML = agendamentos.sort((a,b)=>a.hora.localeCompare(b.hora)).map(a => {
-        const cliente = getData('clientes').find(c => c.id === a.clienteId);
-        const servico = getData('servicos').find(s => s.id === a.servicoId);
-        return `<div class="list-item">
-            <div class="info"><strong>${a.hora}</strong> - ${cliente?cliente.nome:'Cliente'} ${servico?servico.nome:''} (${servico?servico.tempo||30:30}min)</div>
+
+    if (!agendamentos || agendamentos.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhum</div>';
+        return;
+    }
+
+    const clientesMap = {};
+    const { data: clientes } = await supabase.from('clientes').select('id, nome');
+    if (clientes) {
+        clientes.forEach(c => clientesMap[c.id] = c.nome);
+    }
+
+    const servicosMap = {};
+    const { data: servicos } = await supabase.from('servicos').select('id, nome, tempo');
+    if (servicos) {
+        servicos.forEach(s => servicosMap[s.id] = s);
+    }
+
+    const statusMap = { 'agendado': 'badge-warning', 'realizado': 'badge-success', 'adiado': 'badge-info', 'cancelado': 'badge-danger' };
+
+    container.innerHTML = agendamentos.map(a => {
+        const clienteNome = clientesMap[a.cliente_id] || 'Cliente';
+        const servico = servicosMap[a.servico_id];
+        return `
+        <div class="list-item">
+            <div class="info"><strong>${a.hora}</strong> - ${clienteNome} ${servico ? servico.nome : ''} (${servico ? servico.tempo||30 : 30}min)</div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarAgendamento('${a.id}')"><i class="fas fa-pen"></i></button>
                 <button class="btn btn-sm btn-success" onclick="marcarRealizado('${a.id}')"><i class="fas fa-check"></i></button>
                 <button class="btn btn-sm btn-warning" onclick="marcarAdiado('${a.id}')" style="background:#f59e0b;color:white;"><i class="fas fa-clock"></i></button>
                 <button class="btn btn-sm btn-danger" onclick="marcarCancelado('${a.id}')"><i class="fas fa-ban"></i></button>
-                <span class="badge ${statusMap[a.status]||'badge-warning'}">${a.status||'Agendado'}</span>
+                <span class="badge ${statusMap[a.status] || 'badge-warning'}">${a.status || 'Agendado'}</span>
             </div>
         </div>`;
     }).join('');
-    carregarSelectsAgenda();
+
+    await carregarSelectsAgenda();
 }
 
-function salvarAgendamento() {
-    const clienteId = document.getElementById('agendaClienteSelect').value;
-    const datetime = document.getElementById('agendaDateTime').value;
-    const servicoId = document.getElementById('agendaServicoSelect').value;
-    if(!clienteId || !datetime || !servicoId) { alert('Preencha todos'); return; }
-    const data = datetime.split('T')[0];
-    const hora = datetime.split('T')[1]?.slice(0,5) || '00:00';
-    const servico = getData('servicos').find(s => s.id === servicoId);
-    const duracao = servico ? (servico.tempo || 30) : 30;
-    
-    const agendamentos = getData('agendamentos');
-    const conflito = agendamentos.some(a => {
-        if(a.data !== data || a.id === editContext.id) return false;
-        const aHora = a.hora.split(':').map(Number);
-        const aMin = aHora[0]*60 + aHora[1];
-        const nHora = hora.split(':').map(Number);
-        const nMin = nHora[0]*60 + nHora[1];
-        const aDur = getData('servicos').find(s => s.id === a.servicoId)?.tempo || 30;
-        return (nMin < aMin + aDur && nMin + duracao > aMin);
-    });
-    if(conflito) { alert('⚠️ Conflito de horário! Este horário já está ocupado por outro agendamento.'); return; }
-    
-    if(editContext.tipo === 'agendamento' && editContext.id) {
-        const idx = agendamentos.findIndex(a => a.id === editContext.id);
-        if(idx > -1) { agendamentos[idx] = { ...agendamentos[idx], clienteId, data, hora, servicoId }; setData('agendamentos', agendamentos); cancelarEdicao('agendamento'); }
-    } else {
-        agendamentos.push({ id: genId(), clienteId, data, hora, servicoId, status: 'agendado', criadoEm: nowISO() });
-        setData('agendamentos', agendamentos);
-    }
-    document.getElementById('agendaDateTime').value = '';
-    carregarAgendaDia();
-    atualizarDashboard();
-}
-
-function editarAgendamento(id) {
-    const agendamentos = getData('agendamentos');
-    const a = agendamentos.find(x => x.id === id);
-    if(!a) return;
-    editContext = { tipo: 'agendamento', id };
-    document.getElementById('agendaFormTitle').textContent = '✏️ Editando Agendamento';
-    document.getElementById('agendaBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
-    document.getElementById('agendaBtnCancelar').classList.remove('hidden');
-    document.getElementById('agendaClienteSelect').value = a.clienteId;
-    document.getElementById('agendaDateTime').value = a.data + 'T' + a.hora;
-    document.getElementById('agendaServicoSelect').value = a.servicoId || '';
-}
-
-function marcarRealizado(id) {
-    let agendamentos = getData('agendamentos');
-    const ag = agendamentos.find(a => a.id === id);
-    if(ag) {
-        ag.status = 'realizado';
-        if(ag.clienteId) {
-            abrirAtendimento(ag.clienteId);
-            if(ag.servicoId) {
-                document.getElementById('atendServico').value = ag.servicoId;
-                const preco = parseFloat(document.getElementById('atendServico').selectedOptions[0]?.dataset.preco) || 0;
-                document.getElementById('atendValor').value = preco;
-            }
-        }
-    }
-    setData('agendamentos', agendamentos);
-    carregarAgendaDia();
-    atualizarDashboard();
-}
-
-function marcarAdiado(id) {
-    let agendamentos = getData('agendamentos');
-    const ag = agendamentos.find(a => a.id === id);
-    if(ag) { ag.status = 'adiado'; }
-    setData('agendamentos', agendamentos);
-    carregarAgendaDia();
-    atualizarDashboard();
-}
-
-function marcarCancelado(id) {
-    if(!confirm('Cancelar este agendamento?')) return;
-    let agendamentos = getData('agendamentos');
-    const ag = agendamentos.find(a => a.id === id);
-    if(ag) { ag.status = 'cancelado'; }
-    setData('agendamentos', agendamentos);
-    carregarAgendaDia();
-    atualizarDashboard();
-}
-
-function excluirAgendamento(id) {
-    if(!confirm('Excluir?')) return;
-    setData('agendamentos', getData('agendamentos').filter(a => a.id !== id));
-    carregarAgendaDia();
-    atualizarDashboard();
-}
-
-function carregarSelectsAgenda() {
-    const clientes = getData('clientes');
+async function carregarSelectsAgenda() {
+    const { data: clientes } = await supabase.from('clientes').select('id, nome').order('nome');
     const selCli = document.getElementById('agendaClienteSelect');
     const valCli = selCli.value;
     selCli.innerHTML = '<option value="">Cliente</option>';
-    clientes.forEach(c => selCli.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+    if (clientes) {
+        clientes.forEach(c => selCli.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+    }
     selCli.value = valCli;
-    const servicos = getData('servicos').filter(s => s.status === 'ativo');
+
+    const { data: servicos } = await supabase.from('servicos').select('id, nome, preco, tempo').eq('status', 'ativo');
     const selServ = document.getElementById('agendaServicoSelect');
     const valServ = selServ.value;
     selServ.innerHTML = '<option value="">Serviço</option>';
-    servicos.forEach(s => selServ.innerHTML += `<option value="${s.id}">${s.nome} (${formatCurrency(s.preco)}) - ${s.tempo||30}min</option>`);
+    if (servicos) {
+        servicos.forEach(s => selServ.innerHTML += `<option value="${s.id}">${s.nome} (${formatCurrency(s.preco)}) - ${s.tempo||30}min</option>`);
+    }
     selServ.value = valServ;
 }
 
+async function salvarAgendamento() {
+    const clienteId = document.getElementById('agendaClienteSelect').value;
+    const datetime = document.getElementById('agendaDateTime').value;
+    const servicoId = document.getElementById('agendaServicoSelect').value;
+    if (!clienteId || !datetime || !servicoId) { alert('Preencha todos'); return; }
+    const data = datetime.split('T')[0];
+    const hora = datetime.split('T')[1]?.slice(0, 5) || '00:00';
+
+    const { data: servico } = await supabase
+        .from('servicos')
+        .select('tempo')
+        .eq('id', servicoId)
+        .single();
+    const duracao = servico ? (servico.tempo || 30) : 30;
+
+    // Verificar conflito
+    const { data: existing } = await supabase
+        .from('agendamentos')
+        .select('hora, servico_id')
+        .eq('data', data);
+
+    let conflito = false;
+    if (existing) {
+        const nMin = parseInt(hora.split(':')[0]) * 60 + parseInt(hora.split(':')[1]);
+        for (let a of existing) {
+            if (a.id === (editContext.tipo === 'agendamento' ? editContext.id : null)) continue;
+            const aHora = a.hora.split(':').map(Number);
+            const aMin = aHora[0] * 60 + aHora[1];
+            const { data: aServ } = await supabase.from('servicos').select('tempo').eq('id', a.servico_id).single();
+            const aDur = aServ ? (aServ.tempo || 30) : 30;
+            if (nMin < aMin + aDur && nMin + duracao > aMin) {
+                conflito = true;
+                break;
+            }
+        }
+    }
+    if (conflito) { alert('⚠️ Conflito de horário!'); return; }
+
+    const agendamento = {
+        id: editContext.tipo === 'agendamento' && editContext.id ? editContext.id : genId(),
+        cliente_id: clienteId,
+        servico_id: servicoId,
+        data: data,
+        hora: hora,
+        status: 'agendado',
+        criado_em: nowISO()
+    };
+
+    const { error } = await supabase
+        .from('agendamentos')
+        .upsert(agendamento, { onConflict: 'id' });
+
+    if (error) { alert('Erro ao salvar: ' + error.message); return; }
+
+    document.getElementById('agendaDateTime').value = '';
+    editContext = { tipo: null, id: null };
+    document.getElementById('agendaFormTitle').innerHTML = '<i class="fas fa-plus-circle"></i> Agendamento';
+    document.getElementById('agendaBtnSalvar').innerHTML = '<i class="fas fa-calendar-plus"></i> Agendar';
+    document.getElementById('agendaBtnCancelar').classList.add('hidden');
+
+    await carregarAgendaDia();
+    await atualizarDashboard();
+}
+
+function editarAgendamento(id) {
+    supabase.from('agendamentos').select('*').eq('id', id).single()
+        .then(({ data, error }) => {
+            if (error) { alert('Erro ao buscar'); return; }
+            editContext = { tipo: 'agendamento', id: id };
+            document.getElementById('agendaFormTitle').innerHTML = '<i class="fas fa-pen"></i> Editando Agendamento';
+            document.getElementById('agendaBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Atualizar';
+            document.getElementById('agendaBtnCancelar').classList.remove('hidden');
+            document.getElementById('agendaClienteSelect').value = data.cliente_id;
+            document.getElementById('agendaDateTime').value = data.data + 'T' + data.hora;
+            document.getElementById('agendaServicoSelect').value = data.servico_id || '';
+        });
+}
+
+async function marcarRealizado(id) {
+    const { error } = await supabase
+        .from('agendamentos')
+        .update({ status: 'realizado' })
+        .eq('id', id);
+
+    if (error) { alert('Erro ao atualizar'); return; }
+
+    // Buscar cliente_id para abrir atendimento
+    const { data: ag } = await supabase
+        .from('agendamentos')
+        .select('cliente_id, servico_id')
+        .eq('id', id)
+        .single();
+
+    if (ag && ag.cliente_id) {
+        await abrirAtendimento(ag.cliente_id);
+        if (ag.servico_id) {
+            document.getElementById('atendServico').value = ag.servico_id;
+            const preco = parseFloat(document.getElementById('atendServico').selectedOptions[0]?.dataset.preco) || 0;
+            document.getElementById('atendValor').value = preco;
+        }
+    }
+
+    await carregarAgendaDia();
+    await atualizarDashboard();
+}
+
+async function marcarAdiado(id) {
+    const { error } = await supabase
+        .from('agendamentos')
+        .update({ status: 'adiado' })
+        .eq('id', id);
+    if (error) { alert('Erro'); return; }
+    await carregarAgendaDia();
+    await atualizarDashboard();
+}
+
+async function marcarCancelado(id) {
+    if (!confirm('Cancelar este agendamento?')) return;
+    const { error } = await supabase
+        .from('agendamentos')
+        .update({ status: 'cancelado' })
+        .eq('id', id);
+    if (error) { alert('Erro'); return; }
+    await carregarAgendaDia();
+    await atualizarDashboard();
+}
+
+async function excluirAgendamento(id) {
+    if (!confirm('Excluir?')) return;
+    const { error } = await supabase.from('agendamentos').delete().eq('id', id);
+    if (error) { alert('Erro'); return; }
+    await carregarAgendaDia();
+    await atualizarDashboard();
+}
+
 // ================================================================
-//  RECEITAS
+//  📌 FINANCEIRO
 // ================================================================
-function salvarReceita() {
+async function salvarReceita() {
     const valor = parseFloat(document.getElementById('finRecValor').value);
     const desc = document.getElementById('finRecDesc').value.trim();
     const data = document.getElementById('finRecData').value;
-    if(!valor || valor<=0 || !data) { alert('Valor e data obrigatórios'); return; }
-    const pagamentos = getData('pagamentos');
-    const obj = { id: genId(), clienteId: document.getElementById('finRecCliente').value || null, valor, descricao: desc||'Receita', data, forma: document.getElementById('finRecForma').value, tipo: 'receita', criadoEm: nowISO() };
-    if(editContext.tipo === 'receita' && editContext.id) {
-        const idx = pagamentos.findIndex(p => p.id === editContext.id);
-        if(idx > -1) { pagamentos[idx] = { ...pagamentos[idx], ...obj }; setData('pagamentos', pagamentos); cancelarEdicao('receita'); }
-    } else { pagamentos.push(obj); setData('pagamentos', pagamentos); }
-    document.getElementById('finRecValor').value = ''; document.getElementById('finRecDesc').value = '';
-    carregarReceitas();
-    atualizarDashboard();
+    if (!valor || valor <= 0 || !data) { alert('Valor e data obrigatórios'); return; }
+
+    const pagamento = {
+        id: editContext.tipo === 'receita' && editContext.id ? editContext.id : genId(),
+        cliente_id: document.getElementById('finRecCliente').value || null,
+        valor: valor,
+        descricao: desc || 'Receita',
+        data: data,
+        forma: document.getElementById('finRecForma').value,
+        tipo: 'receita',
+        criado_em: nowISO()
+    };
+
+    const { error } = await supabase
+        .from('pagamentos')
+        .upsert(pagamento, { onConflict: 'id' });
+
+    if (error) { alert('Erro ao salvar: ' + error.message); return; }
+
+    document.getElementById('finRecValor').value = '';
+    document.getElementById('finRecDesc').value = '';
+    editContext = { tipo: null, id: null };
+    document.getElementById('recFormTitle').innerHTML = '<i class="fas fa-coins"></i> Nova Receita';
+    document.getElementById('recBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Salvar';
+    document.getElementById('recBtnCancelar').classList.add('hidden');
+
+    await carregarReceitas();
+    await atualizarDashboard();
 }
 
-function carregarReceitas() {
-    const pagamentos = getData('pagamentos').filter(p => p.tipo === 'receita').sort((a,b)=>b.data.localeCompare(a.data));
+async function carregarReceitas() {
+    const { data: pagamentos, error } = await supabase
+        .from('pagamentos')
+        .select('*')
+        .eq('tipo', 'receita')
+        .order('data', { ascending: false });
+
+    if (error) { console.error(error); return; }
+
     const container = document.getElementById('receitasLista');
-    if(pagamentos.length === 0) { container.innerHTML = '<div class="empty">Nenhuma</div>'; return; }
-    container.innerHTML = pagamentos.slice(0,30).map(p => {
-        const cliente = p.clienteId ? getData('clientes').find(c => c.id === p.clienteId) : null;
-        return `<div class="list-item">
-            <div class="info">${formatDateTimeBR(p.data)} - ${p.descricao} ${cliente?'('+cliente.nome+')':''}</div>
+    if (!pagamentos || pagamentos.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhuma</div>';
+        return;
+    }
+
+    const clientesMap = {};
+    const { data: clientes } = await supabase.from('clientes').select('id, nome');
+    if (clientes) {
+        clientes.forEach(c => clientesMap[c.id] = c.nome);
+    }
+
+    container.innerHTML = pagamentos.slice(0, 30).map(p => {
+        const clienteNome = p.cliente_id ? (clientesMap[p.cliente_id] || 'Cliente') : '';
+        return `
+        <div class="list-item">
+            <div class="info">${formatDateTimeBR(p.data)} - ${p.descricao} ${clienteNome ? '('+clienteNome+')' : ''}</div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarReceita('${p.id}')"><i class="fas fa-pen"></i></button>
                 <button class="btn btn-sm btn-danger" onclick="excluirReceita('${p.id}')"><i class="fas fa-trash"></i></button>
@@ -1492,52 +1599,77 @@ function carregarReceitas() {
 }
 
 function editarReceita(id) {
-    const pagamentos = getData('pagamentos');
-    const p = pagamentos.find(x => x.id === id);
-    if(!p) return;
-    editContext = { tipo: 'receita', id };
-    document.getElementById('recFormTitle').textContent = '✏️ Editando Receita';
-    document.getElementById('recBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
-    document.getElementById('recBtnCancelar').classList.remove('hidden');
-    document.getElementById('finRecCliente').value = p.clienteId||'';
-    document.getElementById('finRecValor').value = p.valor||'';
-    document.getElementById('finRecDesc').value = p.descricao||'';
-    document.getElementById('finRecData').value = p.data||'';
-    document.getElementById('finRecForma').value = p.forma||'Dinheiro';
+    supabase.from('pagamentos').select('*').eq('id', id).single()
+        .then(({ data, error }) => {
+            if (error) { alert('Erro ao buscar'); return; }
+            editContext = { tipo: 'receita', id: id };
+            document.getElementById('recFormTitle').innerHTML = '<i class="fas fa-pen"></i> Editando Receita';
+            document.getElementById('recBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Atualizar';
+            document.getElementById('recBtnCancelar').classList.remove('hidden');
+            document.getElementById('finRecCliente').value = data.cliente_id || '';
+            document.getElementById('finRecValor').value = data.valor || '';
+            document.getElementById('finRecDesc').value = data.descricao || '';
+            document.getElementById('finRecData').value = data.data || '';
+            document.getElementById('finRecForma').value = data.forma || 'Dinheiro';
+        });
 }
 
-function excluirReceita(id) {
-    if(!confirm('Excluir receita?')) return;
-    setData('pagamentos', getData('pagamentos').filter(p => p.id !== id));
-    carregarReceitas();
-    atualizarDashboard();
+async function excluirReceita(id) {
+    if (!confirm('Excluir receita?')) return;
+    const { error } = await supabase.from('pagamentos').delete().eq('id', id);
+    if (error) { alert('Erro ao excluir'); return; }
+    await carregarReceitas();
+    await atualizarDashboard();
 }
 
-// ================================================================
-//  DESPESAS
-// ================================================================
-function salvarDespesa() {
+async function salvarDespesa() {
     const desc = document.getElementById('finDespDesc').value.trim();
     const valor = parseFloat(document.getElementById('finDespValor').value);
     const data = document.getElementById('finDespData').value;
-    if(!desc || !valor || valor<=0 || !data) { alert('Preencha todos'); return; }
-    const despesas = getData('despesas') || [];
-    const obj = { id: genId(), desc, valor, data, categoria: document.getElementById('finDespCategoria').value, criadoEm: nowISO() };
-    if(editContext.tipo === 'despesa' && editContext.id) {
-        const idx = despesas.findIndex(d => d.id === editContext.id);
-        if(idx > -1) { despesas[idx] = { ...despesas[idx], ...obj }; setData('despesas', despesas); cancelarEdicao('despesa'); }
-    } else { despesas.push(obj); setData('despesas', despesas); }
-    document.getElementById('finDespDesc').value = ''; document.getElementById('finDespValor').value = '';
-    carregarDespesas();
+    if (!desc || !valor || valor <= 0 || !data) { alert('Preencha todos'); return; }
+
+    const despesa = {
+        id: editContext.tipo === 'despesa' && editContext.id ? editContext.id : genId(),
+        descricao: desc,
+        valor: valor,
+        data: data,
+        categoria: document.getElementById('finDespCategoria').value,
+        criado_em: nowISO()
+    };
+
+    const { error } = await supabase
+        .from('despesas')
+        .upsert(despesa, { onConflict: 'id' });
+
+    if (error) { alert('Erro ao salvar: ' + error.message); return; }
+
+    document.getElementById('finDespDesc').value = '';
+    document.getElementById('finDespValor').value = '';
+    editContext = { tipo: null, id: null };
+    document.getElementById('despFormTitle').innerHTML = '<i class="fas fa-money-bill-wave"></i> Nova Despesa';
+    document.getElementById('despBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Salvar';
+    document.getElementById('despBtnCancelar').classList.add('hidden');
+
+    await carregarDespesas();
 }
 
-function carregarDespesas() {
-    const despesas = getData('despesas').sort((a,b)=>b.data.localeCompare(a.data));
+async function carregarDespesas() {
+    const { data: despesas, error } = await supabase
+        .from('despesas')
+        .select('*')
+        .order('data', { ascending: false });
+
+    if (error) { console.error(error); return; }
+
     const container = document.getElementById('despesasLista');
-    if(despesas.length === 0) { container.innerHTML = '<div class="empty">Nenhuma</div>'; return; }
-    container.innerHTML = despesas.slice(0,30).map(d => `
+    if (!despesas || despesas.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhuma</div>';
+        return;
+    }
+
+    container.innerHTML = despesas.slice(0, 30).map(d => `
         <div class="list-item">
-            <div class="info">${formatDateTimeBR(d.data)} - ${d.desc} (${d.categoria})</div>
+            <div class="info">${formatDateTimeBR(d.data)} - ${d.descricao} (${d.categoria})</div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarDespesa('${d.id}')"><i class="fas fa-pen"></i></button>
                 <button class="btn btn-sm btn-danger" onclick="excluirDespesa('${d.id}')"><i class="fas fa-trash"></i></button>
@@ -1548,44 +1680,168 @@ function carregarDespesas() {
 }
 
 function editarDespesa(id) {
-    const despesas = getData('despesas');
-    const d = despesas.find(x => x.id === id);
-    if(!d) return;
-    editContext = { tipo: 'despesa', id };
-    document.getElementById('despFormTitle').textContent = '✏️ Editando Despesa';
-    document.getElementById('despBtnSalvar').textContent = '<i class="fas fa-save"></i> Atualizar';
-    document.getElementById('despBtnCancelar').classList.remove('hidden');
-    document.getElementById('finDespDesc').value = d.desc||'';
-    document.getElementById('finDespValor').value = d.valor||'';
-    document.getElementById('finDespData').value = d.data||'';
-    document.getElementById('finDespCategoria').value = d.categoria||'Outros';
+    supabase.from('despesas').select('*').eq('id', id).single()
+        .then(({ data, error }) => {
+            if (error) { alert('Erro ao buscar'); return; }
+            editContext = { tipo: 'despesa', id: id };
+            document.getElementById('despFormTitle').innerHTML = '<i class="fas fa-pen"></i> Editando Despesa';
+            document.getElementById('despBtnSalvar').innerHTML = '<i class="fas fa-save"></i> Atualizar';
+            document.getElementById('despBtnCancelar').classList.remove('hidden');
+            document.getElementById('finDespDesc').value = data.descricao || '';
+            document.getElementById('finDespValor').value = data.valor || '';
+            document.getElementById('finDespData').value = data.data || '';
+            document.getElementById('finDespCategoria').value = data.categoria || 'Outros';
+        });
 }
 
-function excluirDespesa(id) {
-    if(!confirm('Excluir despesa?')) return;
-    setData('despesas', getData('despesas').filter(d => d.id !== id));
-    carregarDespesas();
+async function excluirDespesa(id) {
+    if (!confirm('Excluir despesa?')) return;
+    const { error } = await supabase.from('despesas').delete().eq('id', id);
+    if (error) { alert('Erro ao excluir'); return; }
+    await carregarDespesas();
 }
 
-function gerarRelatorioFinanceiro() {
+async function gerarRelatorioFinanceiro() {
     const periodo = document.getElementById('finRelPeriodo').value;
     const agora = new Date();
     let inicio = new Date();
-    if(periodo === 'hoje') { /* */ } else if(periodo === 'semana') { inicio.setDate(agora.getDate() - 7); } else if(periodo === 'mes') { inicio.setMonth(agora.getMonth() - 1); } else if(periodo === 'ano') { inicio.setFullYear(agora.getFullYear() - 1); }
+    if (periodo === 'hoje') { /* */ } else if (periodo === 'semana') { inicio.setDate(agora.getDate() - 7); } else if (periodo === 'mes') { inicio.setMonth(agora.getMonth() - 1); } else if (periodo === 'ano') { inicio.setFullYear(agora.getFullYear() - 1); }
     const inicioStr = inicio.toISOString().split('T')[0];
-    const pagamentos = getData('pagamentos').filter(p => p.tipo === 'receita' && p.data >= inicioStr);
-    const despesas = getData('despesas').filter(d => d.data >= inicioStr);
-    const totalRec = pagamentos.reduce((s,p) => s + parseFloat(p.valor||0), 0);
-    const totalDesp = despesas.reduce((s,d) => s + parseFloat(d.valor||0), 0);
+
+    const { data: receitas } = await supabase
+        .from('pagamentos')
+        .select('valor')
+        .eq('tipo', 'receita')
+        .gte('data', inicioStr);
+
+    const { data: despesas } = await supabase
+        .from('despesas')
+        .select('valor')
+        .gte('data', inicioStr);
+
+    const totalRec = receitas ? receitas.reduce((s, p) => s + parseFloat(p.valor || 0), 0) : 0;
+    const totalDesp = despesas ? despesas.reduce((s, d) => s + parseFloat(d.valor || 0), 0) : 0;
+
     document.getElementById('finRelatorioConteudo').innerHTML = `
-        <p><strong>Período:</strong> ${periodo}</p><p><strong>Receitas:</strong> ${formatCurrency(totalRec)}</p>
-        <p><strong>Despesas:</strong> ${formatCurrency(totalDesp)}</p><p><strong>Lucro:</strong> ${formatCurrency(totalRec - totalDesp)}</p>
+        <p><strong>Período:</strong> ${periodo}</p>
+        <p><strong>Receitas:</strong> ${formatCurrency(totalRec)}</p>
+        <p><strong>Despesas:</strong> ${formatCurrency(totalDesp)}</p>
+        <p><strong>Lucro:</strong> ${formatCurrency(totalRec - totalDesp)}</p>
     `;
 }
 
 // ================================================================
-//  UTILITÁRIOS
+//  📌 DASHBOARD
 // ================================================================
+async function atualizarDashboard() {
+    const hoje = today();
+
+    const { data: agendamentos } = await supabase
+        .from('agendamentos')
+        .select('*')
+        .eq('data', hoje);
+
+    const { data: pagamentos } = await supabase
+        .from('pagamentos')
+        .select('*')
+        .eq('tipo', 'receita')
+        .eq('data', hoje);
+
+    const { data: clientes } = await supabase
+        .from('clientes')
+        .select('creditos');
+
+    let fatHoje = pagamentos ? pagamentos.reduce((s, p) => s + parseFloat(p.valor || 0), 0) : 0;
+    document.getElementById('dashFaturamentoHoje').textContent = formatCurrency(fatHoje);
+
+    const agHoje = agendamentos || [];
+    document.getElementById('dashAgendamentosHoje').textContent = agHoje.length;
+    document.getElementById('dashCortesHoje').textContent = agHoje.filter(a => a.status === 'realizado').length;
+    const comCredito = clientes ? clientes.filter(c => (c.creditos || 0) > 0).length : 0;
+    document.getElementById('dashPlanosAtivos').textContent = comCredito;
+
+    const containerAgenda = document.getElementById('agendaHojeList');
+    if (agHoje.length === 0) {
+        containerAgenda.innerHTML = '<div class="empty">Nenhum</div>';
+    } else {
+        const clientesMap = {};
+        const { data: cli } = await supabase.from('clientes').select('id, nome');
+        if (cli) {
+            cli.forEach(c => clientesMap[c.id] = c.nome);
+        }
+        const statusMap = { 'agendado': 'badge-warning', 'realizado': 'badge-success', 'adiado': 'badge-info', 'cancelado': 'badge-danger' };
+        containerAgenda.innerHTML = agHoje.sort((a, b) => a.hora.localeCompare(b.hora)).map(a => {
+            const nome = clientesMap[a.cliente_id] || 'Cliente';
+            return `<div class="list-item"><span>${a.hora} - ${nome}</span><span class="badge ${statusMap[a.status] || 'badge-warning'}">${a.status || 'Agendado'}</span></div>`;
+        }).join('');
+    }
+
+    document.getElementById('proximosVencimentos').innerHTML = '<div class="empty">Sistema de créditos sem validade</div>';
+    await desenharGraficoReceita();
+}
+
+async function desenharGraficoReceita() {
+    const canvas = document.getElementById('graficoReceita');
+    const ctx = canvas.getContext('2d');
+    const width = canvas.parentElement.clientWidth - 32;
+    canvas.width = width * (devicePixelRatio || 1);
+    canvas.height = 80 * (devicePixelRatio || 1);
+    canvas.style.width = width + 'px';
+    canvas.style.height = '80px';
+
+    const dias = [];
+    for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const ds = d.toISOString().split('T')[0];
+        const { data: pagamentos } = await supabase
+            .from('pagamentos')
+            .select('valor')
+            .eq('tipo', 'receita')
+            .eq('data', ds);
+        const total = pagamentos ? pagamentos.reduce((s, p) => s + parseFloat(p.valor || 0), 0) : 0;
+        dias.push({ label: formatDateBR(ds), value: total });
+    }
+
+    const max = Math.max(...dias.map(d => d.value), 1);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const barW = canvas.width / dias.length * 0.6;
+    const gap = canvas.width / dias.length * 0.4;
+    const scale = (canvas.height - 20) / max;
+    dias.forEach((d, i) => {
+        const x = i * (barW + gap) + gap / 2;
+        const h = d.value * scale;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(x, canvas.height - h - 10, barW, h);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '9px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(d.label, x + barW / 2, canvas.height - 2);
+        if (d.value > 0) {
+            ctx.fillStyle = '#1e293b';
+            ctx.fillText(formatCurrency(d.value), x + barW / 2, canvas.height - h - 14);
+        }
+    });
+}
+
+window.addEventListener('resize', function () {
+    if (document.getElementById('tab-dashboard').classList.contains('active')) {
+        desenharGraficoReceita();
+    }
+});
+
+// ================================================================
+//  📌 UTILITÁRIOS
+// ================================================================
+async function carregarSelectsClientes() {
+    const { data: clientes } = await supabase.from('clientes').select('id, nome').order('nome');
+    const sel = document.getElementById('finRecCliente');
+    sel.innerHTML = '<option value="">Cliente</option>';
+    if (clientes) {
+        clientes.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+    }
+}
+
 function cancelarEdicao(tipo) {
     editContext = { tipo: null, id: null };
     const map = {
@@ -1598,80 +1854,144 @@ function cancelarEdicao(tipo) {
         despesa: { form: 'despFormTitle', btn: 'despBtnSalvar', cancel: 'despBtnCancelar', text: '<i class="fas fa-money-bill-wave"></i> Nova Despesa' }
     };
     const m = map[tipo];
-    if(m) {
+    if (m) {
         document.getElementById(m.form).innerHTML = m.text;
         document.getElementById(m.btn).innerHTML = '<i class="fas fa-save"></i> Salvar';
         document.getElementById(m.cancel).classList.add('hidden');
-        if(tipo === 'cliente') { document.getElementById('cliNome').value=''; document.getElementById('cliTelefone').value=''; document.getElementById('cliCpf').value=''; document.getElementById('cliNascimento').value=''; document.getElementById('cliEndereco').value=''; document.getElementById('cliObs').value=''; }
-        if(tipo === 'categoria') document.getElementById('catNome').value='';
-        if(tipo === 'servico') { document.getElementById('servNome').value=''; document.getElementById('servDesc').value=''; document.getElementById('servPreco').value=''; document.getElementById('servTempo').value='30'; }
-        if(tipo === 'plano') { document.getElementById('planoNome').value=''; document.getElementById('planoPreco').value=''; document.getElementById('planoValidade').value='30'; document.getElementById('planoQtdCortes').value=''; document.getElementById('planoDesconto').value=''; document.getElementById('planoDesc').value=''; }
-        if(tipo === 'agendamento') document.getElementById('agendaDateTime').value='';
-        if(tipo === 'receita') { document.getElementById('finRecValor').value=''; document.getElementById('finRecDesc').value=''; }
-        if(tipo === 'despesa') { document.getElementById('finDespDesc').value=''; document.getElementById('finDespValor').value=''; }
+        if (tipo === 'cliente') {
+            document.getElementById('cliNome').value = '';
+            document.getElementById('cliTelefone').value = '';
+            document.getElementById('cliCpf').value = '';
+            document.getElementById('cliNascimento').value = '';
+            document.getElementById('cliEndereco').value = '';
+            document.getElementById('cliObs').value = '';
+        }
+        if (tipo === 'categoria') document.getElementById('catNome').value = '';
+        if (tipo === 'servico') {
+            document.getElementById('servNome').value = '';
+            document.getElementById('servDesc').value = '';
+            document.getElementById('servPreco').value = '';
+            document.getElementById('servTempo').value = '30';
+        }
+        if (tipo === 'plano') {
+            document.getElementById('planoNome').value = '';
+            document.getElementById('planoPreco').value = '';
+            document.getElementById('planoQtdCortes').value = '';
+            document.getElementById('planoDesconto').value = '';
+            document.getElementById('planoDesc').value = '';
+        }
+        if (tipo === 'agendamento') document.getElementById('agendaDateTime').value = '';
+        if (tipo === 'receita') {
+            document.getElementById('finRecValor').value = '';
+            document.getElementById('finRecDesc').value = '';
+        }
+        if (tipo === 'despesa') {
+            document.getElementById('finDespDesc').value = '';
+            document.getElementById('finDespValor').value = '';
+        }
         carregarTudo();
     }
 }
 
-function carregarSelectsClientes() {
-    const clientes = getData('clientes');
-    const sel = document.getElementById('finRecCliente');
-    sel.innerHTML = '<option value="">Cliente</option>';
-    clientes.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+function fecharModal() {
+    document.getElementById('modalOverlay').classList.remove('open');
 }
 
-function fecharModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+// ================================================================
+//  📌 BACKUP (JSON) – ainda funciona para exportar/importar dados
+// ================================================================
+async function exportarBackup() {
+    const [clientes, agendamentos, pagamentos, despesas, servicos, planos, categorias, compras] = await Promise.all([
+        supabase.from('clientes').select('*'),
+        supabase.from('agendamentos').select('*'),
+        supabase.from('pagamentos').select('*'),
+        supabase.from('despesas').select('*'),
+        supabase.from('servicos').select('*'),
+        supabase.from('planos').select('*'),
+        supabase.from('categorias').select('*'),
+        supabase.from('compras').select('*')
+    ]);
 
-// ================================================================
-//  BACKUP E CONFIG
-// ================================================================
-function exportarBackup() {
     const data = {
-        clientes: getData('clientes'), agendamentos: getData('agendamentos'), pagamentos: getData('pagamentos'),
-        despesas: getData('despesas')||[], servicos: getData('servicos'), planos: getData('planos'),
-        assinaturas: getData('assinaturas'), categorias: getData('categorias'),
-        config: { nome: localStorage.getItem('barberShopName'), pin: getPin(), perfil: { nome: localStorage.getItem('perfNome'), telefone: localStorage.getItem('perfTelefone'), email: localStorage.getItem('perfEmail') } },
+        clientes: clientes.data || [],
+        agendamentos: agendamentos.data || [],
+        pagamentos: pagamentos.data || [],
+        despesas: despesas.data || [],
+        servicos: servicos.data || [],
+        planos: planos.data || [],
+        categorias: categorias.data || [],
+        compras: compras.data || [],
+        config: {
+            nome: localStorage.getItem('barberShopName'),
+            pin: getPin(),
+            perfil: {
+                nome: localStorage.getItem('perfNome'),
+                telefone: localStorage.getItem('perfTelefone'),
+                email: localStorage.getItem('perfEmail')
+            }
+        },
         exportedAt: nowISO()
     };
+
     const json = JSON.stringify(data, null, 2);
-    const blob = new Blob([json], {type:'application/json'});
+    const blob = new Blob([json], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = `backup_salao_${today()}.json`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    a.href = url;
+    a.download = `backup_salao_${today()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    alert('Backup exportado! Guarde este arquivo em local seguro.');
+    alert('Backup exportado!');
 }
 
 function importarBackup(event) {
     const file = event.target.files[0];
-    if(!file) return;
+    if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = async function (e) {
         try {
             const data = JSON.parse(e.target.result);
-            if(!data.clientes) { alert('Arquivo inválido'); return; }
-            if(!confirm('Substituir todos os dados atuais?')) return;
-            setData('clientes', data.clientes||[]);
-            setData('agendamentos', data.agendamentos||[]);
-            setData('pagamentos', data.pagamentos||[]);
-            setData('despesas', data.despesas||[]);
-            setData('servicos', data.servicos||[]);
-            setData('planos', data.planos||[]);
-            setData('assinaturas', data.assinaturas||[]);
-            setData('categorias', data.categorias||[]);
-            if(data.config) {
-                if(data.config.nome) localStorage.setItem('barberShopName', data.config.nome);
-                if(data.config.pin) setPin(data.config.pin);
-                if(data.config.perfil) {
-                    localStorage.setItem('perfNome', data.config.perfil.nome||'');
-                    localStorage.setItem('perfTelefone', data.config.perfil.telefone||'');
-                    localStorage.setItem('perfEmail', data.config.perfil.email||'');
+            if (!data.clientes) { alert('Arquivo inválido'); return; }
+            if (!confirm('Substituir todos os dados atuais?')) return;
+
+            // Inserir dados no Supabase (usando upsert)
+            const tables = [
+                { name: 'clientes', data: data.clientes },
+                { name: 'agendamentos', data: data.agendamentos },
+                { name: 'pagamentos', data: data.pagamentos },
+                { name: 'despesas', data: data.despesas },
+                { name: 'servicos', data: data.servicos },
+                { name: 'planos', data: data.planos },
+                { name: 'categorias', data: data.categorias },
+                { name: 'compras', data: data.compras }
+            ];
+
+            for (let t of tables) {
+                if (t.data && t.data.length > 0) {
+                    const { error } = await supabase
+                        .from(t.name)
+                        .upsert(t.data, { onConflict: 'id' });
+                    if (error) console.error(`Erro ao importar ${t.name}:`, error);
                 }
             }
+
+            if (data.config) {
+                if (data.config.nome) localStorage.setItem('barberShopName', data.config.nome);
+                if (data.config.pin) setPin(data.config.pin);
+                if (data.config.perfil) {
+                    localStorage.setItem('perfNome', data.config.perfil.nome || '');
+                    localStorage.setItem('perfTelefone', data.config.perfil.telefone || '');
+                    localStorage.setItem('perfEmail', data.config.perfil.email || '');
+                }
+            }
+
             alert('Dados restaurados com sucesso!');
-            carregarTudo();
-        } catch(err) { alert('Erro: '+err.message); }
+            await carregarTudo();
+        } catch (err) {
+            alert('Erro: ' + err.message);
+        }
     };
     reader.readAsText(file);
     event.target.value = '';
@@ -1680,14 +2000,14 @@ function importarBackup(event) {
 function salvarConfig() {
     const nome = document.getElementById('confNome').value.trim();
     const pinNovo = document.getElementById('confPin').value.trim();
-    if(nome) localStorage.setItem('barberShopName', nome);
-    if(pinNovo) {
-        if(pinNovo.length !== 4 || !/^\d{4}$/.test(pinNovo)) {
+    if (nome) localStorage.setItem('barberShopName', nome);
+    if (pinNovo) {
+        if (pinNovo.length !== 4 || !/^\d{4}$/.test(pinNovo)) {
             alert('O PIN deve ter exatamente 4 dígitos numéricos.');
             return;
         }
         const pinAtual = prompt('Digite seu PIN atual para confirmar a alteração:');
-        if(pinAtual !== getPin()) {
+        if (pinAtual !== getPin()) {
             alert('PIN atual incorreto! Alteração cancelada.');
             document.getElementById('confPin').value = getPin();
             return;
@@ -1706,34 +2026,52 @@ function salvarPerfil() {
 }
 
 function limparTudo() {
-    if(!confirm('⚠️ ATENÇÃO! Isso vai apagar TODOS os dados permanentemente.')) return;
-    if(!confirm('Última chance! Digite "SIM" no prompt para confirmar.')) return;
+    if (!confirm('⚠️ ATENÇÃO! Isso vai apagar TODOS os dados permanentemente.')) return;
+    if (!confirm('Última chance! Digite "SIM" no prompt para confirmar.')) return;
     const confirmacao = prompt('Digite "SIM" para confirmar a exclusão de todos os dados:');
-    if(confirmacao !== 'SIM') { alert('Operação cancelada.'); return; }
+    if (confirmacao !== 'SIM') { alert('Operação cancelada.'); return; }
     localStorage.clear();
-    alert('Todos os dados foram apagados. A página será recarregada.');
+    alert('Dados locais apagados. Recarregue a página.');
     location.reload();
 }
 
 // ================================================================
 //  PESQUISA GLOBAL
 // ================================================================
-function globalSearch(texto) {
+async function globalSearch(texto) {
     texto = texto.toLowerCase().trim();
-    if(!texto) { carregarClientes(); carregarServicos(); carregarPlanos(); carregarCategorias(); return; }
-    const clientes = getData('clientes').filter(c => c.nome.toLowerCase().includes(texto) || (c.telefone&&c.telefone.includes(texto)));
+    if (!texto) {
+        await carregarClientes();
+        await carregarServicos();
+        await carregarPlanos();
+        await carregarCategorias();
+        return;
+    }
+
+    const { data: clientes } = await supabase
+        .from('clientes')
+        .select('*')
+        .ilike('nome', `%${texto}%`);
+
     const containerCli = document.getElementById('clientesLista');
-    if(clientes.length === 0) containerCli.innerHTML = '<div class="empty">Nenhum cliente</div>';
-    else {
+    if (!clientes || clientes.length === 0) {
+        containerCli.innerHTML = '<div class="empty">Nenhum cliente</div>';
+    } else {
         containerCli.innerHTML = clientes.map(c => `
             <div class="list-item"><div class="info"><strong>${c.nome}</strong> ${c.telefone?'<br><span class="text-muted">'+c.telefone+'</span>':''}</div>
             <div class="actions"><button class="btn btn-sm btn-primary" onclick="abrirFicha('${c.id}')"><i class="fas fa-eye"></i></button></div></div>
         `).join('');
     }
-    const servicos = getData('servicos').filter(s => s.nome.toLowerCase().includes(texto));
+
+    const { data: servicos } = await supabase
+        .from('servicos')
+        .select('*')
+        .ilike('nome', `%${texto}%`);
+
     const containerServ = document.getElementById('servicosLista');
-    if(servicos.length === 0) containerServ.innerHTML = '<div class="empty">Nenhum serviço</div>';
-    else {
+    if (!servicos || servicos.length === 0) {
+        containerServ.innerHTML = '<div class="empty">Nenhum serviço</div>';
+    } else {
         containerServ.innerHTML = servicos.map(s => `
             <div class="list-item"><div class="info"><strong>${s.nome}</strong> ${formatCurrency(s.preco)}</div></div>
         `).join('');
