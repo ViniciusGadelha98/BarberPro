@@ -1356,7 +1356,7 @@ async function carregarSelectsPlanos() {
 }
 
 // ================================================================
-//  📌 AGENDA (SUPABASE)
+//  📌 AGENDA (SUPABASE) – LÓGICA DE CONFLITO CORRIGIDA
 // ================================================================
 async function carregarAgendaDia() {
     const data = document.getElementById('agendaData').value || today();
@@ -1437,6 +1437,7 @@ async function salvarAgendamento() {
     const data = datetime.split('T')[0];
     const hora = datetime.split('T')[1]?.slice(0, 5) || '00:00';
 
+    // Busca duração do serviço
     const { data: servico } = await supabase
         .from('servicos')
         .select('tempo')
@@ -1444,29 +1445,54 @@ async function salvarAgendamento() {
         .single();
     const duracao = servico ? (servico.tempo || 30) : 30;
 
-    // Verificar conflito
-    const { data: existing } = await supabase
+    // Busca agendamentos existentes no mesmo dia
+    const { data: existing, error } = await supabase
         .from('agendamentos')
-        .select('hora, servico_id')
+        .select('id, hora, servico_id')
         .eq('data', data);
 
+    if (error) {
+        console.error('Erro ao buscar agendamentos:', error);
+        alert('Erro ao verificar conflitos.');
+        return;
+    }
+
+    // Mapa de serviços para obter duração
+    const servicosMap = {};
+    const { data: servicos } = await supabase.from('servicos').select('id, tempo');
+    if (servicos) {
+        servicos.forEach(s => servicosMap[s.id] = s);
+    }
+
+    // Verifica conflito
     let conflito = false;
+    const nHora = hora.split(':').map(Number);
+    const nMin = nHora[0] * 60 + nHora[1];
+
     if (existing) {
-        const nMin = parseInt(hora.split(':')[0]) * 60 + parseInt(hora.split(':')[1]);
         for (let a of existing) {
+            // Ignora o próprio agendamento se estiver editando
             if (a.id === (editContext.tipo === 'agendamento' ? editContext.id : null)) continue;
+
             const aHora = a.hora.split(':').map(Number);
             const aMin = aHora[0] * 60 + aHora[1];
-            const { data: aServ } = await supabase.from('servicos').select('tempo').eq('id', a.servico_id).single();
-            const aDur = aServ ? (aServ.tempo || 30) : 30;
+            const aServ = servicosMap[a.servico_id] || { tempo: 30 };
+            const aDur = aServ.tempo || 30;
+
+            // Verifica sobreposição: novo início antes do fim do existente E novo fim após o início do existente
             if (nMin < aMin + aDur && nMin + duracao > aMin) {
                 conflito = true;
                 break;
             }
         }
     }
-    if (conflito) { alert('⚠️ Conflito de horário!'); return; }
 
+    if (conflito) {
+        alert('⚠️ Conflito de horário! Este horário já está ocupado por outro agendamento.');
+        return;
+    }
+
+    // Salvar agendamento
     const agendamento = {
         id: editContext.tipo === 'agendamento' && editContext.id ? editContext.id : genId(),
         cliente_id: clienteId,
@@ -1477,11 +1503,14 @@ async function salvarAgendamento() {
         criado_em: nowISO()
     };
 
-    const { error } = await supabase
+    const { error: saveError } = await supabase
         .from('agendamentos')
         .upsert(agendamento, { onConflict: 'id' });
 
-    if (error) { alert('Erro ao salvar: ' + error.message); return; }
+    if (saveError) {
+        alert('Erro ao salvar: ' + saveError.message);
+        return;
+    }
 
     document.getElementById('agendaDateTime').value = '';
     editContext = { tipo: null, id: null };
