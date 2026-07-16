@@ -414,15 +414,49 @@ function nowISO() { return new Date().toISOString(); }
 
 function formatDateBR(d) {
     if (!d) return '--';
-    let dt = new Date(d + 'T00:00:00');
-    if (isNaN(dt)) dt = new Date(d);
+    // Se já estiver no formato DD/MM/YYYY, retorna direto
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) return d;
+    // Se já estiver no formato DD/MM/YYYY HH:MM, extrai só a data
+    if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/.test(d)) return d.substring(0, 10);
+    
+    let dt = new Date(d);
+    // Se for inválido, tenta parsear como DD/MM/YYYY (caso venha com barras)
+    if (isNaN(dt)) {
+        const partes = d.split(/[\/\-]/);
+        if (partes.length === 3) {
+            const dia = parseInt(partes[0], 10);
+            const mes = parseInt(partes[1], 10) - 1;
+            const ano = parseInt(partes[2], 10);
+            if (!isNaN(dia) && !isNaN(mes) && !isNaN(ano)) {
+                dt = new Date(ano, mes, dia);
+            }
+        }
+    }
     if (isNaN(dt)) return '--';
     return dt.toLocaleDateString('pt-BR');
 }
 
 function formatDateTimeBR(d) {
     if (!d) return '--';
+    // Se já estiver no formato DD/MM/YYYY HH:MM, retorna direto
+    if (/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/.test(d)) return d;
+    // Se for apenas data no formato DD/MM/YYYY, adiciona horário vazio
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) return d + ' 00:00';
+    
     let dt = new Date(d);
+    if (isNaN(dt)) {
+        const partes = d.split(/[\/\-T: ]/);
+        if (partes.length >= 3) {
+            const dia = parseInt(partes[0], 10);
+            const mes = parseInt(partes[1], 10) - 1;
+            const ano = parseInt(partes[2], 10);
+            const hora = parseInt(partes[3] || '0', 10);
+            const min = parseInt(partes[4] || '0', 10);
+            if (!isNaN(dia) && !isNaN(mes) && !isNaN(ano)) {
+                dt = new Date(ano, mes, dia, hora, min);
+            }
+        }
+    }
     if (isNaN(dt)) return '--';
     return dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
@@ -602,6 +636,7 @@ async function salvarCliente() {
 
     await carregarClientes();
     await carregarSelectsClientes();
+    await carregarSelectsAgenda();
     await atualizarDashboard();
     alert('Cliente salvo com sucesso na nuvem!');
 }
@@ -686,6 +721,7 @@ async function excluirCliente(id) {
 
     await carregarClientes();
     await carregarSelectsClientes();
+    await carregarSelectsAgenda();
     await atualizarDashboard();
     alert('Cliente excluído!');
 }
