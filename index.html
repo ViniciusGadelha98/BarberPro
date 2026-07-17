@@ -1852,9 +1852,9 @@ async function desenharGraficoReceita() {
     const ctx = canvas.getContext('2d');
     const width = canvas.parentElement.clientWidth - 32;
     canvas.width = width * (devicePixelRatio || 1);
-    canvas.height = 150 * (devicePixelRatio || 1); // altura maior
+    canvas.height = 160 * (devicePixelRatio || 1); // altura um pouco maior
     canvas.style.width = width + 'px';
-    canvas.style.height = '150px';
+    canvas.style.height = '160px';
 
     // Busca os dados
     const dias = [];
@@ -1874,29 +1874,35 @@ async function desenharGraficoReceita() {
     const max = Math.max(...dias.map(d => d.value), 1);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // Espaço reservado para as datas na parte inferior
+    const bottomMargin = 30; // ← AUMENTEI A MARGEM
+    const topMargin = 10;
+    const chartHeight = canvas.height - bottomMargin - topMargin;
+    const scale = chartHeight / max;
+
     const barW = canvas.width / dias.length * 0.6;
     const gap = canvas.width / dias.length * 0.4;
-    const scale = (canvas.height - 30) / max;
 
     dias.forEach((d, i) => {
         const x = i * (barW + gap) + gap / 2;
         const h = d.value * scale;
 
-        // Barras com cor mais vibrante
-        ctx.fillStyle = '#3b82f6'; // azul forte
-        ctx.fillRect(x, canvas.height - h - 10, barW, h);
+        // Barra com fundo arredondado
+        const yBar = canvas.height - bottomMargin - h;
+        ctx.fillStyle = '#3b82f6';
+        ctx.fillRect(x, yBar, barW, h);
 
-        // Rótulo da data (maior e mais forte)
-        ctx.fillStyle = '#0f172a'; // preto escuro
+        // Data (agora mais abaixo)
+        ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(d.label, x + barW / 2, canvas.height - 2);
+        ctx.fillText(d.label, x + barW / 2, canvas.height - bottomMargin + 18);
 
-        // Valor em cima da barra (maior e mais forte)
-        if (d.value > 0 && h > 25) { // só aparece se houver espaço
-            ctx.fillStyle = '#0f172a'; // preto escuro
+        // Valor (se houver espaço)
+        if (d.value > 0 && h > 20) {
+            ctx.fillStyle = '#0f172a';
             ctx.font = 'bold 13px sans-serif';
-            ctx.fillText(formatCurrency(d.value), x + barW / 2, canvas.height - h - 14);
+            ctx.fillText(formatCurrency(d.value), x + barW / 2, yBar - 6);
         }
     });
 }
