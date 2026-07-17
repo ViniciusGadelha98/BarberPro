@@ -1923,13 +1923,17 @@ async function atualizarDashboard() {
         }).join('');
     }
 
-    // ===== RESUMO RÁPIDO (substitui o antigo "Vencimentos") =====
-    // Total de clientes
-    const { data: totalClientes, error: errClientes } = await supabase
+    // ===== RESUMO RÁPIDO =====
+    // Total de clientes (corrigido)
+    const { count: totalClientes, error: errClientes } = await supabase
         .from('clientes')
-        .select('id', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true });
+
     if (!errClientes) {
         document.getElementById('totalClientesCard').textContent = totalClientes || 0;
+    } else {
+        document.getElementById('totalClientesCard').textContent = '0';
+        console.error('Erro ao contar clientes:', errClientes);
     }
 
     // Próximos agendamentos (a partir de amanhã)
@@ -1964,6 +1968,9 @@ async function atualizarDashboard() {
                 return `<div class="list-item"><span>${dataFormatada} ${a.hora} - ${nome}</span><span class="badge badge-info">${a.status || 'Agendado'}</span></div>`;
             }).join('');
         }
+    } else {
+        document.getElementById('proximosAgendamentosCard').textContent = '0';
+        console.error('Erro ao buscar próximos agendamentos:', errFuturos);
     }
 
     // Gráfico de receita 7 dias
@@ -1971,16 +1978,16 @@ async function atualizarDashboard() {
 }
 
 // ================================================================
-//  GRÁFICO DE RECEITA 7 DIAS (melhorado para celular)
+//  GRÁFICO DE RECEITA 7 DIAS (corrigido para não cortar os valores)
 // ================================================================
 async function desenharGraficoReceita() {
     const canvas = document.getElementById('graficoReceita');
     const ctx = canvas.getContext('2d');
     const width = canvas.parentElement.clientWidth - 32;
     canvas.width = width * (devicePixelRatio || 1);
-    canvas.height = 160 * (devicePixelRatio || 1);
+    canvas.height = 180 * (devicePixelRatio || 1); // aumentei para 180px
     canvas.style.width = width + 'px';
-    canvas.style.height = '160px';
+    canvas.style.height = '180px';
 
     // Coleta dados dos últimos 7 dias
     const dias = [];
@@ -2000,10 +2007,10 @@ async function desenharGraficoReceita() {
     const max = Math.max(...dias.map(d => d.value), 1);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Margem inferior para as datas
-    const bottomMargin = 30;
-    const topMargin = 10;
-    const chartHeight = canvas.height - bottomMargin - topMargin;
+    // Margens
+    const topMargin = 30;    // espaço para os valores
+    const bottomMargin = 30; // espaço para as datas
+    const chartHeight = canvas.height - topMargin - bottomMargin;
     const scale = chartHeight / max;
 
     const barW = canvas.width / dias.length * 0.6;
@@ -2018,17 +2025,27 @@ async function desenharGraficoReceita() {
         ctx.fillStyle = '#3b82f6';
         ctx.fillRect(x, yBar, barW, h);
 
-        // Data (mais abaixo para não encostar na barra)
+        // Data (mais abaixo)
         ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(d.label, x + barW / 2, canvas.height - bottomMargin + 18);
 
-        // Valor (se houver espaço)
-        if (d.value > 0 && h > 20) {
+        // Valor (com espaçamento do topo)
+        if (d.value > 0) {
             ctx.fillStyle = '#0f172a';
             ctx.font = 'bold 13px sans-serif';
-            ctx.fillText(formatCurrency(d.value), x + barW / 2, yBar - 6);
+            const valueY = yBar - 8;
+            // Garante que o valor não ultrapasse o topo do canvas
+            if (valueY > 10) {
+                ctx.fillText(formatCurrency(d.value), x + barW / 2, valueY);
+            } else {
+                // Se não couber, coloca dentro da barra (apenas se a barra for alta o suficiente)
+                if (h > 20) {
+                    ctx.fillStyle = 'white';
+                    ctx.fillText(formatCurrency(d.value), x + barW / 2, yBar + h/2 + 4);
+                }
+            }
         }
     });
 }
