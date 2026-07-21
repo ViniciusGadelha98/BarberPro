@@ -4,18 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Barber Pro</title>
-    <!-- Font Awesome para ícones profissionais -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <!-- Biblioteca Supabase para comunicação com o banco de dados na nuvem -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
-    <!-- Manifest para PWA (ícone e comportamento de app) -->
     <link rel="manifest" href="manifest.json">
     <style>
         /* ========== RESET E VARIÁVEIS ========== */
-        /* Remove margens e define a fonte principal */
         * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { background:#f0f2f5; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
-        /* Cores principais usadas em todo o sistema */
         :root { 
             --primary: #0f172a; 
             --primary-light: #1e293b; 
@@ -29,7 +24,6 @@
         }
 
         /* ========== TELA DE LOGIN ========== */
-        /* Tela que aparece antes de entrar no sistema, com teclado numérico */
         #loginScreen {
             position:fixed; top:0; left:0; width:100%; height:100%;
             background:var(--primary); display:flex; align-items:center; justify-content:center;
@@ -39,11 +33,9 @@
         #loginScreen h1 { color:white; font-size:2.4rem; font-weight:700; display:flex; align-items:center; gap:12px; }
         #loginScreen h1 i { color:var(--accent); font-size:2.2rem; }
         #loginScreen p { color:var(--gray); margin-bottom:28px; font-size:1rem; }
-        /* Pontos que indicam quantos dígitos do PIN foram digitados */
         .pin-dots { display:flex; gap:16px; margin-bottom:28px; }
         .pin-dot { width:22px; height:22px; border-radius:50%; border:2px solid rgba(255,255,255,0.4); background:transparent; transition:0.2s; }
         .pin-dot.filled { background:white; border-color:white; }
-        /* Teclado numérico estilo celular (1-2-3 / 4-5-6 / 7-8-9 / 0) */
         .pin-input { display:grid; grid-template-columns:repeat(3, 1fr); gap:12px; max-width:280px; width:100%; }
         .pin-input button { width:100%; aspect-ratio:1/1; border-radius:50%; border:none; font-size:1.6rem; background:#334155; color:white; font-weight:600; cursor:pointer; transition:0.15s; }
         .pin-input button:active { transform:scale(0.92); background:var(--accent); }
@@ -54,7 +46,6 @@
 
         /* ========== APP ========== */
         #app { flex:1; display:flex; flex-direction:column; height:100%; }
-        /* Cabeçalho fixo com nome da barbearia e barra de pesquisa */
         .header { background:var(--primary); color:white; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; flex-shrink:0; gap:12px; flex-wrap:wrap; }
         .header h2 { font-size:1.2rem; font-weight:700; display:flex; align-items:center; gap:10px; }
         .header h2 i { color:var(--accent); }
@@ -63,33 +54,27 @@
         .header-actions input::placeholder { color:var(--gray); }
         .header-actions input:focus { outline:2px solid var(--accent); }
 
-        /* Área de conteúdo principal (rolável) */
         .main-content { flex:1; overflow-y:auto; padding:16px; padding-bottom:85px; display:flex; flex-direction:column; }
-        /* Cada aba (página) é uma .tab-page, apenas a ativa é exibida */
         .tab-page { display:none; animation:fade .3s; }
         .tab-page.active { display:block; }
         @keyframes fade { from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)} }
 
-        /* Navegação inferior fixa com ícones */
         .bottom-nav { position:fixed; bottom:0; left:0; right:0; background:white; border-top:1px solid #e2e8f0; display:flex; justify-content:space-around; padding:8px 0 12px; z-index:100; overflow-x:auto; }
         .nav-item { background:none; border:none; display:flex; flex-direction:column; align-items:center; font-size:0.6rem; color:var(--gray); cursor:pointer; padding:4px 10px; transition:0.2s; min-width:48px; gap:2px; }
         .nav-item i { font-size:1.6rem; }
         .nav-item.active { color:var(--primary); font-weight:600; }
         .nav-item.active i { color:var(--accent); }
 
-        /* Cards (blocos brancos com sombra) */
         .card { background:white; border-radius:var(--radius); padding:18px; margin-bottom:14px; box-shadow:var(--card-shadow); }
         .card-title { font-weight:600; font-size:1rem; margin-bottom:12px; color:var(--primary); display:flex; justify-content:space-between; align-items:center; }
         .card-title i { color:var(--accent); margin-right:8px; }
 
-        /* Cards de estatísticas (4 no topo do Dashboard) */
         .grid-cards { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
         .stat-card { background:#f8fafc; border-radius:12px; padding:14px; text-align:center; }
         .stat-card .number { font-size:1.6rem; font-weight:700; color:var(--primary); display:flex; align-items:center; justify-content:center; gap:6px; }
         .stat-card .number i { font-size:1.4rem; color:var(--accent); }
         .stat-card .label { font-size:0.7rem; color:var(--gray); margin-top:4px; }
 
-        /* Formulários e botões */
         input, select, textarea, .btn { width:100%; padding:12px 14px; border:1px solid #e2e8f0; border-radius:12px; font-size:0.95rem; margin-bottom:8px; transition:0.2s; }
         input:focus, select:focus, textarea:focus { outline:2px solid var(--accent); border-color:transparent; }
         textarea { resize:vertical; min-height:60px; }
@@ -102,13 +87,11 @@
         .btn-outline { background:transparent; border:1px solid var(--gray); color:var(--primary); }
         .btn-sm { padding:8px 14px; font-size:0.8rem; width:auto; display:inline-flex; }
 
-        /* Listas (itens com borda inferior) */
         .list-item { display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #f1f5f9; flex-wrap:wrap; gap:6px; }
         .list-item:last-child { border-bottom:none; }
         .list-item .info { flex:1; min-width:120px; }
         .list-item .actions { display:flex; gap:6px; flex-wrap:wrap; }
 
-        /* Badges (etiquetas de status) */
         .badge { background:#e2e8f0; padding:4px 12px; border-radius:30px; font-size:0.7rem; font-weight:600; display:inline-flex; align-items:center; gap:4px; }
         .badge-success { background:#dcfce7; color:#166534; }
         .badge-danger { background:#fee2e2; color:#991b1b; }
@@ -122,7 +105,6 @@
         .sub-tab { flex:1; text-align:center; padding:8px 12px; border-radius:10px; font-size:0.8rem; font-weight:500; background:transparent; border:none; cursor:pointer; min-width:60px; transition:0.2s; color:var(--gray); }
         .sub-tab.active { background:white; box-shadow:0 2px 8px rgba(0,0,0,0.06); color:var(--primary); }
 
-        /* Modais (janelas sobrepostas) */
         .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:999; }
         .modal-overlay.open { display:flex; }
         .modal-box { background:white; width:94%; max-width:450px; max-height:85vh; overflow-y:auto; border-radius:28px; padding:24px; }
@@ -159,7 +141,6 @@
 
 <!-- ==================== APP PRINCIPAL ==================== -->
 <div id="app" style="display:none;">
-    <!-- Cabeçalho com nome e pesquisa -->
     <div class="header no-print">
         <h2 id="barberShopName"><i class="fas fa-cut"></i> BarberPro</h2>
         <div class="header-actions">
@@ -167,21 +148,17 @@
         </div>
     </div>
 
-    <!-- Conteúdo principal (onde as abas são exibidas) -->
     <div class="main-content" id="mainContent">
 
         <!-- ==================== ABA DASHBOARD ==================== -->
         <div id="tab-dashboard" class="tab-page active">
-            <!-- 4 cards de estatísticas rápidas -->
             <div class="grid-cards">
                 <div class="stat-card"><div class="number"><i class="fas fa-coins"></i> <span id="dashFaturamentoHoje">R$0</span></div><div class="label">💰 Hoje</div></div>
                 <div class="stat-card"><div class="number"><i class="fas fa-calendar-day"></i> <span id="dashAgendamentosHoje">0</span></div><div class="label">📅 Agenda</div></div>
                 <div class="stat-card"><div class="number"><i class="fas fa-cut"></i> <span id="dashCortesHoje">0</span></div><div class="label">✂️ Cortes</div></div>
                 <div class="stat-card"><div class="number"><i class="fas fa-crown"></i> <span id="dashPlanosAtivos">0</span></div><div class="label">⭐ Créditos</div></div>
             </div>
-            <!-- Agenda de hoje -->
             <div class="card"><div class="card-title"><i class="fas fa-calendar-check"></i> Agenda de Hoje</div><div id="agendaHojeList"><div class="empty">Nenhum</div></div></div>
-            <!-- RESUMO RÁPIDO: substitui o antigo card "Vencimentos" -->
             <div class="card">
                 <div class="card-title"><i class="fas fa-chart-simple"></i> Resumo Rápido</div>
                 <div style="display:flex; gap:12px; flex-wrap:wrap;">
@@ -194,13 +171,11 @@
                         <div style="font-size:0.7rem; color:var(--gray);">📅 Próximos</div>
                     </div>
                 </div>
-                <!-- Lista dos próximos 3 agendamentos (a partir de amanhã) -->
                 <div style="margin-top:12px;">
                     <div style="font-weight:600; font-size:0.9rem; margin-bottom:6px;">📋 Próximos agendamentos</div>
                     <div id="proximosAgendamentosLista"><div class="empty">Nenhum agendamento futuro</div></div>
                 </div>
             </div>
-            <!-- Gráfico de receita dos últimos 7 dias -->
             <div class="card"><div class="card-title"><i class="fas fa-chart-simple"></i> Receita 7 Dias</div><canvas id="graficoReceita" height="80" style="width:100%;"></canvas></div>
         </div>
 
@@ -221,7 +196,6 @@
                 <div class="card-title"><i class="fas fa-users"></i> Lista <span id="qtdClientes" class="badge">0</span></div>
                 <div id="clientesLista"><div class="empty">Nenhum cliente</div></div>
             </div>
-            <!-- Ficha do cliente (detalhes) -->
             <div id="fichaCliente" style="display:none;" class="card">
                 <div class="card-title" id="fichaNome"><i class="fas fa-user"></i> Cliente</div>
                 <div id="fichaDados"></div>
@@ -343,7 +317,7 @@
                     <input type="text" id="finDespDesc" placeholder="Descrição *">
                     <input type="number" id="finDespValor" placeholder="Valor (R$)" step="0.01">
                     <input type="date" id="finDespData" value="">
-                    <select id="finDespCategoria"><option value="Água">Água</option><option value="Luz">Luz</option><option value="Aluguel">Aluguel</option><option value="Produtos">Produtos</option><option value="Outros">Outros</option></select>
+                    <select id="finDespCategoria"><option value="Água">Água</option><option value="Equipamentos">Equipamentos</option><option value="Aluguel">Aluguel</option><option value="Produtos">Produtos</option><option value="Outros">Outros</option><option value="Manutenção">Manutenção</option></select>
                     <button class="btn btn-danger" id="despBtnSalvar" onclick="salvarDespesa()"><i class="fas fa-save"></i> Salvar</button>
                     <button class="btn btn-outline hidden" id="despBtnCancelar" onclick="cancelarEdicao('despesa')"><i class="fas fa-times"></i> Cancelar</button>
                 </div>
@@ -400,7 +374,6 @@
 </div>
 
 <!-- ==================== MODAIS ==================== -->
-<!-- Modal de atendimento (usado para iniciar um corte) -->
 <div class="modal-overlay" id="atendimentoModal">
     <div class="modal-box">
         <h3><i class="fas fa-cut"></i> Atendimento</h3>
@@ -423,7 +396,6 @@
     </div>
 </div>
 
-<!-- Modal de edição genérica (usado para editar planos, assinaturas, etc.) -->
 <div class="modal-overlay" id="modalOverlay">
     <div class="modal-box">
         <h3 id="modalTitle"><i class="fas fa-edit"></i> Editar</h3>
@@ -442,8 +414,8 @@
 // ================================================================
 //  ⚠️ CONFIGURAÇÃO OBRIGATÓRIA: preencha com seus dados do Supabase
 // ================================================================
-const SUPABASE_URL = 'https://yywmylgsmcwrfmzkmmoz.supabase.co';     // ← cole sua URL aqui
-const SUPABASE_ANON_KEY = 'sb_publishable_hGOH6BoUMcRC2av-xAD26Q_YJRFQFY0';           // ← cole sua chave aqui
+const SUPABASE_URL = 'https://yywmylgsmcwrfmzkmmoz.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_hGOH6BoUMcRC2av-xAD26Q_YJRFQFY0';
 
 // ================================================================
 //  INICIALIZAÇÃO DO SUPABASE
@@ -451,17 +423,26 @@ const SUPABASE_ANON_KEY = 'sb_publishable_hGOH6BoUMcRC2av-xAD26Q_YJRFQFY0';     
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ================================================================
-//  FUNÇÕES AUXILIARES (utilitários)
+//  FUNÇÕES AUXILIARES (utilitários) – CORRIGIDAS PARA FUSO LOCAL
 // ================================================================
-// Gera um ID único baseado em timestamp e random
 function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
-// Retorna a data atual no formato ISO (YYYY-MM-DD)
-function today() { return new Date().toISOString().split('T')[0]; }
-// Retorna a data/hora atual em formato ISO completo
-function nowISO() { return new Date().toISOString(); }
+
+// Retorna a data atual no formato YYYY-MM-DD (fuso local do Brasil)
+function today() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+// Retorna a data/hora atual no formato ISO completo (fuso local)
+function nowISO() {
+    const now = new Date();
+    return now.toISOString();
+}
 
 // Formata uma data ISO para DD/MM/YYYY
-// Se já estiver no formato DD/MM/YYYY, retorna sem alterar
 function formatDateBR(d) {
     if (!d) return '--';
     if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) return d;
@@ -507,10 +488,8 @@ function formatDateTimeBR(d) {
     return dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
-// Formata um valor para moeda brasileira (R$ XX,XX)
 function formatCurrency(v) { return 'R$ ' + parseFloat(v || 0).toFixed(2).replace('.', ','); }
 
-// Aplica máscara de telefone (XX) XXXXX-XXXX
 function mascaraTelefone(el) {
     let v = el.value.replace(/\D/g, '');
     if (v.length <= 2) el.value = v;
@@ -518,7 +497,6 @@ function mascaraTelefone(el) {
     else el.value = '(' + v.substring(0, 2) + ') ' + v.substring(2, 7) + '-' + v.substring(7, 11);
 }
 
-// Aplica máscara de CPF XXX.XXX.XXX-XX
 function mascaraCpf(el) {
     let v = el.value.replace(/\D/g, '');
     if (v.length <= 3) el.value = v;
@@ -528,13 +506,12 @@ function mascaraCpf(el) {
 }
 
 // ================================================================
-//  PIN – controle de acesso (armazenado localmente no navegador)
+//  PIN – controle de acesso
 // ================================================================
-let pinCorrente = ''; // armazena os dígitos digitados
-function getPin() { return localStorage.getItem('appPin') || '1234'; } // PIN padrão 1234
+let pinCorrente = '';
+function getPin() { return localStorage.getItem('appPin') || '1234'; }
 function setPin(p) { localStorage.setItem('appPin', p); }
 
-// Exibe a tela de login e oculta o app
 function initLogin() {
     document.getElementById('loginScreen').classList.remove('hidden');
     document.getElementById('app').style.display = 'none';
@@ -543,12 +520,10 @@ function initLogin() {
     document.getElementById('loginError').textContent = '';
 }
 
-// Atualiza os pontos visuais conforme o PIN digitado
 function atualizarDots() {
     document.querySelectorAll('.pin-dot').forEach((dot, i) => dot.classList.toggle('filled', i < pinCorrente.length));
 }
 
-// Evento de clique nos botões do teclado numérico
 document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
     btn.addEventListener('click', function () {
         if (pinCorrente.length < 4) {
@@ -569,13 +544,11 @@ document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
     });
 });
 
-// Botão de voltar (apaga o último dígito)
 document.getElementById('pinBack').addEventListener('click', function () {
     pinCorrente = pinCorrente.slice(0, -1);
     atualizarDots();
 });
 
-// Botão "Entrar" – confirma o PIN manualmente
 document.getElementById('btnLoginConfirm').addEventListener('click', function () {
     if (pinCorrente.length === 4) {
         if (pinCorrente === getPin()) {
@@ -595,7 +568,7 @@ document.getElementById('btnLoginConfirm').addEventListener('click', function ()
 // ================================================================
 //  NAVEGAÇÃO ENTRE ABAS
 // ================================================================
-let editContext = { tipo: null, id: null }; // usado para saber se estamos editando algo
+let editContext = { tipo: null, id: null };
 
 document.querySelectorAll('.nav-item').forEach(btn => {
     btn.addEventListener('click', function () {
@@ -604,7 +577,11 @@ document.querySelectorAll('.nav-item').forEach(btn => {
         document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
         document.getElementById(this.dataset.tab).classList.add('active');
         const tab = this.dataset.tab;
-        if (tab === 'tab-agenda') { document.getElementById('agendaData').value = today(); carregarAgendaDia(); }
+        if (tab === 'tab-agenda') {
+            // Carrega a data atual no campo da agenda usando a função today() corrigida
+            document.getElementById('agendaData').value = today();
+            carregarAgendaDia();
+        }
         if (tab === 'tab-clientes') carregarClientes();
         if (tab === 'tab-categorias') carregarCategorias();
         if (tab === 'tab-servicos') { carregarServicos(); carregarSelectCategorias(); }
@@ -614,7 +591,6 @@ document.querySelectorAll('.nav-item').forEach(btn => {
     });
 });
 
-// Sub-tabs da aba financeiro
 document.querySelectorAll('.sub-tab').forEach(btn => {
     btn.addEventListener('click', function () {
         document.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
@@ -626,7 +602,7 @@ document.querySelectorAll('.sub-tab').forEach(btn => {
 });
 
 // ================================================================
-//  CARREGAR TUDO (após login bem-sucedido)
+//  CARREGAR TUDO (otimizado com Promise.all)
 // ================================================================
 async function carregarTudo() {
     const nome = localStorage.getItem('barberShopName') || '✂️ Barber Pro';
@@ -638,27 +614,27 @@ async function carregarTudo() {
     document.getElementById('finRecData').value = today();
     document.getElementById('finDespData').value = today();
 
-    // Carrega todas as abas (dados do banco)
-    await carregarCategorias();
-    await carregarSelectCategorias();
-    await carregarClientes();
-    await carregarServicos();
-    await carregarPlanos();
-    await carregarHistoricoCompras();
-    await carregarSelectsPlanos();
-    await carregarAgendaDia();
-    await carregarReceitas();
-    await carregarDespesas();
-    await carregarSelectsClientes();
-    await carregarSelectsAgenda();
+    // Carrega todas as abas em paralelo para melhor performance
+    await Promise.all([
+        carregarCategorias(),
+        carregarSelectCategorias(),
+        carregarClientes(),
+        carregarServicos(),
+        carregarPlanos(),
+        carregarHistoricoCompras(),
+        carregarSelectsPlanos(),
+        carregarAgendaDia(),
+        carregarReceitas(),
+        carregarDespesas(),
+        carregarSelectsClientes(),
+        carregarSelectsAgenda()
+    ]);
     await atualizarDashboard();
 }
 
 // ================================================================
 //  CRUD CLIENTES (Supabase)
 // ================================================================
-
-// Salva ou atualiza um cliente
 async function salvarCliente() {
     const nome = document.getElementById('cliNome').value.trim();
     if (!nome) { alert('Nome é obrigatório'); return; }
@@ -684,7 +660,6 @@ async function salvarCliente() {
         return;
     }
 
-    // Limpa o formulário
     document.getElementById('cliNome').value = '';
     document.getElementById('cliTelefone').value = '';
     document.getElementById('cliCpf').value = '';
@@ -704,7 +679,6 @@ async function salvarCliente() {
     alert('Cliente salvo com sucesso na nuvem!');
 }
 
-// Carrega a lista de clientes do Supabase
 async function carregarClientes() {
     const { data: clientes, error } = await supabase
         .from('clientes')
@@ -743,7 +717,6 @@ async function carregarClientes() {
     }).join('');
 }
 
-// Prepara o formulário para editar um cliente
 function editarCliente(id) {
     supabase
         .from('clientes')
@@ -766,7 +739,6 @@ function editarCliente(id) {
         });
 }
 
-// Exclui um cliente e todos os seus dados relacionados
 async function excluirCliente(id) {
     if (!confirm('Excluir cliente e todos os dados?')) return;
 
@@ -792,7 +764,7 @@ async function excluirCliente(id) {
 }
 
 // ================================================================
-//  FICHA DO CLIENTE (detalhes, histórico, estatísticas)
+//  FICHA DO CLIENTE
 // ================================================================
 async function abrirFicha(id) {
     const { data: cliente, error } = await supabase
@@ -806,7 +778,6 @@ async function abrirFicha(id) {
     document.getElementById('fichaCliente').style.display = 'block';
     document.getElementById('fichaNome').innerHTML = `<i class="fas fa-user"></i> ${cliente.nome}`;
 
-    // Busca agendamentos e pagamentos do cliente
     const { data: agendamentos } = await supabase
         .from('agendamentos')
         .select('*')
@@ -834,7 +805,6 @@ async function abrirFicha(id) {
         </div>
     `;
 
-    // Monta o histórico combinando agendamentos e pagamentos
     let historico = [];
     if (agendamentos) {
         agendamentos.forEach(a => {
@@ -859,7 +829,6 @@ async function abrirFicha(id) {
         `).join('');
     }
 
-    // Estatísticas
     const totalGasto = pagamentos ? pagamentos.reduce((s, p) => s + parseFloat(p.valor || 0), 0) : 0;
     const visitas = agendamentos ? agendamentos.filter(a => a.status === 'realizado').length : 0;
     const ultima = agendamentos ? agendamentos.filter(a => a.status === 'realizado').sort((a, b) => b.data.localeCompare(a.data))[0] : null;
@@ -889,11 +858,10 @@ function fecharFicha() {
 }
 
 // ================================================================
-//  ATENDIMENTO (botão tesoura)
+//  ATENDIMENTO
 // ================================================================
 let atendimentoClienteId = null;
 
-// Abre o modal de atendimento para um cliente
 async function abrirAtendimento(clienteId) {
     const { data: cliente, error } = await supabase
         .from('clientes')
@@ -907,7 +875,6 @@ async function abrirAtendimento(clienteId) {
     document.getElementById('atendClienteNome').textContent = cliente.nome;
     document.getElementById('atendClienteId').value = clienteId;
 
-    // Carrega os serviços ativos
     const { data: servicos } = await supabase
         .from('servicos')
         .select('*')
@@ -926,7 +893,6 @@ async function abrirAtendimento(clienteId) {
     };
     document.getElementById('atendValor').value = '';
 
-    // Mostra os créditos do cliente
     const creditos = cliente.creditos || 0;
     const planoInfo = document.getElementById('atendPlanoInfo');
     if (creditos > 0) {
@@ -943,7 +909,6 @@ async function abrirAtendimento(clienteId) {
     document.getElementById('atendimentoModal').classList.add('open');
 }
 
-// Finaliza o atendimento (usando plano ou avulso)
 async function finalizarAtendimento(usarPlano) {
     const clienteId = document.getElementById('atendClienteId').value;
     const servicoId = document.getElementById('atendServico').value;
@@ -963,7 +928,6 @@ async function finalizarAtendimento(usarPlano) {
     const agora = new Date();
     const hora = agora.getHours().toString().padStart(2, '0') + ':' + agora.getMinutes().toString().padStart(2, '0');
 
-    // Cria um agendamento com status "realizado"
     const agendamento = {
         id: genId(),
         cliente_id: clienteId || null,
@@ -982,7 +946,6 @@ async function finalizarAtendimento(usarPlano) {
     if (agError) { alert('Erro ao registrar atendimento: ' + agError.message); return; }
 
     if (usarPlano) {
-        // Busca cliente e desconta 1 crédito
         const { data: cliente, error: cliError } = await supabase
             .from('clientes')
             .select('*')
@@ -1000,7 +963,6 @@ async function finalizarAtendimento(usarPlano) {
 
             if (updError) { alert('Erro ao atualizar créditos'); return; }
 
-            // Registra pagamento com valor 0 (já pago pelo plano)
             const pagamento = {
                 id: genId(),
                 cliente_id: clienteId,
@@ -1019,7 +981,6 @@ async function finalizarAtendimento(usarPlano) {
             return;
         }
     } else {
-        // Pagamento avulso
         if (valor > 0) {
             const pagamento = {
                 id: genId(),
@@ -1053,7 +1014,7 @@ function fecharAtendimento() {
 }
 
 // ================================================================
-//  CRUD CATEGORIAS (Supabase)
+//  CRUD CATEGORIAS
 // ================================================================
 async function salvarCategoria() {
     const nome = document.getElementById('catNome').value.trim();
@@ -1124,7 +1085,6 @@ async function excluirCategoria(id) {
     await carregarSelectCategorias();
 }
 
-// Carrega as categorias no select de serviços
 async function carregarSelectCategorias() {
     const { data: categorias } = await supabase
         .from('categorias')
@@ -1139,7 +1099,7 @@ async function carregarSelectCategorias() {
 }
 
 // ================================================================
-//  CRUD SERVIÇOS (Supabase)
+//  CRUD SERVIÇOS
 // ================================================================
 async function salvarServico() {
     const nome = document.getElementById('servNome').value.trim();
@@ -1223,7 +1183,7 @@ async function excluirServico(id) {
 }
 
 // ================================================================
-//  CRUD PLANOS (pacotes de créditos)
+//  CRUD PLANOS
 // ================================================================
 async function salvarPlano() {
     const nome = document.getElementById('planoNome').value.trim();
@@ -1309,7 +1269,7 @@ async function excluirPlano(id) {
 }
 
 // ================================================================
-//  COMPRAR PLANO (adicionar créditos ao cliente)
+//  COMPRAR PLANO (adicionar créditos)
 // ================================================================
 async function vincularPlano() {
     const clienteId = document.getElementById('vinculoCliente').value;
@@ -1325,7 +1285,6 @@ async function vincularPlano() {
 
     if (pError || !plano) { alert('Plano não encontrado'); return; }
 
-    // Busca cliente e atualiza créditos
     const { data: cliente, error: cError } = await supabase
         .from('clientes')
         .select('*')
@@ -1343,7 +1302,6 @@ async function vincularPlano() {
 
     if (updError) { alert('Erro ao atualizar créditos: ' + updError.message); return; }
 
-    // Registra a compra no histórico
     const compra = {
         id: genId(),
         cliente_id: clienteId,
@@ -1357,7 +1315,6 @@ async function vincularPlano() {
     };
     await supabase.from('compras').insert([compra]);
 
-    // Registra o pagamento no caixa
     const pagamento = {
         id: genId(),
         cliente_id: clienteId,
@@ -1412,7 +1369,6 @@ async function carregarHistoricoCompras() {
     `).join('');
 }
 
-// Carrega os selects de cliente e plano na aba de compras
 async function carregarSelectsPlanos() {
     const { data: clientes } = await supabase.from('clientes').select('id, nome').order('nome');
     const selCli = document.getElementById('vinculoCliente');
@@ -1430,23 +1386,27 @@ async function carregarSelectsPlanos() {
 }
 
 // ================================================================
-//  AGENDA (Supabase)
+//  AGENDA – CORRIGIDA PARA USAR A DATA LOCAL
 // ================================================================
 async function carregarAgendaDia() {
+    // Usa a data selecionada no campo ou a data atual local
     const data = document.getElementById('agendaData').value || today();
+    document.getElementById('agendaTituloDia').innerHTML = `<i class="fas fa-calendar"></i> Agenda - ${formatDateBR(data)}`;
+
     const { data: agendamentos, error } = await supabase
         .from('agendamentos')
         .select('*')
         .eq('data', data)
         .order('hora', { ascending: true });
 
-    if (error) { console.error(error); return; }
+    if (error) {
+        console.error('Erro ao carregar agenda:', error);
+        return;
+    }
 
-    document.getElementById('agendaTituloDia').innerHTML = `<i class="fas fa-calendar"></i> Agenda - ${formatDateBR(data)}`;
     const container = document.getElementById('agendaLista');
-
     if (!agendamentos || agendamentos.length === 0) {
-        container.innerHTML = '<div class="empty">Nenhum</div>';
+        container.innerHTML = '<div class="empty">Nenhum agendamento para este dia</div>';
         return;
     }
 
@@ -1464,7 +1424,7 @@ async function carregarAgendaDia() {
 
     const statusMap = { 'agendado': 'badge-warning', 'realizado': 'badge-success', 'adiado': 'badge-info', 'cancelado': 'badge-danger' };
 
-    container.innerHTML = agendamentos.map(a => {
+    container.innerHTML = agendamentos.sort((a, b) => a.hora.localeCompare(b.hora)).map(a => {
         const clienteNome = clientesMap[a.cliente_id] || 'Cliente';
         const servico = servicosMap[a.servico_id];
         return `
@@ -1483,7 +1443,6 @@ async function carregarAgendaDia() {
     await carregarSelectsAgenda();
 }
 
-// Carrega os selects de cliente e serviço na aba agenda
 async function carregarSelectsAgenda() {
     const { data: clientes } = await supabase.from('clientes').select('id, nome').order('nome');
     const selCli = document.getElementById('agendaClienteSelect');
@@ -1504,12 +1463,13 @@ async function carregarSelectsAgenda() {
     selServ.value = valServ;
 }
 
-// Salva um novo agendamento com verificação de conflito
 async function salvarAgendamento() {
     const clienteId = document.getElementById('agendaClienteSelect').value;
     const datetime = document.getElementById('agendaDateTime').value;
     const servicoId = document.getElementById('agendaServicoSelect').value;
     if (!clienteId || !datetime || !servicoId) { alert('Preencha todos'); return; }
+
+    // Extrai data e hora diretamente do input (já está no fuso local)
     const data = datetime.split('T')[0];
     const hora = datetime.split('T')[1]?.slice(0, 5) || '00:00';
 
@@ -1546,16 +1506,13 @@ async function salvarAgendamento() {
     const nMin = nHora[0] * 60 + nHora[1];
 
     if (existing) {
+        const editId = (editContext.tipo === 'agendamento' && editContext.id) ? editContext.id : null;
         for (let a of existing) {
-            // Ignora o próprio agendamento se estiver editando
-            if (a.id === (editContext.tipo === 'agendamento' ? editContext.id : null)) continue;
-
+            if (editId && a.id === editId) continue;
             const aHora = a.hora.split(':').map(Number);
             const aMin = aHora[0] * 60 + aHora[1];
             const aServ = servicosMap[a.servico_id] || { tempo: 30 };
             const aDur = aServ.tempo || 30;
-
-            // Verifica sobreposição: novo início antes do fim do existente E novo fim após o início do existente
             if (nMin < aMin + aDur && nMin + duracao > aMin) {
                 conflito = true;
                 break;
@@ -1621,7 +1578,6 @@ async function marcarRealizado(id) {
 
     if (error) { alert('Erro ao atualizar'); return; }
 
-    // Abre atendimento para registrar pagamento
     const { data: ag } = await supabase
         .from('agendamentos')
         .select('cliente_id, servico_id')
@@ -1671,7 +1627,7 @@ async function excluirAgendamento(id) {
 }
 
 // ================================================================
-//  FINANCEIRO (Receitas e Despesas)
+//  FINANCEIRO
 // ================================================================
 async function salvarReceita() {
     const valor = parseFloat(document.getElementById('finRecValor').value);
@@ -1845,7 +1801,6 @@ async function excluirDespesa(id) {
     await carregarDespesas();
 }
 
-// Gera relatório financeiro (receitas - despesas) por período
 async function gerarRelatorioFinanceiro() {
     const periodo = document.getElementById('finRelPeriodo').value;
     const agora = new Date();
@@ -1876,7 +1831,7 @@ async function gerarRelatorioFinanceiro() {
 }
 
 // ================================================================
-//  DASHBOARD – ATUALIZAÇÃO DO RESUMO RÁPIDO E GRÁFICO
+//  DASHBOARD – CORRIGIDO
 // ================================================================
 async function atualizarDashboard() {
     const hoje = today();
@@ -1924,7 +1879,7 @@ async function atualizarDashboard() {
     }
 
     // ===== RESUMO RÁPIDO =====
-    // Total de clientes (corrigido)
+    // Total de clientes
     const { count: totalClientes, error: errClientes } = await supabase
         .from('clientes')
         .select('*', { count: 'exact', head: true });
@@ -1973,23 +1928,22 @@ async function atualizarDashboard() {
         console.error('Erro ao buscar próximos agendamentos:', errFuturos);
     }
 
-    // Gráfico de receita 7 dias
+    // Gráfico
     await desenharGraficoReceita();
 }
 
 // ================================================================
-//  GRÁFICO DE RECEITA 7 DIAS (corrigido para não cortar os valores)
+//  GRÁFICO DE RECEITA 7 DIAS – CORRIGIDO
 // ================================================================
 async function desenharGraficoReceita() {
     const canvas = document.getElementById('graficoReceita');
     const ctx = canvas.getContext('2d');
     const width = canvas.parentElement.clientWidth - 32;
     canvas.width = width * (devicePixelRatio || 1);
-    canvas.height = 180 * (devicePixelRatio || 1); // aumentei para 180px
+    canvas.height = 180 * (devicePixelRatio || 1);
     canvas.style.width = width + 'px';
     canvas.style.height = '180px';
 
-    // Coleta dados dos últimos 7 dias
     const dias = [];
     for (let i = 6; i >= 0; i--) {
         const d = new Date();
@@ -2007,9 +1961,8 @@ async function desenharGraficoReceita() {
     const max = Math.max(...dias.map(d => d.value), 1);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // Margens
-    const topMargin = 30;    // espaço para os valores
-    const bottomMargin = 30; // espaço para as datas
+    const topMargin = 30;
+    const bottomMargin = 30;
     const chartHeight = canvas.height - topMargin - bottomMargin;
     const scale = chartHeight / max;
 
@@ -2021,36 +1974,29 @@ async function desenharGraficoReceita() {
         const h = d.value * scale;
         const yBar = canvas.height - bottomMargin - h;
 
-        // Barra
         ctx.fillStyle = '#3b82f6';
         ctx.fillRect(x, yBar, barW, h);
 
-        // Data (mais abaixo)
         ctx.fillStyle = '#0f172a';
         ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
         ctx.fillText(d.label, x + barW / 2, canvas.height - bottomMargin + 18);
 
-        // Valor (com espaçamento do topo)
         if (d.value > 0) {
             ctx.fillStyle = '#0f172a';
             ctx.font = 'bold 13px sans-serif';
             const valueY = yBar - 8;
-            // Garante que o valor não ultrapasse o topo do canvas
             if (valueY > 10) {
                 ctx.fillText(formatCurrency(d.value), x + barW / 2, valueY);
-            } else {
-                // Se não couber, coloca dentro da barra (apenas se a barra for alta o suficiente)
-                if (h > 20) {
-                    ctx.fillStyle = 'white';
-                    ctx.fillText(formatCurrency(d.value), x + barW / 2, yBar + h/2 + 4);
-                }
+            } else if (h > 20) {
+                // Fallback: coloca dentro da barra
+                ctx.fillStyle = 'white';
+                ctx.fillText(formatCurrency(d.value), x + barW / 2, yBar + h / 2 + 4);
             }
         }
     });
 }
 
-// Ajusta o gráfico ao redimensionar a tela (especialmente no celular)
 window.addEventListener('resize', function () {
     if (document.getElementById('tab-dashboard').classList.contains('active')) {
         desenharGraficoReceita();
@@ -2060,7 +2006,6 @@ window.addEventListener('resize', function () {
 // ================================================================
 //  UTILITÁRIOS GERAIS
 // ================================================================
-// Carrega os clientes no select de receitas (Caixa)
 async function carregarSelectsClientes() {
     const { data: clientes } = await supabase.from('clientes').select('id, nome').order('nome');
     const sel = document.getElementById('finRecCliente');
@@ -2070,7 +2015,6 @@ async function carregarSelectsClientes() {
     }
 }
 
-// Cancela uma edição (volta ao modo "novo")
 function cancelarEdicao(tipo) {
     editContext = { tipo: null, id: null };
     const map = {
@@ -2087,7 +2031,6 @@ function cancelarEdicao(tipo) {
         document.getElementById(m.form).innerHTML = m.text;
         document.getElementById(m.btn).innerHTML = '<i class="fas fa-save"></i> Salvar';
         document.getElementById(m.cancel).classList.add('hidden');
-        // Limpa os campos do formulário correspondente
         if (tipo === 'cliente') {
             document.getElementById('cliNome').value = '';
             document.getElementById('cliTelefone').value = '';
@@ -2123,13 +2066,12 @@ function cancelarEdicao(tipo) {
     }
 }
 
-// Fecha o modal genérico
 function fecharModal() {
     document.getElementById('modalOverlay').classList.remove('open');
 }
 
 // ================================================================
-//  BACKUP (exportar/importar dados via JSON)
+//  BACKUP
 // ================================================================
 async function exportarBackup() {
     const [clientes, agendamentos, pagamentos, despesas, servicos, planos, categorias, compras] = await Promise.all([
@@ -2187,7 +2129,6 @@ function importarBackup(event) {
             if (!data.clientes) { alert('Arquivo inválido'); return; }
             if (!confirm('Substituir todos os dados atuais?')) return;
 
-            // Insere dados no Supabase via upsert
             const tables = [
                 { name: 'clientes', data: data.clientes },
                 { name: 'agendamentos', data: data.agendamentos },
@@ -2229,7 +2170,7 @@ function importarBackup(event) {
 }
 
 // ================================================================
-//  CONFIGURAÇÕES E PERFIL
+//  CONFIGURAÇÕES
 // ================================================================
 function salvarConfig() {
     const nome = document.getElementById('confNome').value.trim();
@@ -2270,7 +2211,7 @@ function limparTudo() {
 }
 
 // ================================================================
-//  PESQUISA GLOBAL (filtra clientes e serviços)
+//  PESQUISA GLOBAL
 // ================================================================
 async function globalSearch(texto) {
     texto = texto.toLowerCase().trim();
@@ -2311,7 +2252,6 @@ async function globalSearch(texto) {
         `).join('');
     }
 }
-
 
 // ================================================================
 //  INICIAR O SISTEMA
