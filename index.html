@@ -23,6 +23,187 @@
             --radius: 16px;
         }
 
+        /* ========== TEMA ESCURO ========== */
+        body.dark-mode {
+            --primary: #1e293b;
+            --primary-light: #334155;
+            --bg: #0f172a;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            --gray: #94a3b8;
+        }
+
+        body.dark-mode {
+            background: var(--bg);
+        }
+
+        body.dark-mode .card {
+            background: var(--primary);
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .card-title {
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .stat-card {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .stat-card .number {
+            color: #f1f5f9;
+        }
+
+        body.dark-mode input,
+        body.dark-mode select,
+        body.dark-mode textarea {
+            background: #1e293b;
+            color: #e2e8f0;
+            border-color: #334155;
+        }
+
+        body.dark-mode .list-item {
+            border-bottom-color: #334155;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .badge {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .nav-item {
+            color: #94a3b8;
+        }
+
+        body.dark-mode .nav-item.active {
+            color: #f1f5f9;
+        }
+
+        body.dark-mode .nav-item.active i {
+            color: var(--accent);
+        }
+
+        body.dark-mode .bottom-nav {
+            background: #1e293b;
+            border-top-color: #334155;
+        }
+
+        body.dark-mode .empty {
+            color: #94a3b8;
+        }
+
+        body.dark-mode .modal-box {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .text-muted {
+            color: #94a3b8;
+        }
+
+        body.dark-mode .header {
+            background: #0f172a;
+        }
+
+        body.dark-mode .header-actions input {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .header-actions input::placeholder {
+            color: #64748b;
+        }
+
+        body.dark-mode .grid-cards .stat-card {
+            background: #1e293b;
+        }
+
+        body.dark-mode .pin-input button {
+            background: #334155;
+            color: white;
+        }
+
+        body.dark-mode .pin-input button:active {
+            background: var(--accent);
+        }
+
+        body.dark-mode .btn-primary {
+            background: #1e293b;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+        }
+
+        body.dark-mode .btn-primary:hover {
+            background: #334155;
+        }
+
+        body.dark-mode .btn-success {
+            background: #0b5e42;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .btn-danger {
+            background: #7f1d1d;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .btn-accent {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        body.dark-mode .btn-outline {
+            background: transparent;
+            border: 1px solid #334155;
+            color: #e2e8f0;
+        }
+
+        body.dark-mode .btn-outline:hover {
+            background: #334155;
+        }
+
+        body.dark-mode .credits {
+            background: var(--accent);
+            color: var(--primary);
+        }
+
+        body.dark-mode #loginScreen {
+            background: #0f172a;
+        }
+
+        body.dark-mode #loginScreen h1 {
+            color: white;
+        }
+
+        body.dark-mode #loginScreen p {
+            color: var(--gray);
+        }
+
+        body.dark-mode #loginError {
+            color: #f87171;
+        }
+
+        body.dark-mode .badge-success {
+            background: #0b5e42;
+            color: #a7f3d0;
+        }
+
+        body.dark-mode .badge-danger {
+            background: #7f1d1d;
+            color: #fca5a5;
+        }
+
+        body.dark-mode .badge-warning {
+            background: #78350f;
+            color: #fcd34d;
+        }
+
+        body.dark-mode .badge-info {
+            background: #1e3a5f;
+            color: #93c5fd;
+        }
+
         /* ========== TELA DE LOGIN ========== */
         #loginScreen {
             position:fixed; top:0; left:0; width:100%; height:100%;
@@ -145,6 +326,10 @@
         <h2 id="barberShopName"><i class="fas fa-cut"></i> BarberPro</h2>
         <div class="header-actions">
             <input type="text" id="globalSearch" placeholder="🔍 Pesquisar..." oninput="globalSearch(this.value)">
+            <!-- Botão de alternância do tema escuro -->
+            <button onclick="toggleTheme()" id="themeToggle" style="background:transparent; border:none; color:white; font-size:1.2rem; cursor:pointer;">
+                <i class="fas fa-moon"></i>
+            </button>
         </div>
     </div>
 
@@ -423,6 +608,41 @@ const SUPABASE_ANON_KEY = 'sb_publishable_hGOH6BoUMcRC2av-xAD26Q_YJRFQFY0';
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ================================================================
+//  TEMA ESCURO – FUNÇÃO DE ALTERNÂNCIA E PERSISTÊNCIA
+// ================================================================
+function toggleTheme() {
+    const body = document.body;
+    body.classList.toggle('dark-mode');
+    const isDark = body.classList.contains('dark-mode');
+    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    // Atualiza o ícone do botão
+    const btn = document.getElementById('themeToggle');
+    if (btn) {
+        btn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+    }
+}
+
+function loadTheme() {
+    const theme = localStorage.getItem('theme');
+    if (theme === 'dark') {
+        document.body.classList.add('dark-mode');
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-sun"></i>';
+        }
+    } else {
+        document.body.classList.remove('dark-mode');
+        const btn = document.getElementById('themeToggle');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-moon"></i>';
+        }
+    }
+}
+
+// Carrega o tema ao iniciar
+window.addEventListener('DOMContentLoaded', loadTheme);
+
+// ================================================================
 //  FUNÇÕES AUXILIARES (utilitários) – CORRIGIDAS PARA FUSO LOCAL
 // ================================================================
 function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
@@ -578,7 +798,6 @@ document.querySelectorAll('.nav-item').forEach(btn => {
         document.getElementById(this.dataset.tab).classList.add('active');
         const tab = this.dataset.tab;
         if (tab === 'tab-agenda') {
-            // Carrega a data atual no campo da agenda usando a função today() corrigida
             document.getElementById('agendaData').value = today();
             carregarAgendaDia();
         }
@@ -614,7 +833,6 @@ async function carregarTudo() {
     document.getElementById('finRecData').value = today();
     document.getElementById('finDespData').value = today();
 
-    // Carrega todas as abas em paralelo para melhor performance
     await Promise.all([
         carregarCategorias(),
         carregarSelectCategorias(),
@@ -1389,7 +1607,6 @@ async function carregarSelectsPlanos() {
 //  AGENDA – CORRIGIDA PARA USAR A DATA LOCAL
 // ================================================================
 async function carregarAgendaDia() {
-    // Usa a data selecionada no campo ou a data atual local
     const data = document.getElementById('agendaData').value || today();
     document.getElementById('agendaTituloDia').innerHTML = `<i class="fas fa-calendar"></i> Agenda - ${formatDateBR(data)}`;
 
@@ -1469,11 +1686,9 @@ async function salvarAgendamento() {
     const servicoId = document.getElementById('agendaServicoSelect').value;
     if (!clienteId || !datetime || !servicoId) { alert('Preencha todos'); return; }
 
-    // Extrai data e hora diretamente do input (já está no fuso local)
     const data = datetime.split('T')[0];
     const hora = datetime.split('T')[1]?.slice(0, 5) || '00:00';
 
-    // Busca duração do serviço
     const { data: servico } = await supabase
         .from('servicos')
         .select('tempo')
@@ -1481,7 +1696,6 @@ async function salvarAgendamento() {
         .single();
     const duracao = servico ? (servico.tempo || 30) : 30;
 
-    // Busca agendamentos existentes no mesmo dia
     const { data: existing, error } = await supabase
         .from('agendamentos')
         .select('id, hora, servico_id')
@@ -1493,14 +1707,12 @@ async function salvarAgendamento() {
         return;
     }
 
-    // Mapa de serviços para obter duração
     const servicosMap = {};
     const { data: servicos } = await supabase.from('servicos').select('id, tempo');
     if (servicos) {
         servicos.forEach(s => servicosMap[s.id] = s);
     }
 
-    // Verifica conflito
     let conflito = false;
     const nHora = hora.split(':').map(Number);
     const nMin = nHora[0] * 60 + nHora[1];
@@ -1525,7 +1737,6 @@ async function salvarAgendamento() {
         return;
     }
 
-    // Salva o agendamento
     const agendamento = {
         id: editContext.tipo === 'agendamento' && editContext.id ? editContext.id : genId(),
         cliente_id: clienteId,
@@ -1569,7 +1780,6 @@ function editarAgendamento(id) {
         });
 }
 
-// Ações para mudar o status do agendamento
 async function marcarRealizado(id) {
     const { error } = await supabase
         .from('agendamentos')
@@ -1831,12 +2041,11 @@ async function gerarRelatorioFinanceiro() {
 }
 
 // ================================================================
-//  DASHBOARD – CORRIGIDO
+//  DASHBOARD
 // ================================================================
 async function atualizarDashboard() {
     const hoje = today();
 
-    // Cards principais
     const { data: agendamentos } = await supabase
         .from('agendamentos')
         .select('*')
@@ -1861,7 +2070,6 @@ async function atualizarDashboard() {
     const comCredito = clientes ? clientes.filter(c => (c.creditos || 0) > 0).length : 0;
     document.getElementById('dashPlanosAtivos').textContent = comCredito;
 
-    // Agenda de hoje (lista)
     const containerAgenda = document.getElementById('agendaHojeList');
     if (agHoje.length === 0) {
         containerAgenda.innerHTML = '<div class="empty">Nenhum</div>';
@@ -1878,8 +2086,6 @@ async function atualizarDashboard() {
         }).join('');
     }
 
-    // ===== RESUMO RÁPIDO =====
-    // Total de clientes
     const { count: totalClientes, error: errClientes } = await supabase
         .from('clientes')
         .select('*', { count: 'exact', head: true });
@@ -1891,7 +2097,6 @@ async function atualizarDashboard() {
         console.error('Erro ao contar clientes:', errClientes);
     }
 
-    // Próximos agendamentos (a partir de amanhã)
     const amanha = new Date();
     amanha.setDate(amanha.getDate() + 1);
     const amanhaStr = amanha.toISOString().split('T')[0];
@@ -1928,12 +2133,11 @@ async function atualizarDashboard() {
         console.error('Erro ao buscar próximos agendamentos:', errFuturos);
     }
 
-    // Gráfico
     await desenharGraficoReceita();
 }
 
 // ================================================================
-//  GRÁFICO DE RECEITA 7 DIAS – CORRIGIDO
+//  GRÁFICO DE RECEITA 7 DIAS
 // ================================================================
 async function desenharGraficoReceita() {
     const canvas = document.getElementById('graficoReceita');
@@ -1989,7 +2193,6 @@ async function desenharGraficoReceita() {
             if (valueY > 10) {
                 ctx.fillText(formatCurrency(d.value), x + barW / 2, valueY);
             } else if (h > 20) {
-                // Fallback: coloca dentro da barra
                 ctx.fillStyle = 'white';
                 ctx.fillText(formatCurrency(d.value), x + barW / 2, yBar + h / 2 + 4);
             }
