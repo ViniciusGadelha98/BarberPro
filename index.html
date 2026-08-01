@@ -30,9 +30,6 @@
             --bg: #0f172a;
             --card-shadow: 0 4px 12px rgba(0,0,0,0.4);
             --gray: #94a3b8;
-        }
-
-        body.dark-mode {
             background: var(--bg);
         }
 
@@ -645,21 +642,82 @@ window.addEventListener('DOMContentLoaded', loadTheme);
 // ================================================================
 //  FUNÇÕES AUXILIARES (utilitários) – CORRIGIDAS PARA FUSO LOCAL
 // ================================================================
-function genId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
+function genId() {
+    if (window.crypto && typeof crypto.randomUUID === 'function') {
+        return crypto.randomUUID();
+    }
+    const buf = new Uint8Array(16);
+    if (window.crypto && crypto.getRandomValues) {
+        crypto.getRandomValues(buf);
+    } else {
+        for (let i = 0; i < 16; i++) buf[i] = Math.floor(Math.random() * 256);
+    }
+    buf[6] = (buf[6] & 0x0f) | 0x40;
+    buf[8] = (buf[8] & 0x3f) | 0x80;
+    const hex = Array.from(buf).map(b => b.toString(16).padStart(2, '0')).join('');
+    return `${hex.substring(0,8)}-${hex.substring(8,12)}-${hex.substring(12,16)}-${hex.substring(16,20)}-${hex.substring(20)}`;
+}
 
-// Retorna a data atual no formato YYYY-MM-DD (fuso local do Brasil)
-function today() {
-    const now = new Date();
+function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function validarEmail(email) {
+    if (!email) return false;
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email).trim());
+}
+
+function validarCPF(cpf) {
+    if (!cpf) return false;
+    const str = String(cpf).replace(/\D/g, '');
+    if (str.length !== 11) return false;
+    if (/^(\d)\1{10}$/.test(str)) return false;
+    let soma = 0;
+    for (let i = 0; i < 9; i++) soma += parseInt(str[i]) * (10 - i);
+    let d1 = 11 - (soma % 11);
+    d1 = (d1 > 9) ? 0 : d1;
+    if (parseInt(str[9]) !== d1) return false;
+    soma = 0;
+    for (let i = 0; i < 10; i++) soma += parseInt(str[i]) * (11 - i);
+    let d2 = 11 - (soma % 11);
+    d2 = (d2 > 9) ? 0 : d2;
+    return parseInt(str[10]) === d2;
+}
+
+function toLocalISO(d) {
+    const dt = d || new Date();
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    const hour = String(dt.getHours()).padStart(2, '0');
+    const min = String(dt.getMinutes()).padStart(2, '0');
+    const sec = String(dt.getSeconds()).padStart(2, '0');
+    const ms = String(dt.getMilliseconds()).padStart(3, '0');
+    return `${year}-${month}-${day}T${hour}:${min}:${sec}.${ms}`;
+}
+
+function todayISO(d) {
+    const now = d ? new Date(d) : new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
 
-// Retorna a data/hora atual no formato ISO completo (fuso local)
+// Retorna a data atual no formato YYYY-MM-DD (fuso local do Brasil)
+function today() {
+    return todayISO();
+}
+
+// Retorna a data/hora atual no formato ISO completo (fuso LOCAL, não UTC)
 function nowISO() {
-    const now = new Date();
-    return now.toISOString();
+    return toLocalISO();
 }
 
 // Formata uma data ISO para DD/MM/YYYY
@@ -708,6 +766,22 @@ function formatDateTimeBR(d) {
     return dt.toLocaleDateString('pt-BR') + ' ' + dt.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 }
 
+function setBtnLoading(btn, loading, originalHtml) {
+    if (!btn) return;
+    if (loading) {
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.style.opacity = '0.7';
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+    } else {
+        btn.disabled = false;
+        btn.style.opacity = '';
+        btn.style.pointerEvents = '';
+        btn.innerHTML = btn.dataset.originalHtml || originalHtml || btn.innerHTML;
+    }
+}
+
 function formatCurrency(v) { return 'R$ ' + parseFloat(v || 0).toFixed(2).replace('.', ','); }
 
 function mascaraTelefone(el) {
@@ -729,19 +803,84 @@ function mascaraCpf(el) {
 //  PIN – controle de acesso
 // ================================================================
 let pinCorrente = '';
-function getPin() { return localStorage.getItem('appPin') || '1234'; }
-function setPin(p) { localStorage.setItem('appPin', p); }
+let pinFirstRunPending = false;
+
+function getPin() { return localStorage.getItem('appPin') || null; }
+function setPin(p) { localStorage.setItem('appPin', p); localStorage.setItem('pinDefinido', '1'); }
+function isPinPadraoOuNovo() { return !localStorage.getItem('pinDefinido') || getPin() === '1234'; }
 
 function initLogin() {
-    document.getElementById('loginScreen').classList.remove('hidden');
-    document.getElementById('app').style.display = 'none';
+    const screen = document.getElementById('loginScreen');
+    const app = document.getElementById('app');
+    const errEl = document.getElementById('loginError');
+    const titulo = screen.querySelector('h1');
+    const subtitulo = screen.querySelector('p');
+    const btnConfirm = document.getElementById('btnLoginConfirm');
+
+    screen.classList.remove('hidden');
+    app.style.display = 'none';
     pinCorrente = '';
+    errEl.textContent = '';
     atualizarDots();
-    document.getElementById('loginError').textContent = '';
+
+    if (isPinPadraoOuNovo()) {
+        pinFirstRunPending = true;
+        subtitulo.textContent = '⚠️ Crie um novo PIN de 4 dígitos (segurança)';
+        btnConfirm.innerHTML = '<i class="fas fa-check"></i> Definir PIN';
+        titulo.innerHTML = '<i class="fas fa-shield-halved"></i> BarberPro';
+        errEl.textContent = 'PIN padrão detectado. Crie um novo PIN agora.';
+        errEl.style.color = '#f59e0b';
+    } else {
+        pinFirstRunPending = false;
+        subtitulo.textContent = 'Digite seu PIN de 4 dígitos';
+        btnConfirm.innerHTML = '<i class="fas fa-arrow-right"></i> Entrar';
+        titulo.innerHTML = '<i class="fas fa-cut"></i> BarberPro';
+        errEl.style.color = '';
+    }
 }
 
 function atualizarDots() {
     document.querySelectorAll('.pin-dot').forEach((dot, i) => dot.classList.toggle('filled', i < pinCorrente.length));
+}
+
+function tentarLogin() {
+    const errEl = document.getElementById('loginError');
+    errEl.style.color = pinFirstRunPending ? '#f59e0b' : '#f87171';
+    errEl.textContent = '';
+
+    if (pinCorrente.length !== 4) {
+        errEl.textContent = 'Digite os 4 dígitos completos!';
+        return;
+    }
+
+    if (pinFirstRunPending) {
+        if (pinCorrente === '1234') {
+            errEl.textContent = '⚠️ Não use o PIN 1234! Escolha outro.';
+            pinCorrente = '';
+            atualizarDots();
+            return;
+        }
+        setPin(pinCorrente);
+        pinFirstRunPending = false;
+        errEl.style.color = '#10b981';
+        errEl.textContent = '✅ PIN criado com sucesso! Entrando...';
+        setTimeout(entrarNoApp, 600);
+        return;
+    }
+
+    if (pinCorrente === getPin()) {
+        entrarNoApp();
+    } else {
+        errEl.textContent = 'PIN incorreto!';
+        pinCorrente = '';
+        atualizarDots();
+    }
+}
+
+function entrarNoApp() {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('app').style.display = 'flex';
+    carregarTudo();
 }
 
 document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
@@ -749,41 +888,40 @@ document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
         if (pinCorrente.length < 4) {
             pinCorrente += this.dataset.v;
             atualizarDots();
-            if (pinCorrente.length === 4) {
-                if (pinCorrente === getPin()) {
-                    document.getElementById('loginScreen').classList.add('hidden');
-                    document.getElementById('app').style.display = 'flex';
-                    carregarTudo();
-                } else {
-                    document.getElementById('loginError').textContent = 'PIN incorreto!';
-                    pinCorrente = '';
-                    atualizarDots();
-                }
+            if (pinCorrente.length === 4 && !pinFirstRunPending) {
+                tentarLogin();
             }
         }
     });
 });
 
 document.getElementById('pinBack').addEventListener('click', function () {
-    pinCorrente = pinCorrente.slice(0, -1);
-    atualizarDots();
-});
-
-document.getElementById('btnLoginConfirm').addEventListener('click', function () {
-    if (pinCorrente.length === 4) {
-        if (pinCorrente === getPin()) {
-            document.getElementById('loginScreen').classList.add('hidden');
-            document.getElementById('app').style.display = 'flex';
-            carregarTudo();
-        } else {
-            document.getElementById('loginError').textContent = 'PIN incorreto!';
-            pinCorrente = '';
-            atualizarDots();
-        }
-    } else {
-        document.getElementById('loginError').textContent = 'Digite os 4 dígitos completos!';
+    if (pinCorrente.length > 0) {
+        pinCorrente = pinCorrente.slice(0, -1);
+        atualizarDots();
     }
 });
+
+document.addEventListener('keydown', function (e) {
+    const loginScreen = document.getElementById('loginScreen');
+    if (loginScreen.classList.contains('hidden')) return;
+    if (/^[0-9]$/.test(e.key)) {
+        if (pinCorrente.length < 4) {
+            pinCorrente += e.key;
+            atualizarDots();
+            if (pinCorrente.length === 4 && !pinFirstRunPending) tentarLogin();
+        }
+    } else if (e.key === 'Backspace') {
+        if (pinCorrente.length > 0) {
+            pinCorrente = pinCorrente.slice(0, -1);
+            atualizarDots();
+        }
+    } else if (e.key === 'Enter') {
+        tentarLogin();
+    }
+});
+
+document.getElementById('btnLoginConfirm').addEventListener('click', tentarLogin);
 
 // ================================================================
 //  NAVEGAÇÃO ENTRE ABAS
@@ -857,11 +995,14 @@ async function salvarCliente() {
     const nome = document.getElementById('cliNome').value.trim();
     if (!nome) { alert('Nome é obrigatório'); return; }
 
+    const cpfRaw = document.getElementById('cliCpf').value.trim();
+    if (cpfRaw && !validarCPF(cpfRaw)) { alert('CPF inválido. Verifique os dígitos.'); return; }
+
     const cliente = {
         id: editContext.tipo === 'cliente' && editContext.id ? editContext.id : genId(),
         nome: nome,
         telefone: document.getElementById('cliTelefone').value.trim(),
-        cpf: document.getElementById('cliCpf').value.trim(),
+        cpf: cpfRaw,
         nascimento: document.getElementById('cliNascimento').value,
         endereco: document.getElementById('cliEndereco').value.trim(),
         obs: document.getElementById('cliObs').value.trim(),
@@ -920,16 +1061,17 @@ async function carregarClientes() {
         const creditos = c.creditos || 0;
         const statusTexto = creditos > 0 ? `📦 ${creditos} cortes` : '⚠️ Sem créditos';
         const statusClass = creditos > 0 ? 'text-success' : 'text-danger';
+        const telefoneHtml = c.telefone ? `<br><span class="text-muted">${escapeHtml(c.telefone)}</span>` : '';
         return `
         <div class="list-item">
-            <div class="info" onclick="abrirFicha('${c.id}')" style="cursor:pointer;">
-                <strong>${c.nome}</strong> ${c.telefone ? '<br><span class="text-muted">'+c.telefone+'</span>' : ''}
+            <div class="info" onclick="abrirFicha('${escapeHtml(c.id)}')" style="cursor:pointer;">
+                <strong>${escapeHtml(c.nome)}</strong> ${telefoneHtml}
                 <br><span class="${statusClass}">${statusTexto}</span>
             </div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarCliente('${c.id}')"><i class="fas fa-pen"></i></button>
-                <button class="btn btn-sm btn-success" onclick="abrirAtendimento('${c.id}')"><i class="fas fa-cut"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="excluirCliente('${c.id}')"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-accent" onclick="editarCliente('${escapeHtml(c.id)}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-success" onclick="abrirAtendimento('${escapeHtml(c.id)}')"><i class="fas fa-cut"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirCliente('${escapeHtml(c.id)}')"><i class="fas fa-trash"></i></button>
             </div>
         </div>`;
     }).join('');
@@ -994,7 +1136,7 @@ async function abrirFicha(id) {
     if (error || !cliente) { alert('Cliente não encontrado'); return; }
 
     document.getElementById('fichaCliente').style.display = 'block';
-    document.getElementById('fichaNome').innerHTML = `<i class="fas fa-user"></i> ${cliente.nome}`;
+    document.getElementById('fichaNome').innerHTML = `<i class="fas fa-user"></i> ${escapeHtml(cliente.nome)}`;
 
     const { data: agendamentos } = await supabase
         .from('agendamentos')
@@ -1011,10 +1153,10 @@ async function abrirFicha(id) {
     const creditos = cliente.creditos || 0;
 
     document.getElementById('fichaDados').innerHTML = `
-        <p><strong>Telefone:</strong> ${cliente.telefone||'--'}</p>
-        <p><strong>CPF:</strong> ${cliente.cpf||'--'}</p>
+        <p><strong>Telefone:</strong> ${escapeHtml(cliente.telefone)||'--'}</p>
+        <p><strong>CPF:</strong> ${escapeHtml(cliente.cpf)||'--'}</p>
         <p><strong>Nasc:</strong> ${cliente.nascimento ? formatDateBR(cliente.nascimento) : '--'}</p>
-        <p><strong>Obs:</strong> ${cliente.obs||'--'}</p>
+        <p><strong>Obs:</strong> ${escapeHtml(cliente.obs)||'--'}</p>
     `;
 
     document.getElementById('fichaCredito').innerHTML = `
@@ -1041,8 +1183,8 @@ async function abrirFicha(id) {
     else {
         containerHist.innerHTML = historico.slice(0, 20).map(h => `
             <div class="list-item">
-                <span>${formatDateTimeBR(h.data)} - ${h.desc}</span>
-                <span class="badge ${h.tipo==='Pagamento'?'badge-success':'badge-warning'}">${h.tipo} ${formatCurrency(h.valor)}</span>
+                <span>${formatDateTimeBR(h.data)} - ${escapeHtml(h.desc)}</span>
+                <span class="badge ${h.tipo==='Pagamento'?'badge-success':'badge-warning'}">${escapeHtml(h.tipo)} ${formatCurrency(h.valor)}</span>
             </div>
         `).join('');
     }
@@ -1102,7 +1244,7 @@ async function abrirAtendimento(clienteId) {
     selServ.innerHTML = '<option value="">Selecione o Serviço</option>';
     if (servicos) {
         servicos.forEach(s => {
-            selServ.innerHTML += `<option value="${s.id}" data-preco="${s.preco}" data-tempo="${s.tempo||30}">${s.nome} - ${formatCurrency(s.preco)} (${s.tempo||30}min)</option>`;
+            selServ.innerHTML += `<option value="${escapeHtml(s.id)}" data-preco="${escapeHtml(s.preco)}" data-tempo="${escapeHtml(s.tempo||30)}">${escapeHtml(s.nome)} - ${formatCurrency(s.preco)} (${s.tempo||30}min)</option>`;
         });
     }
     selServ.onchange = function () {
@@ -1274,10 +1416,10 @@ async function carregarCategorias() {
     }
     container.innerHTML = categorias.map(c => `
         <div class="list-item">
-            <span><i class="fas fa-tag"></i> ${c.nome}</span>
+            <span><i class="fas fa-tag"></i> ${escapeHtml(c.nome)}</span>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarCategoria('${c.id}')"><i class="fas fa-pen"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="excluirCategoria('${c.id}')"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-accent" onclick="editarCategoria('${escapeHtml(c.id)}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirCategoria('${escapeHtml(c.id)}')"><i class="fas fa-trash"></i></button>
             </div>
         </div>
     `).join('');
@@ -1312,7 +1454,7 @@ async function carregarSelectCategorias() {
     const sel = document.getElementById('servCategoria');
     sel.innerHTML = '<option value="">Selecione a Categoria</option>';
     if (categorias) {
-        categorias.forEach(c => sel.innerHTML += `<option value="${c.nome}">${c.nome}</option>`);
+        categorias.forEach(c => sel.innerHTML += `<option value="${escapeHtml(c.nome)}">${escapeHtml(c.nome)}</option>`);
     }
 }
 
@@ -1367,10 +1509,10 @@ async function carregarServicos() {
     }
     container.innerHTML = servicos.map(s => `
         <div class="list-item">
-            <div class="info"><strong>${s.nome}</strong> ${s.categoria ? '<span class="badge">'+s.categoria+'</span>' : ''}<br><span class="text-muted">${formatCurrency(s.preco)} - ${s.tempo||30}min ${s.status==='ativo'?'':' (inativo)'}</span></div>
+            <div class="info"><strong>${escapeHtml(s.nome)}</strong> ${s.categoria ? '<span class="badge">'+escapeHtml(s.categoria)+'</span>' : ''}<br><span class="text-muted">${formatCurrency(s.preco)} - ${s.tempo||30}min ${s.status==='ativo'?'':' (inativo)'}</span></div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarServico('${s.id}')"><i class="fas fa-pen"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="excluirServico('${s.id}')"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-accent" onclick="editarServico('${escapeHtml(s.id)}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirServico('${escapeHtml(s.id)}')"><i class="fas fa-trash"></i></button>
             </div>
         </div>
     `).join('');
@@ -1453,10 +1595,10 @@ async function carregarPlanos() {
     }
     container.innerHTML = planos.map(p => `
         <div class="list-item">
-            <div class="info"><strong>${p.nome}</strong> ${formatCurrency(p.preco)}<br><span class="text-muted">${p.qtd_cortes} cortes</span></div>
+            <div class="info"><strong>${escapeHtml(p.nome)}</strong> ${formatCurrency(p.preco)}<br><span class="text-muted">${p.qtd_cortes} cortes</span></div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarPlano('${p.id}')"><i class="fas fa-pen"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="excluirPlano('${p.id}')"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-accent" onclick="editarPlano('${escapeHtml(p.id)}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirPlano('${escapeHtml(p.id)}')"><i class="fas fa-trash"></i></button>
             </div>
         </div>
     `).join('');
@@ -1579,10 +1721,10 @@ async function carregarHistoricoCompras() {
     container.innerHTML = compras.slice(0, 30).map(c => `
         <div class="list-item">
             <div class="info">
-                <strong>${clientesMap[c.cliente_id] || 'Cliente removido'}</strong><br>
-                <span class="text-muted">${c.nome_plano} - ${c.qtd} cortes - ${formatCurrency(c.valor)} - ${formatDateBR(c.data)}</span>
+                <strong>${escapeHtml(clientesMap[c.cliente_id] || 'Cliente removido')}</strong><br>
+                <span class="text-muted">${escapeHtml(c.nome_plano)} - ${c.qtd} cortes - ${formatCurrency(c.valor)} - ${formatDateBR(c.data)}</span>
             </div>
-            <span class="badge badge-success">${c.forma_pagamento}</span>
+            <span class="badge badge-success">${escapeHtml(c.forma_pagamento)}</span>
         </div>
     `).join('');
 }
@@ -1592,14 +1734,14 @@ async function carregarSelectsPlanos() {
     const selCli = document.getElementById('vinculoCliente');
     selCli.innerHTML = '<option value="">Cliente</option>';
     if (clientes) {
-        clientes.forEach(c => selCli.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+        clientes.forEach(c => selCli.innerHTML += `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nome)}</option>`);
     }
 
     const { data: planos } = await supabase.from('planos').select('id, nome, qtd_cortes').order('nome');
     const selPlano = document.getElementById('vinculoPlano');
     selPlano.innerHTML = '<option value="">Plano</option>';
     if (planos) {
-        planos.forEach(p => selPlano.innerHTML += `<option value="${p.id}">${p.nome} (${p.qtd_cortes} cortes)</option>`);
+        planos.forEach(p => selPlano.innerHTML += `<option value="${escapeHtml(p.id)}">${escapeHtml(p.nome)} (${p.qtd_cortes} cortes)</option>`);
     }
 }
 
@@ -1644,15 +1786,16 @@ async function carregarAgendaDia() {
     container.innerHTML = agendamentos.sort((a, b) => a.hora.localeCompare(b.hora)).map(a => {
         const clienteNome = clientesMap[a.cliente_id] || 'Cliente';
         const servico = servicosMap[a.servico_id];
+        const servHtml = servico ? ` ${escapeHtml(servico.nome)} (${servico ? servico.tempo||30 : 30}min)` : '';
         return `
         <div class="list-item">
-            <div class="info"><strong>${a.hora}</strong> - ${clienteNome} ${servico ? servico.nome : ''} (${servico ? servico.tempo||30 : 30}min)</div>
+            <div class="info"><strong>${escapeHtml(a.hora)}</strong> - ${escapeHtml(clienteNome)}${servHtml}</div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarAgendamento('${a.id}')"><i class="fas fa-pen"></i></button>
-                <button class="btn btn-sm btn-success" onclick="marcarRealizado('${a.id}')"><i class="fas fa-check"></i></button>
-                <button class="btn btn-sm btn-warning" onclick="marcarAdiado('${a.id}')" style="background:#f59e0b;color:white;"><i class="fas fa-clock"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="marcarCancelado('${a.id}')"><i class="fas fa-ban"></i></button>
-                <span class="badge ${statusMap[a.status] || 'badge-warning'}">${a.status || 'Agendado'}</span>
+                <button class="btn btn-sm btn-accent" onclick="editarAgendamento('${escapeHtml(a.id)}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-success" onclick="marcarRealizado('${escapeHtml(a.id)}')"><i class="fas fa-check"></i></button>
+                <button class="btn btn-sm btn-warning" onclick="marcarAdiado('${escapeHtml(a.id)}')" style="background:#f59e0b;color:white;"><i class="fas fa-clock"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="marcarCancelado('${escapeHtml(a.id)}')"><i class="fas fa-ban"></i></button>
+                <span class="badge ${statusMap[a.status] || 'badge-warning'}">${escapeHtml(a.status || 'Agendado')}</span>
             </div>
         </div>`;
     }).join('');
@@ -1666,7 +1809,7 @@ async function carregarSelectsAgenda() {
     const valCli = selCli.value;
     selCli.innerHTML = '<option value="">Cliente</option>';
     if (clientes) {
-        clientes.forEach(c => selCli.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+        clientes.forEach(c => selCli.innerHTML += `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nome)}</option>`);
     }
     selCli.value = valCli;
 
@@ -1675,7 +1818,7 @@ async function carregarSelectsAgenda() {
     const valServ = selServ.value;
     selServ.innerHTML = '<option value="">Serviço</option>';
     if (servicos) {
-        servicos.forEach(s => selServ.innerHTML += `<option value="${s.id}">${s.nome} (${formatCurrency(s.preco)}) - ${s.tempo||30}min</option>`);
+        servicos.forEach(s => selServ.innerHTML += `<option value="${escapeHtml(s.id)}">${escapeHtml(s.nome)} (${formatCurrency(s.preco)}) - ${s.tempo||30}min</option>`);
     }
     selServ.value = valServ;
 }
@@ -1896,12 +2039,13 @@ async function carregarReceitas() {
 
     container.innerHTML = pagamentos.slice(0, 30).map(p => {
         const clienteNome = p.cliente_id ? (clientesMap[p.cliente_id] || 'Cliente') : '';
+        const clienteHtml = clienteNome ? `(${escapeHtml(clienteNome)})` : '';
         return `
         <div class="list-item">
-            <div class="info">${formatDateTimeBR(p.data)} - ${p.descricao} ${clienteNome ? '('+clienteNome+')' : ''}</div>
+            <div class="info">${formatDateTimeBR(p.data)} - ${escapeHtml(p.descricao)} ${clienteHtml}</div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarReceita('${p.id}')"><i class="fas fa-pen"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="excluirReceita('${p.id}')"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-accent" onclick="editarReceita('${escapeHtml(p.id)}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirReceita('${escapeHtml(p.id)}')"><i class="fas fa-trash"></i></button>
                 <span class="badge badge-success">${formatCurrency(p.valor)}</span>
             </div>
         </div>`;
@@ -1979,10 +2123,10 @@ async function carregarDespesas() {
 
     container.innerHTML = despesas.slice(0, 30).map(d => `
         <div class="list-item">
-            <div class="info">${formatDateTimeBR(d.data)} - ${d.descricao} (${d.categoria})</div>
+            <div class="info">${formatDateTimeBR(d.data)} - ${escapeHtml(d.descricao)} (${escapeHtml(d.categoria)})</div>
             <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="editarDespesa('${d.id}')"><i class="fas fa-pen"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="excluirDespesa('${d.id}')"><i class="fas fa-trash"></i></button>
+                <button class="btn btn-sm btn-accent" onclick="editarDespesa('${escapeHtml(d.id)}')"><i class="fas fa-pen"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirDespesa('${escapeHtml(d.id)}')"><i class="fas fa-trash"></i></button>
                 <span class="badge badge-danger">${formatCurrency(d.valor)}</span>
             </div>
         </div>
@@ -2014,9 +2158,12 @@ async function excluirDespesa(id) {
 async function gerarRelatorioFinanceiro() {
     const periodo = document.getElementById('finRelPeriodo').value;
     const agora = new Date();
-    let inicio = new Date();
-    if (periodo === 'hoje') { /* */ } else if (periodo === 'semana') { inicio.setDate(agora.getDate() - 7); } else if (periodo === 'mes') { inicio.setMonth(agora.getMonth() - 1); } else if (periodo === 'ano') { inicio.setFullYear(agora.getFullYear() - 1); }
-    const inicioStr = inicio.toISOString().split('T')[0];
+    let inicio = new Date(agora);
+    if (periodo === 'hoje') { /* mantém hoje */ }
+    else if (periodo === 'semana') { inicio.setDate(agora.getDate() - 7); }
+    else if (periodo === 'mes') { inicio.setMonth(agora.getMonth() - 1); }
+    else if (periodo === 'ano') { inicio.setFullYear(agora.getFullYear() - 1); }
+    const inicioStr = todayISO(inicio);
 
     const { data: receitas } = await supabase
         .from('pagamentos')
@@ -2082,7 +2229,7 @@ async function atualizarDashboard() {
         const statusMap = { 'agendado': 'badge-warning', 'realizado': 'badge-success', 'adiado': 'badge-info', 'cancelado': 'badge-danger' };
         containerAgenda.innerHTML = agHoje.sort((a, b) => a.hora.localeCompare(b.hora)).map(a => {
             const nome = clientesMap[a.cliente_id] || 'Cliente';
-            return `<div class="list-item"><span>${a.hora} - ${nome}</span><span class="badge ${statusMap[a.status] || 'badge-warning'}">${a.status || 'Agendado'}</span></div>`;
+            return `<div class="list-item"><span>${escapeHtml(a.hora)} - ${escapeHtml(nome)}</span><span class="badge ${statusMap[a.status] || 'badge-warning'}">${escapeHtml(a.status || 'Agendado')}</span></div>`;
         }).join('');
     }
 
@@ -2099,7 +2246,7 @@ async function atualizarDashboard() {
 
     const amanha = new Date();
     amanha.setDate(amanha.getDate() + 1);
-    const amanhaStr = amanha.toISOString().split('T')[0];
+    const amanhaStr = todayISO(amanha);
 
     const { data: futuros, error: errFuturos } = await supabase
         .from('agendamentos')
@@ -2125,7 +2272,7 @@ async function atualizarDashboard() {
             container.innerHTML = futuros.map(a => {
                 const nome = clientesMap[a.cliente_id] || 'Cliente';
                 const dataFormatada = formatDateBR(a.data);
-                return `<div class="list-item"><span>${dataFormatada} ${a.hora} - ${nome}</span><span class="badge badge-info">${a.status || 'Agendado'}</span></div>`;
+                return `<div class="list-item"><span>${escapeHtml(dataFormatada)} ${escapeHtml(a.hora)} - ${escapeHtml(nome)}</span><span class="badge badge-info">${escapeHtml(a.status || 'Agendado')}</span></div>`;
             }).join('');
         }
     } else {
@@ -2152,7 +2299,7 @@ async function desenharGraficoReceita() {
     for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
-        const ds = d.toISOString().split('T')[0];
+        const ds = todayISO(d);
         const { data: pagamentos } = await supabase
             .from('pagamentos')
             .select('valor')
@@ -2214,7 +2361,7 @@ async function carregarSelectsClientes() {
     const sel = document.getElementById('finRecCliente');
     sel.innerHTML = '<option value="">Cliente</option>';
     if (clientes) {
-        clientes.forEach(c => sel.innerHTML += `<option value="${c.id}">${c.nome}</option>`);
+        clientes.forEach(c => sel.innerHTML += `<option value="${escapeHtml(c.id)}">${escapeHtml(c.nome)}</option>`);
     }
 }
 
@@ -2397,20 +2544,42 @@ function salvarConfig() {
 }
 
 function salvarPerfil() {
+    const email = document.getElementById('perfEmail').value.trim();
+    if (email && !validarEmail(email)) { alert('E-mail inválido.'); return; }
     localStorage.setItem('perfNome', document.getElementById('perfNome').value.trim());
     localStorage.setItem('perfTelefone', document.getElementById('perfTelefone').value.trim());
-    localStorage.setItem('perfEmail', document.getElementById('perfEmail').value.trim());
+    localStorage.setItem('perfEmail', email);
     alert('Perfil salvo!');
 }
 
 function limparTudo() {
-    if (!confirm('⚠️ ATENÇÃO! Isso vai apagar TODOS os dados permanentemente.')) return;
-    if (!confirm('Última chance! Digite "SIM" no prompt para confirmar.')) return;
-    const confirmacao = prompt('Digite "SIM" para confirmar a exclusão de todos os dados:');
-    if (confirmacao !== 'SIM') { alert('Operação cancelada.'); return; }
-    localStorage.clear();
-    alert('Dados locais apagados. Recarregue a página.');
-    location.reload();
+    if (!confirm('⚠️ ATENÇÃO! Isso vai apagar TODOS os dados (clientes, agendamentos, finanças, planos, etc.) permanentemente, TANTO LOCAL QUANTO NA NUVEM (Supabase).')) return;
+    if (!confirm('Última chance! Tem certeza ABSOLUTA?')) return;
+    const confirmacao = prompt('Digite "SIM, APAGAR TUDO" para confirmar a exclusão COMPLETA de todos os dados:');
+    if (confirmacao !== 'SIM, APAGAR TUDO') { alert('Operação cancelada.'); return; }
+
+    const msg = document.createElement('div');
+    msg.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1e293b;color:white;padding:20px 32px;border-radius:16px;z-index:99999;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,0.5);';
+    msg.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Apagando todos os dados...';
+    document.body.appendChild(msg);
+
+    (async function () {
+        try {
+            const tabelas = ['compras', 'pagamentos', 'agendamentos', 'clientes', 'servicos', 'planos', 'categorias', 'despesas'];
+            for (const tbl of tabelas) {
+                try { await supabase.from(tbl).delete().neq('id', '00000000-0000-0000-0000-000000000000'); }
+                catch (e) { console.warn(`Erro ao limpar tabela ${tbl}:`, e); }
+            }
+            localStorage.clear();
+            msg.innerHTML = '<i class="fas fa-check-circle"></i> Todos os dados foram apagados!';
+            setTimeout(() => { msg.remove(); location.reload(); }, 1200);
+        } catch (err) {
+            console.error(err);
+            localStorage.clear();
+            msg.innerHTML = '<i class="fas fa-exclamation-circle"></i> Dados locais apagados. Recarregando...';
+            setTimeout(() => { msg.remove(); location.reload(); }, 1500);
+        }
+    })();
 }
 
 // ================================================================
@@ -2436,8 +2605,8 @@ async function globalSearch(texto) {
         containerCli.innerHTML = '<div class="empty">Nenhum cliente</div>';
     } else {
         containerCli.innerHTML = clientes.map(c => `
-            <div class="list-item"><div class="info"><strong>${c.nome}</strong> ${c.telefone?'<br><span class="text-muted">'+c.telefone+'</span>':''}</div>
-            <div class="actions"><button class="btn btn-sm btn-primary" onclick="abrirFicha('${c.id}')"><i class="fas fa-eye"></i></button></div></div>
+            <div class="list-item"><div class="info"><strong>${escapeHtml(c.nome)}</strong> ${c.telefone?'<br><span class="text-muted">'+escapeHtml(c.telefone)+'</span>':''}</div>
+            <div class="actions"><button class="btn btn-sm btn-primary" onclick="abrirFicha('${escapeHtml(c.id)}')"><i class="fas fa-eye"></i></button></div></div>
         `).join('');
     }
 
@@ -2451,7 +2620,7 @@ async function globalSearch(texto) {
         containerServ.innerHTML = '<div class="empty">Nenhum serviço</div>';
     } else {
         containerServ.innerHTML = servicos.map(s => `
-            <div class="list-item"><div class="info"><strong>${s.nome}</strong> ${formatCurrency(s.preco)}</div></div>
+            <div class="list-item"><div class="info"><strong>${escapeHtml(s.nome)}</strong> ${formatCurrency(s.preco)}</div></div>
         `).join('');
     }
 }
