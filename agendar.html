@@ -26,7 +26,6 @@
             width: 100%;
         }
 
-        /* Card principal */
         .card {
             background: #ffffff;
             border-radius: 24px;
@@ -34,7 +33,6 @@
             margin-bottom: 20px;
             box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
             border: 1px solid rgba(0, 0, 0, 0.02);
-            transition: all 0.2s;
         }
         .card-header {
             text-align: center;
@@ -98,6 +96,75 @@
             box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.1);
         }
 
+        .autocomplete-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        .autocomplete-wrapper input {
+            padding-right: 40px;
+        }
+        .autocomplete-wrapper .loading-indicator {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+        .autocomplete-list {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: white;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            display: none;
+        }
+        .autocomplete-list.show {
+            display: block;
+        }
+        .autocomplete-item {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.1s;
+        }
+        .autocomplete-item:last-child {
+            border-bottom: none;
+        }
+        .autocomplete-item:hover {
+            background: #f1f5f9;
+        }
+        .autocomplete-item .nome {
+            font-weight: 500;
+            color: #0f172a;
+        }
+        .autocomplete-item .telefone {
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .autocomplete-item .creditos-badge {
+            background: #f59e0b;
+            color: #0f172a;
+            padding: 2px 10px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+        .autocomplete-item .novo-cliente {
+            color: #10b981;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
         .btn {
             width: 100%;
             padding: 16px;
@@ -135,7 +202,6 @@
             pointer-events: none;
         }
 
-        /* Horários */
         #horariosContainer {
             display: flex;
             flex-wrap: wrap;
@@ -176,7 +242,6 @@
             text-align: center;
         }
 
-        /* Formulário de agendamento */
         #formAgendamento {
             margin-top: 4px;
         }
@@ -227,6 +292,20 @@
             color: #94a3b8;
             margin-top: 4px;
         }
+        .cliente-info {
+            background: #f1f5f9;
+            padding: 10px 14px;
+            border-radius: 12px;
+            margin-top: 8px;
+            display: none;
+        }
+        .cliente-info.show {
+            display: block;
+        }
+        .cliente-info .creditos {
+            color: #f59e0b;
+            font-weight: 700;
+        }
 
         .footer {
             text-align: center;
@@ -240,7 +319,6 @@
             color: #f59e0b;
         }
 
-        /* Responsivo */
         @media (max-width: 480px) {
             .card { padding: 20px 16px; }
             .horario-livre { flex: 1 0 calc(50% - 10px); }
@@ -280,7 +358,19 @@
             <h3><i class="fas fa-user-plus"></i> Preencha seus dados</h3>
 
             <label class="campo-obrigatorio"><i class="fas fa-user"></i> Seu nome</label>
-            <input type="text" id="cliNome" placeholder="Digite seu nome completo">
+            <div class="autocomplete-wrapper">
+                <input type="text" id="cliNome" placeholder="Digite seu nome..." autocomplete="off" oninput="buscarClientes(this.value)">
+                <span class="loading-indicator hidden" id="loadingClientes"><i class="fas fa-spinner fa-spin"></i></span>
+                <div class="autocomplete-list" id="autocompleteList"></div>
+            </div>
+            <div class="texto-ajuda">Digite seu nome e selecione na lista, ou digite o nome completo para cadastrar.</div>
+
+            <!-- Informações do cliente selecionado -->
+            <div class="cliente-info" id="clienteInfo">
+                <p><i class="fas fa-phone"></i> Telefone: <span id="clienteTelefoneInfo">-</span></p>
+                <p><i class="fas fa-coins"></i> Créditos disponíveis: <span class="creditos" id="clienteCreditosInfo">0</span></p>
+                <p class="texto-ajuda" style="margin-top:6px;">Se você tem créditos, pode usá-los no atendimento.</p>
+            </div>
 
             <label class="campo-obrigatorio"><i class="fas fa-phone"></i> Telefone</label>
             <input type="text" id="cliTelefone" placeholder="(XX) XXXXX-XXXX" oninput="mascaraTelefone(this)" maxlength="16">
@@ -315,7 +405,7 @@
         let horarioSelecionado = null;
         let servicoSelecionado = null;
         let dataSelecionada = '';
-        let horariosDisponiveis = [];
+        let clienteSelecionado = null;
 
         // ========== CARREGAR NOME DA BARBEARIA ==========
         async function carregarNomeBarbearia() {
@@ -323,11 +413,11 @@
             document.getElementById('barberShopDisplay').textContent = nome;
         }
 
-        // ========== CARREGAR SERVIÇOS ATIVOS ==========
+        // ========== CARREGAR SERVIÇOS ATIVOS (APENAS NOME E CATEGORIA) ==========
         async function carregarServicos() {
             const { data, error } = await supabase
                 .from('servicos')
-                .select('id, nome, preco, tempo')
+                .select('id, nome, preco, tempo, categoria')
                 .eq('status', 'ativo')
                 .order('nome');
             if (error) {
@@ -339,11 +429,118 @@
             sel.innerHTML = '<option value="">-- Selecione um serviço --</option>';
             if (data && data.length > 0) {
                 data.forEach(s => {
-                    sel.innerHTML += `<option value="${s.id}" data-tempo="${s.tempo || 30}">${s.nome} (${s.tempo||30}min - R$ ${parseFloat(s.preco||0).toFixed(2).replace('.', ',')})</option>`;
+                    // Mostra apenas NOME e CATEGORIA (se tiver)
+                    const nomeExibicao = s.categoria ? `${s.nome} - ${s.categoria}` : s.nome;
+                    sel.innerHTML += `<option value="${s.id}" data-tempo="${s.tempo || 30}">${nomeExibicao}</option>`;
                 });
             } else {
                 sel.innerHTML = '<option value="">Nenhum serviço ativo</option>';
             }
+        }
+
+        // ========== BUSCAR CLIENTES (AUTOCOMPLETE) ==========
+        let timeoutBusca = null;
+        async function buscarClientes(texto) {
+            const list = document.getElementById('autocompleteList');
+            const loading = document.getElementById('loadingClientes');
+
+            if (!texto || texto.length < 1) {
+                list.classList.remove('show');
+                list.innerHTML = '';
+                return;
+            }
+
+            loading.classList.remove('hidden');
+
+            clearTimeout(timeoutBusca);
+            timeoutBusca = setTimeout(async () => {
+                try {
+                    const { data, error } = await supabase
+                        .from('clientes')
+                        .select('id, nome, telefone, creditos')
+                        .ilike('nome', `${texto}%`)
+                        .order('nome')
+                        .limit(8);
+
+                    loading.classList.add('hidden');
+
+                    if (error) {
+                        console.error(error);
+                        return;
+                    }
+
+                    const existeExato = data ? data.some(c => c.nome.toLowerCase() === texto.toLowerCase()) : false;
+
+                    if (!data || data.length === 0) {
+                        list.innerHTML = `
+                            <div class="autocomplete-item" onclick="selecionarCliente(null, '${texto}', '')">
+                                <span class="novo-cliente"><i class="fas fa-plus-circle"></i> Cadastrar novo: <strong>${texto}</strong></span>
+                            </div>
+                        `;
+                        list.classList.add('show');
+                        return;
+                    }
+
+                    let html = '';
+                    data.forEach(c => {
+                        const creditos = c.creditos || 0;
+                        const badge = creditos > 0 ? `<span class="creditos-badge">${creditos} créditos</span>` : '';
+                        html += `
+                            <div class="autocomplete-item" onclick="selecionarCliente('${c.id}', '${c.nome}', '${c.telefone || ''}', ${creditos})">
+                                <span>
+                                    <span class="nome">${c.nome}</span>
+                                    ${c.telefone ? `<span class="telefone">${c.telefone}</span>` : ''}
+                                </span>
+                                ${badge}
+                            </div>
+                        `;
+                    });
+
+                    if (!existeExato && texto.length >= 2) {
+                        html += `
+                            <div class="autocomplete-item" style="border-top:1px solid #e2e8f0;" onclick="selecionarCliente(null, '${texto}', '')">
+                                <span class="novo-cliente"><i class="fas fa-plus-circle"></i> Cadastrar novo: <strong>${texto}</strong></span>
+                            </div>
+                        `;
+                    }
+
+                    list.innerHTML = html;
+                    list.classList.add('show');
+
+                } catch (err) {
+                    console.error(err);
+                    loading.classList.add('hidden');
+                }
+            }, 300);
+        }
+
+        // ========== SELECIONAR CLIENTE ==========
+        function selecionarCliente(id, nome, telefone, creditos = 0) {
+            const list = document.getElementById('autocompleteList');
+            list.classList.remove('show');
+
+            document.getElementById('cliNome').value = nome;
+
+            if (id) {
+                clienteSelecionado = { id, nome, telefone, creditos };
+                document.getElementById('cliTelefone').value = telefone || '';
+
+                const info = document.getElementById('clienteInfo');
+                document.getElementById('clienteTelefoneInfo').textContent = telefone || 'Não cadastrado';
+                document.getElementById('clienteCreditosInfo').textContent = creditos;
+                info.classList.add('show');
+
+                if (!telefone) {
+                    document.getElementById('cliTelefone').focus();
+                }
+            } else {
+                clienteSelecionado = null;
+                document.getElementById('cliTelefone').value = '';
+                document.getElementById('clienteInfo').classList.remove('show');
+                document.getElementById('cliTelefone').focus();
+            }
+
+            document.getElementById('msgErro').textContent = '';
         }
 
         // ========== BUSCAR HORÁRIOS ==========
@@ -355,7 +552,6 @@
                 return;
             }
 
-            // Mostrar loading
             const btn = document.getElementById('btnBuscar');
             btn.disabled = true;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
@@ -365,7 +561,6 @@
             const tempo = parseInt(sel.options[sel.selectedIndex]?.dataset.tempo) || 30;
             servicoSelecionado = { id: servicoId, tempo };
 
-            // 1. Buscar disponibilidade
             const diaSemana = new Date(data + 'T00:00:00').getDay();
             const { data: disp, error: e1 } = await supabase
                 .from('disponibilidade')
@@ -381,7 +576,6 @@
                 return;
             }
 
-            // 2. Buscar agendamentos existentes (não cancelados)
             const { data: agendamentos, error: e2 } = await supabase
                 .from('agendamentos')
                 .select('id, hora, servico_id')
@@ -389,7 +583,6 @@
                 .not('status', 'eq', 'cancelado');
             if (e2) console.error(e2);
 
-            // 3. Gerar slots livres
             const slots = [];
             disp.forEach(d => {
                 const inicio = d.hora_inicio.split(':').map(Number);
@@ -403,7 +596,7 @@
                     let conflito = false;
                     for (let a of agendamentos) {
                         const aHora = new Date(1970, 0, 1, ...a.hora.split(':').map(Number));
-                        const aDur = 30; // simplificado, mas você pode buscar a duração real
+                        const aDur = 30;
                         const aFim = new Date(aHora.getTime() + aDur * 60000);
                         const slotFim = new Date(horaAtual.getTime() + tempo * 60000);
                         if ( (horaAtual < aFim && slotFim > aHora) ) {
@@ -425,13 +618,10 @@
                 return;
             }
 
-            // Exibir horários
-            horariosDisponiveis = slots;
             container.innerHTML = slots.map(h =>
                 `<button class="horario-livre" data-hora="${h}" onclick="selecionarHorario(this, '${h}')">${h}</button>`
             ).join('');
 
-            // Mostrar formulário
             document.getElementById('formAgendamento').classList.remove('hidden');
             document.getElementById('msgErro').textContent = '';
             document.getElementById('msgSucesso').classList.add('hidden');
@@ -461,12 +651,11 @@
             }
             document.getElementById('msgErro').textContent = '';
 
-            // Desabilitar botão para evitar duplo clique
             const btnConfirm = document.getElementById('btnConfirmar');
             btnConfirm.disabled = true;
             btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirmando...';
 
-            // Verificar se o horário ainda está livre (conflito)
+            // Verificar conflito
             const { data: agendamentos, error: eAg } = await supabase
                 .from('agendamentos')
                 .select('id, hora, servico_id')
@@ -501,30 +690,34 @@
                 return;
             }
 
-            // Buscar ou criar cliente
-            let clienteId = null;
-            const { data: clientes, error: eC } = await supabase
-                .from('clientes')
-                .select('id')
-                .eq('nome', nome)
-                .eq('telefone', telefone);
-            if (eC) {
-                alert('Erro ao buscar cliente.');
-                btnConfirm.disabled = false;
-                btnConfirm.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar Agendamento';
-                return;
+            // Verificar se já existe cliente
+            let clienteId = clienteSelecionado?.id || null;
+
+            if (!clienteId) {
+                const { data: clientes, error: eC } = await supabase
+                    .from('clientes')
+                    .select('id')
+                    .eq('nome', nome)
+                    .eq('telefone', telefone);
+                if (eC) {
+                    alert('Erro ao buscar cliente.');
+                    btnConfirm.disabled = false;
+                    btnConfirm.innerHTML = '<i class="fas fa-check-circle"></i> Confirmar Agendamento';
+                    return;
+                }
+                if (clientes && clientes.length > 0) {
+                    clienteId = clientes[0].id;
+                }
             }
 
-            if (clientes && clientes.length > 0) {
-                clienteId = clientes[0].id;
-            } else {
+            if (!clienteId) {
                 const novoCliente = {
                     id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
                     nome: nome,
                     telefone: telefone,
                     creditos: 0,
                     data_cadastro: new Date().toISOString(),
-                    obs: obs // salva a observação no cadastro do cliente
+                    obs: obs || null
                 };
                 const { error: eI } = await supabase.from('clientes').insert([novoCliente]);
                 if (eI) {
@@ -556,20 +749,19 @@
                 return;
             }
 
-            // Sucesso
+            // Data no formato brasileiro
+            const partesData = data.split('-');
+            const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
+
             document.getElementById('msgSucessoTexto').textContent =
-                `✅ Agendamento confirmado para ${data} às ${horarioSelecionado}! Enviaremos um lembrete.`;
+                `✅ Agendamento confirmado para ${dataFormatada} às ${horarioSelecionado}!`;
             document.getElementById('msgSucesso').classList.remove('hidden');
             document.getElementById('msgSucesso').style.display = 'flex';
 
-            // Limpar e desabilitar
             document.querySelectorAll('.horario-livre').forEach(b => b.disabled = true);
             btnConfirm.disabled = true;
             btnConfirm.style.opacity = '0.6';
-            btnConfirm.innerHTML = '<i class="fas fa-check-circle"></i> Agendado';
-
-            // Ocultar botão de buscar?
-            // Não, mas pode deixar como está
+            btnConfirm.innerHTML = '<i class="fas fa-check-circle"></i> Agendado!';
         }
 
         // ========== MÁSCARA TELEFONE ==========
@@ -579,6 +771,14 @@
             else if (v.length <= 7) el.value = '(' + v.substring(0, 2) + ') ' + v.substring(2);
             else el.value = '(' + v.substring(0, 2) + ') ' + v.substring(2, 7) + '-' + v.substring(7, 11);
         }
+
+        // ========== FECHAR AUTOCOMPLETE ==========
+        document.addEventListener('click', function(e) {
+            const wrapper = document.querySelector('.autocomplete-wrapper');
+            if (!wrapper.contains(e.target)) {
+                document.getElementById('autocompleteList').classList.remove('show');
+            }
+        });
 
         // ========== INICIALIZAR ==========
         window.onload = function() {
