@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Agende seu Corte</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; font-family: 'Inter', sans-serif; }
+        body { background:#f4f6fa; padding:20px; display:flex; justify-content:center; }
+        .container { max-width:480px; width:100%; }
+        .card { background:white; border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:0 4px 12px rgba(0,0,0,0.06); }
+        h1 { font-size:1.6rem; display:flex; align-items:center; gap:10px; }
+        h1 i { color:#f59e0b; }
+        label { display:block; font-weight:600; margin:10px 0 4px; font-size:0.9rem; }
+        input, select, button { width:100%; padding:12px; border-radius:12px; border:1px solid #e2e8f0; font-size:1rem; margin-bottom:8px; }
+        button { background:#0f172a; color:white; font-weight:700; border:none; cursor:pointer; transition:0.2s; }
+        button:active { transform:scale(0.96); }
+        .horario-livre { background:#10b981; color:white; border:none; padding:12px; border-radius:8px; margin:4px; cursor:pointer; width:auto; display:inline-block; }
+        .horario-livre:disabled { opacity:0.5; cursor:not-allowed; }
+        .horario-livre.selecionado { background:#0f172a; }
+        .badge { background:#e2e8f0; padding:4px 12px; border-radius:30px; font-size:0.7rem; font-weight:600; }
+        .text-muted { color:#94a3b8; font-size:0.8rem; }
+        .hidden { display:none; }
+        .erro { color:#ef4444; margin-top:8px; }
+        .sucesso { color:#10b981; margin-top:8px; }
+        #horariosContainer { margin-top:12px; display:flex; flex-wrap:wrap; gap:6px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="card">
+        <h1><i class="fas fa-cut"></i> Agende seu Corte</h1>
+        <p class="text-muted">Escolha o serviço, a data e veja os horários disponíveis.</p>
+    </div>
+
+    <div class="card">
+        <label>📋 Serviço</label>
+        <select id="servicoSelect"><option value="">Carregando...</option></select>
+
+        <label>📅 Data</label>
+        <input type="date" id="dataSelect" min="">
+
+        <button id="btnBuscar" onclick="buscarHorarios()"><i class="fas fa-search"></i> Ver horários</button>
+
+        <div id="horariosContainer"></div>
+    </div>
+
+    <div class="card hidden" id="formAgendamento">
+        <h3>Preencha seus dados</h3>
+        <label>Seu nome *</label>
+        <input type="text" id="cliNome" placeholder="Digite seu nome completo">
+
+        <label>Telefone *</label>
+        <input type="text" id="cliTelefone" placeholder="(XX) XXXXX-XXXX" oninput="mascaraTelefone(this)" maxlength="16">
+
+        <button onclick="confirmarAgendamento()"><i class="fas fa-check"></i> Confirmar Agendamento</button>
+        <div id="msgErro" class="erro"></div>
+        <div id="msgSucesso" class="sucesso hidden"></div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = 'https://yywmylgsmcwrfmzkmmoz.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_hGOH6BoUMcRC2av-xAD26Q_YJRFQFY0';
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let horarioSelecionado = null;
+    let servicoSelecionado = null;
+    let dataSelecionada = '';
+
+    async function carregarServicos() {
+        const { data, error } = await supabase
+            .from('servicos')
+            .select('id, nome, preco, tempo')
+            .eq('status', 'ativo')
+            .order('nome');
+        if (error) { console.error(error); return; }
+        const sel = document.getElementById('servicoSelect');
+        sel.innerHTML = '<option value="">-- Selecione --</option>';
+        data.forEach(s => {
+            sel.innerHTML += `<option value="${s.id}" data-tempo="${s.tempo || 30}">${s.nome} (${s.tempo||30}min - R$ ${parseFloat(s.preco||0).toFixed(2)})</option>`;
+        });
+    }
+
+    async function buscarHorarios() {
+        const data = document.getElementById('dataSelect').value;
+        const servicoId = document.getElementById('servicoSelect').value;
+        if (!data || !servicoId) { alert('Selecione serviço e data.'); return; }
+        dataSelecionada = data;
+        const sel = document.getElementById('servicoSelect');
+        const tempo = parseInt(sel.options[sel.selectedIndex]?.dataset.tempo) || 30;
+        servicoSelecionado = { id: servicoId, tempo };
+
+        const diaSemana = new Date(data + 'T00:00:00').getDay();
+        const { data: disp, error: e1 } = await supabase
+            .from('disponibilidade')
+            .select('*')
+            .or(`dia_semana.eq.${diaSemana}, data_especifica.eq.${data}`)
+            .eq('ativo', true);
+
+        if (e1 || !disp || disp.length === 0) {
+            document.getElementById('horariosContainer').innerHTML = '<p class="text-muted">Nenhum atendimento disponível neste dia.</p>';
+            document.getElementById('formAgendamento').classList.add('hidden');
+            return;
+        }
+
+        const { data: agendamentos, error: e2 } = await supabase
+            .from('agendamentos')
+            .select('id, hora, servico_id')
+            .eq('data', data)
+            .not('status', 'eq', 'cancelado');
+        if (e2) console.error(e2);
+
+        const slots = [];
+        disp.forEach(d => {
+            const inicio = d.hora_inicio.split(':').map(Number);
+            const fim = d.hora_fim.split(':').map(Number);
+            const intervalo = d.intervalo || 60;
+            let horaAtual = new Date(1970,0,1, inicio[0], inicio[1]);
+            const horaFim = new Date(1970,0,1, fim[0], fim[1]);
+
+            while (horaAtual < horaFim) {
+                const horaStr = horaAtual.toTimeString().slice(0,5);
+                let conflito = false;
+                for (let a of agendamentos) {
+                    const aHora = new Date(1970,0,1, ...a.hora.split(':').map(Number));
+                    const aDur = 30;
+                    const aFim = new Date(aHora.getTime() + aDur*60000);
+                    const slotFim = new Date(horaAtual.getTime() + tempo*60000);
+                    if ( (horaAtual < aFim && slotFim > aHora) ) {
+                        conflito = true;
+                        break;
+                    }
+                }
+                if (!conflito) slots.push(horaStr);
+                horaAtual.setMinutes(horaAtual.getMinutes() + intervalo);
+            }
+        });
+
+        const container = document.getElementById('horariosContainer');
+        if (slots.length === 0) {
+            container.innerHTML = '<p class="text-muted">Nenhum horário disponível para este serviço.</p>';
+            document.getElementById('formAgendamento').classList.add('hidden');
+            return;
+        }
+
+        container.innerHTML = slots.map(h =>
+            `<button class="horario-livre" data-hora="${h}" onclick="selecionarHorario(this, '${h}')">${h}</button>`
+        ).join('');
+
+        document.getElementById('formAgendamento').classList.remove('hidden');
+        document.getElementById('msgErro').textContent = '';
+        document.getElementById('msgSucesso').classList.add('hidden');
+        horarioSelecionado = null;
+    }
+
+    function selecionarHorario(btn, hora) {
+        document.querySelectorAll('.horario-livre').forEach(b => b.classList.remove('selecionado'));
+        btn.classList.add('selecionado');
+        horarioSelecionado = hora;
+    }
+
+    async function confirmarAgendamento() {
+        const nome = document.getElementById('cliNome').value.trim();
+        const telefone = document.getElementById('cliTelefone').value.trim();
+        const data = dataSelecionada;
+
+        if (!nome || !telefone || !horarioSelecionado) {
+            document.getElementById('msgErro').textContent = 'Preencha nome, telefone e selecione um horário.';
+            return;
+        }
+        document.getElementById('msgErro').textContent = '';
+
+        const { data: agendamentos, error: eAg } = await supabase
+            .from('agendamentos')
+            .select('id, hora, servico_id')
+            .eq('data', data)
+            .not('status', 'eq', 'cancelado');
+        if (eAg) { alert('Erro ao verificar horário.'); return; }
+
+        let conflito = false;
+        const tempo = servicoSelecionado.tempo;
+        const horaSel = new Date(1970,0,1, ...horarioSelecionado.split(':').map(Number));
+        const fimSel = new Date(horaSel.getTime() + tempo*60000);
+        for (let a of agendamentos) {
+            const aHora = new Date(1970,0,1, ...a.hora.split(':').map(Number));
+            const aDur = 30;
+            const aFim = new Date(aHora.getTime() + aDur*60000);
+            if ( (horaSel < aFim && fimSel > aHora) ) {
+                conflito = true;
+                break;
+            }
+        }
+
+        if (conflito) {
+            document.getElementById('msgErro').textContent = '⚠️ Este horário acabou de ser ocupado. Escolha outro.';
+            buscarHorarios();
+            return;
+        }
+
+        let clienteId = null;
+        const { data: clientes, error: eC } = await supabase
+            .from('clientes')
+            .select('id')
+            .eq('nome', nome)
+            .eq('telefone', telefone);
+        if (eC) { alert('Erro ao buscar cliente.'); return; }
+
+        if (clientes && clientes.length > 0) {
+            clienteId = clientes[0].id;
+        } else {
+            const novoCliente = {
+                id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+                nome: nome,
+                telefone: telefone,
+                creditos: 0,
+                data_cadastro: new Date().toISOString()
+            };
+            const { error: eI } = await supabase.from('clientes').insert([novoCliente]);
+            if (eI) { alert('Erro ao criar cliente: '+eI.message); return; }
+            clienteId = novoCliente.id;
+        }
+
+        const agendamento = {
+            id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+            cliente_id: clienteId,
+            servico_id: servicoSelecionado.id,
+            data: data,
+            hora: horarioSelecionado,
+            status: 'agendado',
+            origem: 'publico',
+            criado_em: new Date().toISOString()
+        };
+        const { error: eA } = await supabase.from('agendamentos').insert([agendamento]);
+        if (eA) { alert('Erro ao agendar: '+eA.message); return; }
+
+        document.getElementById('msgSucesso').textContent = `✅ Agendamento confirmado para ${data} às ${horarioSelecionado}!`;
+        document.getElementById('msgSucesso').classList.remove('hidden');
+        document.getElementById('formAgendamento').querySelector('button').disabled = true;
+        document.getElementById('formAgendamento').querySelector('button').style.opacity = '0.6';
+        document.querySelectorAll('.horario-livre').forEach(b => b.disabled = true);
+        horarioSelecionado = null;
+    }
+
+    function mascaraTelefone(el) {
+        let v = el.value.replace(/\D/g, '');
+        if (v.length <= 2) el.value = v;
+        else if (v.length <= 7) el.value = '(' + v.substring(0,2) + ') ' + v.substring(2);
+        else el.value = '(' + v.substring(0,2) + ') ' + v.substring(2,7) + '-' + v.substring(7,11);
+    }
+
+    window.onload = function() {
+        carregarServicos();
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('dataSelect').min = hoje;
+        document.getElementById('dataSelect').value = hoje;
+    };
+</script>
+</body>
+</html>

@@ -517,6 +517,28 @@
             </div>
         </div>
 
+        <!-- ==================== ABA DISPONIBILIDADE (NOVA) ==================== -->
+        <div id="tab-disponibilidade" class="tab-page">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-clock"></i> Configurar Horários</div>
+                <select id="dispDia">
+                    <option value="0">Domingo</option><option value="1">Segunda</option>
+                    <option value="2">Terça</option><option value="3">Quarta</option>
+                    <option value="4">Quinta</option><option value="5">Sexta</option>
+                    <option value="6">Sábado</option>
+                </select>
+                <label>Início</label><input type="time" id="dispInicio" value="18:00">
+                <label>Fim</label><input type="time" id="dispFim" value="22:00">
+                <label>Intervalo (min)</label><input type="number" id="dispIntervalo" value="60">
+                <label>Data específica (opcional)</label><input type="date" id="dispDataEsp">
+                <button class="btn btn-primary" onclick="salvarDisponibilidade()"><i class="fas fa-save"></i> Salvar</button>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-list"></i> Horários Cadastrados</div>
+                <div id="dispLista"><div class="empty">Nenhum</div></div>
+            </div>
+        </div>
+
         <!-- ==================== ABA CONFIGURAÇÕES ==================== -->
         <div id="tab-config" class="tab-page">
             <div class="card">
@@ -551,6 +573,7 @@
         <button class="nav-item" data-tab="tab-planos"><i class="fas fa-box"></i><span>Planos</span></button>
         <button class="nav-item" data-tab="tab-agenda"><i class="fas fa-calendar"></i><span>Agenda</span></button>
         <button class="nav-item" data-tab="tab-financeiro"><i class="fas fa-coins"></i><span>Caixa</span></button>
+        <button class="nav-item" data-tab="tab-disponibilidade"><i class="fas fa-clock"></i><span>Disponib.</span></button>
         <button class="nav-item" data-tab="tab-config"><i class="fas fa-gear"></i><span>Config</span></button>
     </div>
 </div>
@@ -945,6 +968,7 @@ document.querySelectorAll('.nav-item').forEach(btn => {
         if (tab === 'tab-planos') { carregarPlanos(); carregarHistoricoCompras(); carregarSelectsPlanos(); }
         if (tab === 'tab-financeiro') { carregarReceitas(); carregarDespesas(); }
         if (tab === 'tab-dashboard') atualizarDashboard();
+        if (tab === 'tab-disponibilidade') carregarDisponibilidade();
     });
 });
 
@@ -983,7 +1007,8 @@ async function carregarTudo() {
         carregarReceitas(),
         carregarDespesas(),
         carregarSelectsClientes(),
-        carregarSelectsAgenda()
+        carregarSelectsAgenda(),
+        carregarDisponibilidade()  // <-- NOVO
     ]);
     await atualizarDashboard();
 }
@@ -2352,6 +2377,66 @@ window.addEventListener('resize', function () {
         desenharGraficoReceita();
     }
 });
+
+// ================================================================
+//  DISPONIBILIDADE (NOVA FUNCIONALIDADE)
+// ================================================================
+async function salvarDisponibilidade() {
+    const dia = parseInt(document.getElementById('dispDia').value);
+    const inicio = document.getElementById('dispInicio').value;
+    const fim = document.getElementById('dispFim').value;
+    const intervalo = parseInt(document.getElementById('dispIntervalo').value) || 60;
+    const dataEsp = document.getElementById('dispDataEsp').value || null;
+    if (isNaN(dia) || !inicio || !fim) { alert('Preencha dia, início e fim'); return; }
+    if (inicio >= fim) { alert('O horário de início deve ser anterior ao fim.'); return; }
+
+    const { error } = await supabase
+        .from('disponibilidade')
+        .insert([{ dia_semana: dia, hora_inicio: inicio, hora_fim: fim, intervalo: intervalo, ativo: true, data_especifica: dataEsp }]);
+    if (error) { alert('Erro ao salvar: ' + error.message); return; }
+    alert('Disponibilidade salva!');
+    document.getElementById('dispDataEsp').value = '';
+    carregarDisponibilidade();
+}
+
+async function carregarDisponibilidade() {
+    const { data, error } = await supabase
+        .from('disponibilidade')
+        .select('*')
+        .order('dia_semana')
+        .order('data_especifica', { ascending: true, nullsFirst: true });
+    if (error) { console.error(error); return; }
+    const container = document.getElementById('dispLista');
+    if (!data || data.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhum horário cadastrado</div>';
+        return;
+    }
+    const dias = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+    container.innerHTML = data.map(d => {
+        const diaLabel = d.data_especifica ? formatDateBR(d.data_especifica) : dias[d.dia_semana];
+        return `
+        <div class="list-item">
+            <div><strong>${diaLabel}</strong><br>${d.hora_inicio} - ${d.hora_fim} (a cada ${d.intervalo}min) <span class="badge ${d.ativo?'badge-success':'badge-danger'}">${d.ativo?'Ativo':'Inativo'}</span></div>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="toggleDisponibilidade('${d.id}', ${!d.ativo})"><i class="fas ${d.ativo?'fa-pause':'fa-play'}"></i></button>
+                <button class="btn btn-sm btn-danger" onclick="excluirDisponibilidade('${d.id}')"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+async function toggleDisponibilidade(id, ativo) {
+    const { error } = await supabase.from('disponibilidade').update({ ativo }).eq('id', id);
+    if (error) { alert('Erro: '+error.message); return; }
+    carregarDisponibilidade();
+}
+
+async function excluirDisponibilidade(id) {
+    if (!confirm('Excluir esta disponibilidade?')) return;
+    const { error } = await supabase.from('disponibilidade').delete().eq('id', id);
+    if (error) { alert('Erro: '+error.message); return; }
+    carregarDisponibilidade();
+}
 
 // ================================================================
 //  UTILITÁRIOS GERAIS
