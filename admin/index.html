@@ -914,6 +914,20 @@ function entrarNoApp() {
     document.getElementById('loginScreen').classList.add('hidden');
     document.getElementById('app').style.display = 'flex';
     carregarTudo();
+    
+    // ===== ATUALIZAÇÃO AUTOMÁTICA A CADA 30 SEGUNDOS =====
+    setInterval(() => {
+        // Verifica se a aba AGENDA está ativa
+        const agendaTab = document.getElementById('tab-agenda');
+        if (agendaTab && agendaTab.classList.contains('active')) {
+            carregarAgendaDia();
+        }
+        // Verifica se a aba DASHBOARD está ativa
+        const dashboardTab = document.getElementById('tab-dashboard');
+        if (dashboardTab && dashboardTab.classList.contains('active')) {
+            atualizarDashboard();
+        }
+    }, 30000); // 30.000 milissegundos = 30 segundos
 }
 
 document.querySelectorAll('#pinInput button[data-v]').forEach(btn => {
