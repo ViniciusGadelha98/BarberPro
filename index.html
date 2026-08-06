@@ -517,33 +517,35 @@
             </div>
         </div>
 
-        <!-- ==================== ABA DISPONIBILIDADE (NOVA VERSÃO POR SEMANA) ==================== -->
+        <!-- ==================== ABA DISPONIBILIDADE (HORÁRIOS INDIVIDUAIS) ==================== -->
         <div id="tab-disponibilidade" class="tab-page">
             <div class="card">
-                <div class="card-title"><i class="fas fa-calendar-week"></i> Definir Disponibilidade da Semana</div>
-                <p class="text-muted">Defina os dias e horários que você vai atender nesta semana.</p>
+                <div class="card-title"><i class="fas fa-clock"></i> Definir Horários Disponíveis</div>
+                <p class="text-muted">Adicione os horários exatos que os clientes podem agendar.</p>
                 
-                <label>📅 Início da semana</label>
-                <input type="date" id="dispDataInicio" onchange="carregarDiasSemana()">
+                <label>📅 Data</label>
+                <input type="date" id="dispData">
                 
-                <div id="diasSemanaContainer">
-                    <!-- Os dias da semana serão gerados aqui -->
+                <div id="horariosIndividuaisContainer">
+                    <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+                        <input type="time" id="novoHorario" style="flex:1;">
+                        <button class="btn btn-sm btn-success" onclick="adicionarHorarioIndividual()" style="width:auto; padding:8px 16px;">
+                            <i class="fas fa-plus"></i> Adicionar
+                        </button>
+                    </div>
+                    <div id="listaHorariosIndividuais" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">
+                        <span class="text-muted" style="font-size:0.8rem;">Nenhum horário adicionado.</span>
+                    </div>
                 </div>
 
-                <hr style="margin: 16px 0;">
-
-                <div id="horariosSemanaContainer">
-                    <!-- Para cada dia selecionado, aparecerá um card para definir horários -->
-                </div>
-
-                <button class="btn btn-primary" onclick="salvarDisponibilidadeSemana()">
-                    <i class="fas fa-save"></i> Salvar Disponibilidade da Semana
+                <button class="btn btn-primary" onclick="salvarHorariosIndividuais()" style="margin-top:12px;">
+                    <i class="fas fa-save"></i> Salvar Horários
                 </button>
             </div>
 
             <div class="card">
-                <div class="card-title"><i class="fas fa-list"></i> Disponibilidades Cadastradas</div>
-                <div id="dispLista"><div class="empty">Nenhuma disponibilidade cadastrada</div></div>
+                <div class="card-title"><i class="fas fa-list"></i> Horários Cadastrados</div>
+                <div id="dispLista"><div class="empty">Nenhum horário cadastrado</div></div>
             </div>
         </div>
 
@@ -1016,7 +1018,7 @@ async function carregarTudo() {
         carregarDespesas(),
         carregarSelectsClientes(),
         carregarSelectsAgenda(),
-        carregarDisponibilidade()  // <-- NOVO
+        carregarDisponibilidade()
     ]);
     await atualizarDashboard();
 }
@@ -2393,239 +2395,111 @@ window.addEventListener('resize', function () {
 });
 
 // ================================================================
-//  DISPONIBILIDADE POR SEMANA (NOVA VERSÃO)
+//  DISPONIBILIDADE - HORÁRIOS INDIVIDUAIS
 // ================================================================
 
-let diasSemanaSelecionados = {};
+let horariosIndividuais = [];
 
-function carregarDiasSemana() {
-    const dataInicio = document.getElementById('dispDataInicio').value;
-    if (!dataInicio) return;
-
-    // Parse manual da data para evitar fuso
-    const [ano, mes, dia] = dataInicio.split('-').map(Number);
-    const inicio = new Date(ano, mes - 1, dia);
-
-    const container = document.getElementById('diasSemanaContainer');
-    const diasNomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-    let html = '<div style="display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0;">';
+function adicionarHorarioIndividual() {
+    const horario = document.getElementById('novoHorario').value;
+    if (!horario) { alert('Selecione um horário.'); return; }
     
-    for (let i = 0; i < 7; i++) {
-        const data = new Date(inicio);
-        data.setDate(inicio.getDate() + i);
-        const dataStr = data.getFullYear() + '-' + String(data.getMonth()+1).padStart(2,'0') + '-' + String(data.getDate()).padStart(2,'0');
-        const diaSemana = data.getDay();
-        const nomeDia = diasNomes[diaSemana];
-        const diaFormatado = String(data.getDate()).padStart(2,'0') + '/' + String(data.getMonth()+1).padStart(2,'0');
-        
-        html += `
-            <div style="flex:1; min-width:80px; text-align:center; padding:8px; background:#f1f5f9; border-radius:12px; cursor:pointer; border:2px solid transparent;" 
-                 id="diaCard_${dataStr}" onclick="toggleDiaSemana('${dataStr}', ${diaSemana})">
-                <div style="font-weight:600; font-size:0.75rem;">${nomeDia}</div>
-                <div style="font-size:0.7rem; color:#64748b;">${diaFormatado}</div>
-                <div id="status_${dataStr}" style="font-size:0.6rem; color:#94a3b8;">❌ Desmarcado</div>
-            </div>
-        `;
-    }
-    html += '</div>';
-    container.innerHTML = html;
-    document.getElementById('horariosSemanaContainer').innerHTML = '';
-    diasSemanaSelecionados = {};
-}
-
-function toggleDiaSemana(dataStr, diaSemana) {
-    const card = document.getElementById(`diaCard_${dataStr}`);
-    const status = document.getElementById(`status_${dataStr}`);
-    
-    if (diasSemanaSelecionados[dataStr]) {
-        delete diasSemanaSelecionados[dataStr];
-        card.style.borderColor = 'transparent';
-        card.style.background = '#f1f5f9';
-        status.textContent = '❌ Desmarcado';
-        status.style.color = '#94a3b8';
-    } else {
-        diasSemanaSelecionados[dataStr] = { diaSemana, dataStr };
-        card.style.borderColor = '#10b981';
-        card.style.background = '#ecfdf5';
-        status.textContent = '✅ Selecionado';
-        status.style.color = '#10b981';
-    }
-    gerarHorariosDiasSelecionados();
-}
-
-function gerarHorariosDiasSelecionados() {
-    const container = document.getElementById('horariosSemanaContainer');
-    const keys = Object.keys(diasSemanaSelecionados);
-    
-    if (keys.length === 0) {
-        container.innerHTML = '<p class="text-muted" style="padding:12px 0;">Selecione pelo menos um dia para definir os horários.</p>';
+    // Verifica se já foi adicionado
+    if (horariosIndividuais.includes(horario)) {
+        alert('Este horário já foi adicionado.');
         return;
     }
-
-    let html = '';
-    keys.forEach(dataStr => {
-        const { diaSemana } = diasSemanaSelecionados[dataStr];
-        const diasNomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-        const [ano, mes, dia] = dataStr.split('-').map(Number);
-        const dataFormatada = String(dia).padStart(2,'0') + '/' + String(mes).padStart(2,'0') + '/' + ano;
-        
-        html += `
-            <div style="background:#f8fafc; padding:14px; border-radius:12px; margin-bottom:12px; border-left:4px solid #f59e0b;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <strong>${diasNomes[diaSemana]} - ${dataFormatada}</strong>
-                    <button class="btn btn-sm btn-danger" onclick="removerDiaSelecionado('${dataStr}')">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                    <div style="flex:1; min-width:120px;">
-                        <label style="font-size:0.75rem;">Início</label>
-                        <input type="time" id="horarioInicio_${dataStr}" value="18:00" style="padding:8px; border-radius:8px; border:1px solid #e2e8f0; width:100%;">
-                    </div>
-                    <div style="flex:1; min-width:120px;">
-                        <label style="font-size:0.75rem;">Fim</label>
-                        <input type="time" id="horarioFim_${dataStr}" value="22:00" style="padding:8px; border-radius:8px; border:1px solid #e2e8f0; width:100%;">
-                    </div>
-                    <div style="flex:0 0 80px;">
-                        <label style="font-size:0.75rem;">Intervalo (min)</label>
-                        <input type="number" id="horarioIntervalo_${dataStr}" value="60" style="padding:8px; border-radius:8px; border:1px solid #e2e8f0; width:100%;">
-                    </div>
-                </div>
-            </div>
-        `;
-    });
-    container.innerHTML = html;
+    
+    horariosIndividuais.push(horario);
+    horariosIndividuais.sort();
+    renderizarHorariosIndividuais();
+    document.getElementById('novoHorario').value = '';
 }
 
-function removerDiaSelecionado(dataStr) {
-    delete diasSemanaSelecionados[dataStr];
-    const card = document.getElementById(`diaCard_${dataStr}`);
-    if (card) {
-        card.style.borderColor = 'transparent';
-        card.style.background = '#f1f5f9';
-        const status = document.getElementById(`status_${dataStr}`);
-        if (status) {
-            status.textContent = '❌ Desmarcado';
-            status.style.color = '#94a3b8';
-        }
-    }
-    gerarHorariosDiasSelecionados();
+function removerHorarioIndividual(horario) {
+    horariosIndividuais = horariosIndividuais.filter(h => h !== horario);
+    renderizarHorariosIndividuais();
 }
 
-// ========== SALVAR DISPONIBILIDADE DA SEMANA ==========
-async function salvarDisponibilidadeSemana() {
-    const dataInicio = document.getElementById('dispDataInicio').value;
-    if (!dataInicio) {
-        alert('Selecione a data de início da semana.');
+function renderizarHorariosIndividuais() {
+    const container = document.getElementById('listaHorariosIndividuais');
+    if (horariosIndividuais.length === 0) {
+        container.innerHTML = '<span class="text-muted" style="font-size:0.8rem;">Nenhum horário adicionado.</span>';
         return;
     }
+    container.innerHTML = horariosIndividuais.map(h => `
+        <span style="background:#0f172a; color:white; padding:4px 12px; border-radius:40px; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;">
+            ${h}
+            <button onclick="removerHorarioIndividual('${h}')" style="background:transparent; border:none; color:#ef4444; cursor:pointer; font-size:0.7rem;">
+                <i class="fas fa-times"></i>
+            </button>
+        </span>
+    `).join('');
+}
 
-    const keys = Object.keys(diasSemanaSelecionados);
-    if (keys.length === 0) {
-        alert('Selecione pelo menos um dia para atender.');
-        return;
-    }
+// ========== SALVAR HORÁRIOS INDIVIDUAIS ==========
+async function salvarHorariosIndividuais() {
+    const data = document.getElementById('dispData').value;
+    if (!data) { alert('Selecione uma data.'); return; }
+    if (horariosIndividuais.length === 0) { alert('Adicione pelo menos um horário.'); return; }
 
-    // Calcular data fim (7 dias depois)
-    const [ano, mes, dia] = dataInicio.split('-').map(Number);
-    const inicioDate = new Date(ano, mes - 1, dia);
-    const fimDate = new Date(inicioDate);
-    fimDate.setDate(fimDate.getDate() + 6);
-    const dataFim = fimDate.getFullYear() + '-' + String(fimDate.getMonth()+1).padStart(2,'0') + '-' + String(fimDate.getDate()).padStart(2,'0');
+    const diaSemana = new Date(data + 'T00:00:00').getDay();
+    const horariosStr = horariosIndividuais.join(',');
 
-    // Verificar se já existe disponibilidade para esta semana
+    // Verificar se já existe registro para esta data
     const { data: existente, error: eExist } = await supabase
         .from('disponibilidade')
         .select('id')
-        .eq('data_inicio_semana', dataInicio)
-        .eq('data_fim_semana', dataFim);
+        .eq('data_especifica', data);
 
     if (eExist) {
-        alert('Erro ao verificar disponibilidade: ' + eExist.message);
+        alert('Erro ao verificar: ' + eExist.message);
         return;
     }
 
     if (existente && existente.length > 0) {
-        if (!confirm('Já existe disponibilidade cadastrada para esta semana. Deseja sobrescrever?')) {
+        if (!confirm('Já existe horário cadastrado para esta data. Deseja sobrescrever?')) {
             return;
         }
         const { error: eDel } = await supabase
             .from('disponibilidade')
             .delete()
-            .eq('data_inicio_semana', dataInicio);
+            .eq('data_especifica', data);
         if (eDel) {
-            alert('Erro ao remover disponibilidade antiga: ' + eDel.message);
+            alert('Erro ao remover: ' + eDel.message);
             return;
         }
-    }
-
-    const registros = [];
-    for (let dataStr of keys) {
-        const inicio = document.getElementById(`horarioInicio_${dataStr}`).value;
-        const fim = document.getElementById(`horarioFim_${dataStr}`).value;
-        const intervalo = parseInt(document.getElementById(`horarioIntervalo_${dataStr}`).value) || 60;
-        const diaSemana = new Date(dataStr + 'T00:00:00').getDay();
-
-        if (!inicio || !fim) {
-            alert(`Preencha o horário para ${dataStr}`);
-            return;
-        }
-        if (inicio >= fim) {
-            alert(`O horário de início deve ser anterior ao fim para ${dataStr}`);
-            return;
-        }
-
-        registros.push({
-            id: genId(),
-            dia_semana: diaSemana,
-            hora_inicio: inicio,
-            hora_fim: fim,
-            intervalo: intervalo,
-            ativo: true,
-            data_especifica: dataStr,
-            data_inicio_semana: dataInicio,
-            data_fim_semana: dataFim,
-            criado_em: nowISO()
-        });
     }
 
     const { error } = await supabase
         .from('disponibilidade')
-        .insert(registros);
+        .insert([{
+            id: genId(),
+            dia_semana: diaSemana,
+            data_especifica: data,
+            horarios_individuais: horariosStr,
+            ativo: true,
+            criado_em: nowISO()
+        }]);
 
     if (error) {
-        alert('Erro ao salvar disponibilidade: ' + error.message);
+        alert('Erro ao salvar: ' + error.message);
         return;
     }
 
-    alert('✅ Disponibilidade da semana salva com sucesso!');
+    alert('✅ Horários salvos com sucesso!');
+    horariosIndividuais = [];
+    renderizarHorariosIndividuais();
+    document.getElementById('dispData').value = '';
     carregarDisponibilidade();
-    resetarFormularioDisponibilidade();
 }
 
-function resetarFormularioDisponibilidade() {
-    diasSemanaSelecionados = {};
-    document.getElementById('horariosSemanaContainer').innerHTML = '';
-    const cards = document.querySelectorAll('[id^="diaCard_"]');
-    cards.forEach(card => {
-        card.style.borderColor = 'transparent';
-        card.style.background = '#f1f5f9';
-        const dataStr = card.id.replace('diaCard_', '');
-        const status = document.getElementById(`status_${dataStr}`);
-        if (status) {
-            status.textContent = '❌ Desmarcado';
-            status.style.color = '#94a3b8';
-        }
-    });
-}
-
-// ========== CARREGAR DISPONIBILIDADES CADASTRADAS ==========
+// ========== CARREGAR HORÁRIOS CADASTRADOS ==========
 async function carregarDisponibilidade() {
     const { data, error } = await supabase
         .from('disponibilidade')
         .select('*')
-        .order('data_inicio_semana', { ascending: false })
-        .order('data_especifica');
+        .order('data_especifica', { ascending: false });
 
     if (error) {
         console.error(error);
@@ -2634,83 +2508,68 @@ async function carregarDisponibilidade() {
 
     const container = document.getElementById('dispLista');
     if (!data || data.length === 0) {
-        container.innerHTML = '<div class="empty">Nenhuma disponibilidade cadastrada</div>';
+        container.innerHTML = '<div class="empty">Nenhum horário cadastrado</div>';
         return;
     }
 
-    const semanas = {};
-    data.forEach(d => {
-        const chave = d.data_inicio_semana || 'sem_data';
-        if (!semanas[chave]) {
-            semanas[chave] = {
-                data_inicio: d.data_inicio_semana,
-                data_fim: d.data_fim_semana,
-                dias: []
-            };
-        }
-        semanas[chave].dias.push(d);
-    });
-
     const diasNomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-    let html = '';
-
-    for (let chave in semanas) {
-        const semana = semanas[chave];
-        if (!semana.data_inicio) continue;
-
-        // Formatar datas sem usar Date
-        const dataInicioArr = semana.data_inicio.split('-');
-        const dataInicioFormatada = dataInicioArr[2] + '/' + dataInicioArr[1] + '/' + dataInicioArr[0];
-        let dataFimFormatada = '';
-        if (semana.data_fim) {
-            const dataFimArr = semana.data_fim.split('-');
-            dataFimFormatada = dataFimArr[2] + '/' + dataFimArr[1] + '/' + dataFimArr[0];
-        } else {
-            dataFimFormatada = dataInicioFormatada;
-        }
-
-        html += `
-            <div style="background:#f8fafc; border-radius:12px; padding:12px; margin-bottom:12px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <strong>📅 Semana: ${dataInicioFormatada} - ${dataFimFormatada}</strong>
-                    <button class="btn btn-sm btn-danger" onclick="excluirSemana('${semana.data_inicio}')">
-                        <i class="fas fa-trash"></i> Excluir semana
-                    </button>
-                </div>
-                <div style="display:flex; flex-wrap:wrap; gap:6px;">
-        `;
-
-        semana.dias.forEach(d => {
-            const dataStr = d.data_especifica || '';
-            let diaNome = diasNomes[d.dia_semana];
-            if (dataStr) {
-                const partes = dataStr.split('-');
-                diaNome += ` (${partes[2]}/${partes[1]}/${partes[0]})`;
-            }
-            html += `
-                <span style="background:${d.ativo ? '#10b981' : '#ef4444'}; color:white; padding:4px 12px; border-radius:40px; font-size:0.7rem; font-weight:500;">
-                    ${diaNome} ${d.hora_inicio}-${d.hora_fim} (${d.intervalo}min)
+    
+    container.innerHTML = data.map(d => {
+        const horarios = d.horarios_individuais ? d.horarios_individuais.split(',') : [];
+        const dataFormatada = d.data_especifica.split('-').reverse().join('/');
+        const diaNome = diasNomes[d.dia_semana] || '';
+        
+        return `
+        <div class="list-item">
+            <div>
+                <strong>${diaNome} - ${dataFormatada}</strong>
+                <br>
+                <span style="display:flex; flex-wrap:wrap; gap:4px; margin-top:4px;">
+                    ${horarios.map(h => `<span style="background:#f1f5f9; padding:2px 10px; border-radius:20px; font-size:0.75rem;">${h}</span>`).join('')}
                 </span>
-            `;
-        });
-
-        html += `</div></div>`;
-    }
-
-    container.innerHTML = html;
+                <span class="badge ${d.ativo?'badge-success':'badge-danger'}">${d.ativo?'Ativo':'Inativo'}</span>
+            </div>
+            <div class="actions">
+                <button class="btn btn-sm btn-accent" onclick="editarHorariosIndividuais('${escapeHtml(d.id)}')">
+                    <i class="fas fa-pen"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="excluirHorariosIndividuais('${escapeHtml(d.id)}')">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        </div>`;
+    }).join('');
 }
 
-// ========== EXCLUIR SEMANA COMPLETA ==========
-async function excluirSemana(dataInicio) {
-    if (!confirm('Excluir toda a disponibilidade desta semana?')) return;
+// ========== EDITAR HORÁRIOS ==========
+async function editarHorariosIndividuais(id) {
+    const { data, error } = await supabase
+        .from('disponibilidade')
+        .select('*')
+        .eq('id', id)
+        .single();
+    
+    if (error) { alert('Erro ao buscar: ' + error.message); return; }
+    
+    document.getElementById('dispData').value = data.data_especifica;
+    horariosIndividuais = data.horarios_individuais ? data.horarios_individuais.split(',') : [];
+    renderizarHorariosIndividuais();
+    
+    // Salvar o ID para edição
+    window.editDisponibilidadeId = id;
+    
+    // Rolar para o topo
+    document.getElementById('tab-disponibilidade').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ========== EXCLUIR HORÁRIOS ==========
+async function excluirHorariosIndividuais(id) {
+    if (!confirm('Excluir estes horários?')) return;
     const { error } = await supabase
         .from('disponibilidade')
         .delete()
-        .eq('data_inicio_semana', dataInicio);
-    if (error) {
-        alert('Erro ao excluir: ' + error.message);
-        return;
-    }
+        .eq('id', id);
+    if (error) { alert('Erro ao excluir: ' + error.message); return; }
     carregarDisponibilidade();
 }
 
