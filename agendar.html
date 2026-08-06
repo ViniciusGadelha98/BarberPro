@@ -543,95 +543,88 @@
         }
 
         // ========== BUSCAR HORÁRIOS (CORRIGIDO PARA NÃO CONVERTER DATA) ==========
-        async function buscarHorarios() {
-            const data = document.getElementById('dataSelect').value;
-            const servicoId = document.getElementById('servicoSelect').value;
-            if (!data || !servicoId) {
-                alert('Selecione um serviço e uma data.');
-                return;
-            }
+        // ========== BUSCAR HORÁRIOS ==========
+async function buscarHorarios() {
+    const data = document.getElementById('dataSelect').value;
+    const servicoId = document.getElementById('servicoSelect').value;
+    if (!data || !servicoId) {
+        alert('Selecione um serviço e uma data.');
+        return;
+    }
 
-            const btn = document.getElementById('btnBuscar');
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
+    const btn = document.getElementById('btnBuscar');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Buscando...';
 
-            dataSelecionada = data;
-            const sel = document.getElementById('servicoSelect');
-            const tempo = parseInt(sel.options[sel.selectedIndex]?.dataset.tempo) || 30;
-            servicoSelecionado = { id: servicoId, tempo };
+    dataSelecionada = data;
+    const sel = document.getElementById('servicoSelect');
+    const tempo = parseInt(sel.options[sel.selectedIndex]?.dataset.tempo) || 30;
+    servicoSelecionado = { id: servicoId, tempo };
 
-            // CORREÇÃO: Calcular o dia da semana sem converter para UTC
-            const [ano, mes, dia] = data.split('-').map(Number);
-            const diaSemana = new Date(ano, mes - 1, dia).getDay();
+    // BUSCAR DISPONIBILIDADE PELA DATA ESPECÍFICA (NOVO)
+    const { data: disp, error: e1 } = await supabase
+        .from('disponibilidade')
+        .select('*')
+        .eq('data_especifica', data)
+        .eq('ativo', true);
 
-            const { data: disp, error: e1 } = await supabase
-                .from('disponibilidade')
-                .select('*')
-                .or(`dia_semana.eq.${diaSemana}, data_especifica.eq.${data}`)
-                .eq('ativo', true);
+    if (e1 || !disp || disp.length === 0) {
+        document.getElementById('horariosContainer').innerHTML = '<div class="sem-horarios">😕 Nenhum atendimento disponível neste dia.</div>';
+        document.getElementById('formAgendamento').classList.add('hidden');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-search"></i> Ver horários';
+        return;
+    }
 
-            if (e1 || !disp || disp.length === 0) {
-                document.getElementById('horariosContainer').innerHTML = '<div class="sem-horarios">😕 Nenhum atendimento disponível neste dia.</div>';
-                document.getElementById('formAgendamento').classList.add('hidden');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-search"></i> Ver horários';
-                return;
-            }
+    // Buscar agendamentos existentes (não cancelados)
+    const { data: agendamentos, error: e2 } = await supabase
+        .from('agendamentos')
+        .select('id, hora, servico_id')
+        .eq('data', data)
+        .not('status', 'eq', 'cancelado');
+    if (e2) console.error(e2);
 
-            const { data: agendamentos, error: e2 } = await supabase
-                .from('agendamentos')
-                .select('id, hora, servico_id')
-                .eq('data', data)
-                .not('status', 'eq', 'cancelado');
-            if (e2) console.error(e2);
+    // Lista de horários ocupados
+    const horariosOcupados = agendamentos ? agendamentos.map(a => a.hora) : [];
 
-            const slots = [];
-            disp.forEach(d => {
-                const inicio = d.hora_inicio.split(':').map(Number);
-                const fim = d.hora_fim.split(':').map(Number);
-                const intervalo = d.intervalo || 60;
-                let horaAtual = new Date(1970, 0, 1, inicio[0], inicio[1]);
-                const horaFim = new Date(1970, 0, 1, fim[0], fim[1]);
-
-                while (horaAtual < horaFim) {
-                    const horaStr = horaAtual.toTimeString().slice(0, 5);
-                    let conflito = false;
-                    for (let a of agendamentos) {
-                        const aHora = new Date(1970, 0, 1, ...a.hora.split(':').map(Number));
-                        const aDur = 30;
-                        const aFim = new Date(aHora.getTime() + aDur * 60000);
-                        const slotFim = new Date(horaAtual.getTime() + tempo * 60000);
-                        if ( (horaAtual < aFim && slotFim > aHora) ) {
-                            conflito = true;
-                            break;
-                        }
-                    }
-                    if (!conflito) slots.push(horaStr);
-                    horaAtual.setMinutes(horaAtual.getMinutes() + intervalo);
+    // Extrair horários individuais
+    let horariosDisponiveis = [];
+    disp.forEach(d => {
+        if (d.horarios_individuais) {
+            const horarios = d.horarios_individuais.split(',');
+            horarios.forEach(hora => {
+                if (!horariosOcupados.includes(hora)) {
+                    horariosDisponiveis.push(hora);
                 }
             });
-
-            const container = document.getElementById('horariosContainer');
-            if (slots.length === 0) {
-                container.innerHTML = '<div class="sem-horarios">⏰ Nenhum horário disponível para este serviço neste dia.</div>';
-                document.getElementById('formAgendamento').classList.add('hidden');
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-search"></i> Ver horários';
-                return;
-            }
-
-            container.innerHTML = slots.map(h =>
-                `<button class="horario-livre" data-hora="${h}" onclick="selecionarHorario(this, '${h}')">${h}</button>`
-            ).join('');
-
-            document.getElementById('formAgendamento').classList.remove('hidden');
-            document.getElementById('msgErro').textContent = '';
-            document.getElementById('msgSucesso').classList.add('hidden');
-            horarioSelecionado = null;
-
-            btn.disabled = false;
-            btn.innerHTML = '<i class="fas fa-search"></i> Ver horários';
         }
+    });
+
+    // Ordenar
+    horariosDisponiveis.sort();
+
+    const container = document.getElementById('horariosContainer');
+    if (horariosDisponiveis.length === 0) {
+        container.innerHTML = '<div class="sem-horarios">⏰ Nenhum horário disponível para este dia.</div>';
+        document.getElementById('formAgendamento').classList.add('hidden');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-search"></i> Ver horários';
+        return;
+    }
+
+    // Exibir horários
+    container.innerHTML = horariosDisponiveis.map(h =>
+        `<button class="horario-livre" data-hora="${h}" onclick="selecionarHorario(this, '${h}')">${h}</button>`
+    ).join('');
+
+    document.getElementById('formAgendamento').classList.remove('hidden');
+    document.getElementById('msgErro').textContent = '';
+    document.getElementById('msgSucesso').classList.add('hidden');
+    horarioSelecionado = null;
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-search"></i> Ver horários';
+}
 
         // ========== SELECIONAR HORÁRIO ==========
         function selecionarHorario(btn, hora) {
