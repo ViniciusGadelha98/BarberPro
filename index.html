@@ -2312,7 +2312,8 @@ async function atualizarDashboard() {
         } else {
             container.innerHTML = futuros.map(a => {
                 const nome = clientesMap[a.cliente_id] || 'Cliente';
-                const dataFormatada = formatDateBR(a.data);
+                const partesData = a.data.split('-');
+                const dataFormatada = `${partesData[2]}/${partesData[1]}/${partesData[0]}`;
                 return `<div class="list-item"><span>${escapeHtml(dataFormatada)} ${escapeHtml(a.hora)} - ${escapeHtml(nome)}</span><span class="badge badge-info">${escapeHtml(a.status || 'Agendado')}</span></div>`;
             }).join('');
         }
