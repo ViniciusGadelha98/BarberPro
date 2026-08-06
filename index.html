@@ -517,25 +517,33 @@
             </div>
         </div>
 
-        <!-- ==================== ABA DISPONIBILIDADE (NOVA) ==================== -->
+        <!-- ==================== ABA DISPONIBILIDADE (NOVA VERSÃO POR SEMANA) ==================== -->
         <div id="tab-disponibilidade" class="tab-page">
             <div class="card">
-                <div class="card-title"><i class="fas fa-clock"></i> Configurar Horários</div>
-                <select id="dispDia">
-                    <option value="0">Domingo</option><option value="1">Segunda</option>
-                    <option value="2">Terça</option><option value="3">Quarta</option>
-                    <option value="4">Quinta</option><option value="5">Sexta</option>
-                    <option value="6">Sábado</option>
-                </select>
-                <label>Início</label><input type="time" id="dispInicio" value="18:00">
-                <label>Fim</label><input type="time" id="dispFim" value="22:00">
-                <label>Intervalo (min)</label><input type="number" id="dispIntervalo" value="60">
-                <label>Data específica (opcional)</label><input type="date" id="dispDataEsp">
-                <button class="btn btn-primary" onclick="salvarDisponibilidade()"><i class="fas fa-save"></i> Salvar</button>
+                <div class="card-title"><i class="fas fa-calendar-week"></i> Definir Disponibilidade da Semana</div>
+                <p class="text-muted">Defina os dias e horários que você vai atender nesta semana.</p>
+                
+                <label>📅 Início da semana</label>
+                <input type="date" id="dispDataInicio" onchange="carregarDiasSemana()">
+                
+                <div id="diasSemanaContainer">
+                    <!-- Os dias da semana serão gerados aqui -->
+                </div>
+
+                <hr style="margin: 16px 0;">
+
+                <div id="horariosSemanaContainer">
+                    <!-- Para cada dia selecionado, aparecerá um card para definir horários -->
+                </div>
+
+                <button class="btn btn-primary" onclick="salvarDisponibilidadeSemana()">
+                    <i class="fas fa-save"></i> Salvar Disponibilidade da Semana
+                </button>
             </div>
+
             <div class="card">
-                <div class="card-title"><i class="fas fa-list"></i> Horários Cadastrados</div>
-                <div id="dispLista"><div class="empty">Nenhum</div></div>
+                <div class="card-title"><i class="fas fa-list"></i> Disponibilidades Cadastradas</div>
+                <div id="dispLista"><div class="empty">Nenhuma disponibilidade cadastrada</div></div>
             </div>
         </div>
 
@@ -2379,62 +2387,313 @@ window.addEventListener('resize', function () {
 });
 
 // ================================================================
-//  DISPONIBILIDADE (NOVA FUNCIONALIDADE)
+//  DISPONIBILIDADE POR SEMANA (NOVA VERSÃO)
 // ================================================================
-async function salvarDisponibilidade() {
-    const dia = parseInt(document.getElementById('dispDia').value);
-    const inicio = document.getElementById('dispInicio').value;
-    const fim = document.getElementById('dispFim').value;
-    const intervalo = parseInt(document.getElementById('dispIntervalo').value) || 60;
-    const dataEsp = document.getElementById('dispDataEsp').value || null;
-    if (isNaN(dia) || !inicio || !fim) { alert('Preencha dia, início e fim'); return; }
-    if (inicio >= fim) { alert('O horário de início deve ser anterior ao fim.'); return; }
 
-    const { error } = await supabase
-        .from('disponibilidade')
-        .insert([{ dia_semana: dia, hora_inicio: inicio, hora_fim: fim, intervalo: intervalo, ativo: true, data_especifica: dataEsp }]);
-    if (error) { alert('Erro ao salvar: ' + error.message); return; }
-    alert('Disponibilidade salva!');
-    document.getElementById('dispDataEsp').value = '';
-    carregarDisponibilidade();
+let diasSemanaSelecionados = {};
+
+function carregarDiasSemana() {
+    const dataInicio = document.getElementById('dispDataInicio').value;
+    if (!dataInicio) return;
+
+    const inicio = new Date(dataInicio + 'T00:00:00');
+    const container = document.getElementById('diasSemanaContainer');
+    const diasNomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    let html = '<div style="display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0;">';
+    
+    // Gera os 7 dias da semana
+    for (let i = 0; i < 7; i++) {
+        const data = new Date(inicio);
+        data.setDate(inicio.getDate() + i);
+        const dataStr = data.toISOString().split('T')[0];
+        const diaSemana = data.getDay();
+        const nomeDia = diasNomes[diaSemana];
+        
+        html += `
+            <div style="flex:1; min-width:80px; text-align:center; padding:8px; background:#f1f5f9; border-radius:12px; cursor:pointer; border:2px solid transparent;" 
+                 id="diaCard_${dataStr}" onclick="toggleDiaSemana('${dataStr}', ${diaSemana})">
+                <div style="font-weight:600; font-size:0.75rem;">${nomeDia}</div>
+                <div style="font-size:0.7rem; color:#64748b;">${dataStr.split('-')[2]}/${dataStr.split('-')[1]}</div>
+                <div id="status_${dataStr}" style="font-size:0.6rem; color:#94a3b8;">❌ Desmarcado</div>
+            </div>
+        `;
+    }
+    html += '</div>';
+    container.innerHTML = html;
+    document.getElementById('horariosSemanaContainer').innerHTML = '';
 }
 
+function toggleDiaSemana(dataStr, diaSemana) {
+    const card = document.getElementById(`diaCard_${dataStr}`);
+    const status = document.getElementById(`status_${dataStr}`);
+    
+    if (diasSemanaSelecionados[dataStr]) {
+        delete diasSemanaSelecionados[dataStr];
+        card.style.borderColor = 'transparent';
+        card.style.background = '#f1f5f9';
+        status.textContent = '❌ Desmarcado';
+        status.style.color = '#94a3b8';
+    } else {
+        diasSemanaSelecionados[dataStr] = { diaSemana, dataStr };
+        card.style.borderColor = '#10b981';
+        card.style.background = '#ecfdf5';
+        status.textContent = '✅ Selecionado';
+        status.style.color = '#10b981';
+    }
+    gerarHorariosDiasSelecionados();
+}
+
+function gerarHorariosDiasSelecionados() {
+    const container = document.getElementById('horariosSemanaContainer');
+    const keys = Object.keys(diasSemanaSelecionados);
+    
+    if (keys.length === 0) {
+        container.innerHTML = '<p class="text-muted" style="padding:12px 0;">Selecione pelo menos um dia para definir os horários.</p>';
+        return;
+    }
+
+    let html = '';
+    keys.forEach(dataStr => {
+        const { diaSemana } = diasSemanaSelecionados[dataStr];
+        const diasNomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+        const dataFormatada = `${dataStr.split('-')[2]}/${dataStr.split('-')[1]}/${dataStr.split('-')[0]}`;
+        
+        html += `
+            <div style="background:#f8fafc; padding:14px; border-radius:12px; margin-bottom:12px; border-left:4px solid #f59e0b;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <strong>${diasNomes[diaSemana]} - ${dataFormatada}</strong>
+                    <button class="btn btn-sm btn-danger" onclick="removerDiaSelecionado('${dataStr}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                    <div style="flex:1; min-width:120px;">
+                        <label style="font-size:0.75rem;">Início</label>
+                        <input type="time" id="horarioInicio_${dataStr}" value="18:00" style="padding:8px; border-radius:8px; border:1px solid #e2e8f0; width:100%;">
+                    </div>
+                    <div style="flex:1; min-width:120px;">
+                        <label style="font-size:0.75rem;">Fim</label>
+                        <input type="time" id="horarioFim_${dataStr}" value="22:00" style="padding:8px; border-radius:8px; border:1px solid #e2e8f0; width:100%;">
+                    </div>
+                    <div style="flex:0 0 80px;">
+                        <label style="font-size:0.75rem;">Intervalo (min)</label>
+                        <input type="number" id="horarioIntervalo_${dataStr}" value="60" style="padding:8px; border-radius:8px; border:1px solid #e2e8f0; width:100%;">
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    container.innerHTML = html;
+}
+
+function removerDiaSelecionado(dataStr) {
+    delete diasSemanaSelecionados[dataStr];
+    const card = document.getElementById(`diaCard_${dataStr}`);
+    if (card) {
+        card.style.borderColor = 'transparent';
+        card.style.background = '#f1f5f9';
+        const status = document.getElementById(`status_${dataStr}`);
+        if (status) {
+            status.textContent = '❌ Desmarcado';
+            status.style.color = '#94a3b8';
+        }
+    }
+    gerarHorariosDiasSelecionados();
+}
+
+// ========== SALVAR DISPONIBILIDADE DA SEMANA ==========
+async function salvarDisponibilidadeSemana() {
+    const dataInicio = document.getElementById('dispDataInicio').value;
+    if (!dataInicio) {
+        alert('Selecione a data de início da semana.');
+        return;
+    }
+
+    const keys = Object.keys(diasSemanaSelecionados);
+    if (keys.length === 0) {
+        alert('Selecione pelo menos um dia para atender.');
+        return;
+    }
+
+    // Calcular data fim (7 dias depois)
+    const inicioDate = new Date(dataInicio + 'T00:00:00');
+    const fimDate = new Date(inicioDate);
+    fimDate.setDate(fimDate.getDate() + 6);
+    const dataFim = fimDate.toISOString().split('T')[0];
+
+    // Verificar se já existe disponibilidade para esta semana
+    const { data: existente, error: eExist } = await supabase
+        .from('disponibilidade')
+        .select('id')
+        .eq('data_inicio_semana', dataInicio)
+        .eq('data_fim_semana', dataFim);
+
+    if (eExist) {
+        alert('Erro ao verificar disponibilidade: ' + eExist.message);
+        return;
+    }
+
+    // Se já existe, pergunta se quer sobrescrever
+    if (existente && existente.length > 0) {
+        if (!confirm('Já existe disponibilidade cadastrada para esta semana. Deseja sobrescrever?')) {
+            return;
+        }
+        // Apagar os registros antigos
+        const { error: eDel } = await supabase
+            .from('disponibilidade')
+            .delete()
+            .eq('data_inicio_semana', dataInicio);
+        if (eDel) {
+            alert('Erro ao remover disponibilidade antiga: ' + eDel.message);
+            return;
+        }
+    }
+
+    // Coletar todos os dias selecionados com seus horários
+    const registros = [];
+    for (let dataStr of keys) {
+        const inicio = document.getElementById(`horarioInicio_${dataStr}`).value;
+        const fim = document.getElementById(`horarioFim_${dataStr}`).value;
+        const intervalo = parseInt(document.getElementById(`horarioIntervalo_${dataStr}`).value) || 60;
+        const diaSemana = new Date(dataStr + 'T00:00:00').getDay();
+
+        if (!inicio || !fim) {
+            alert(`Preencha o horário para ${dataStr}`);
+            return;
+        }
+        if (inicio >= fim) {
+            alert(`O horário de início deve ser anterior ao fim para ${dataStr}`);
+            return;
+        }
+
+        registros.push({
+            id: genId(),
+            dia_semana: diaSemana,
+            hora_inicio: inicio,
+            hora_fim: fim,
+            intervalo: intervalo,
+            ativo: true,
+            data_especifica: dataStr,           // guarda a data específica
+            data_inicio_semana: dataInicio,
+            data_fim_semana: dataFim,
+            criado_em: nowISO()
+        });
+    }
+
+    // Salvar todos os registros
+    const { error } = await supabase
+        .from('disponibilidade')
+        .insert(registros);
+
+    if (error) {
+        alert('Erro ao salvar disponibilidade: ' + error.message);
+        return;
+    }
+
+    alert('✅ Disponibilidade da semana salva com sucesso!');
+    carregarDisponibilidade();
+    resetarFormularioDisponibilidade();
+}
+
+function resetarFormularioDisponibilidade() {
+    diasSemanaSelecionados = {};
+    document.getElementById('horariosSemanaContainer').innerHTML = '';
+    const cards = document.querySelectorAll('[id^="diaCard_"]');
+    cards.forEach(card => {
+        card.style.borderColor = 'transparent';
+        card.style.background = '#f1f5f9';
+        const dataStr = card.id.replace('diaCard_', '');
+        const status = document.getElementById(`status_${dataStr}`);
+        if (status) {
+            status.textContent = '❌ Desmarcado';
+            status.style.color = '#94a3b8';
+        }
+    });
+}
+
+// ========== CARREGAR DISPONIBILIDADES CADASTRADAS ==========
 async function carregarDisponibilidade() {
     const { data, error } = await supabase
         .from('disponibilidade')
         .select('*')
-        .order('dia_semana')
-        .order('data_especifica', { ascending: true, nullsFirst: true });
-    if (error) { console.error(error); return; }
-    const container = document.getElementById('dispLista');
-    if (!data || data.length === 0) {
-        container.innerHTML = '<div class="empty">Nenhum horário cadastrado</div>';
+        .order('data_inicio_semana', { ascending: false })
+        .order('data_especifica');
+
+    if (error) {
+        console.error(error);
         return;
     }
-    const dias = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
-    container.innerHTML = data.map(d => {
-        const diaLabel = d.data_especifica ? formatDateBR(d.data_especifica) : dias[d.dia_semana];
-        return `
-        <div class="list-item">
-            <div><strong>${diaLabel}</strong><br>${d.hora_inicio} - ${d.hora_fim} (a cada ${d.intervalo}min) <span class="badge ${d.ativo?'badge-success':'badge-danger'}">${d.ativo?'Ativo':'Inativo'}</span></div>
-            <div class="actions">
-                <button class="btn btn-sm btn-accent" onclick="toggleDisponibilidade('${d.id}', ${!d.ativo})"><i class="fas ${d.ativo?'fa-pause':'fa-play'}"></i></button>
-                <button class="btn btn-sm btn-danger" onclick="excluirDisponibilidade('${d.id}')"><i class="fas fa-trash"></i></button>
-            </div>
-        </div>`;
-    }).join('');
+
+    const container = document.getElementById('dispLista');
+    if (!data || data.length === 0) {
+        container.innerHTML = '<div class="empty">Nenhuma disponibilidade cadastrada</div>';
+        return;
+    }
+
+    // Agrupar por semana
+    const semanas = {};
+    data.forEach(d => {
+        const chave = d.data_inicio_semana || 'sem_data';
+        if (!semanas[chave]) {
+            semanas[chave] = {
+                data_inicio: d.data_inicio_semana,
+                data_fim: d.data_fim_semana,
+                dias: []
+            };
+        }
+        semanas[chave].dias.push(d);
+    });
+
+    const diasNomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
+    let html = '';
+
+    for (let chave in semanas) {
+        const semana = semanas[chave];
+        if (!semana.data_inicio) continue;
+
+        const dataInicio = semana.data_inicio.split('-').reverse().join('/');
+        const dataFim = semana.data_fim ? semana.data_fim.split('-').reverse().join('/') : dataInicio;
+
+        html += `
+            <div style="background:#f8fafc; border-radius:12px; padding:12px; margin-bottom:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                    <strong>📅 Semana: ${dataInicio} - ${dataFim}</strong>
+                    <button class="btn btn-sm btn-danger" onclick="excluirSemana('${semana.data_inicio}')">
+                        <i class="fas fa-trash"></i> Excluir semana
+                    </button>
+                </div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px;">
+        `;
+
+        semana.dias.forEach(d => {
+            const dataStr = d.data_especifica || '';
+            const diaNome = dataStr ? `${diasNomes[d.dia_semana]} (${dataStr.split('-').reverse().join('/')})` : diasNomes[d.dia_semana];
+            html += `
+                <span style="background:${d.ativo ? '#10b981' : '#ef4444'}; color:white; padding:4px 12px; border-radius:40px; font-size:0.7rem; font-weight:500;">
+                    ${diaNome} ${d.hora_inicio}-${d.hora_fim} (${d.intervalo}min)
+                </span>
+            `;
+        });
+
+        html += `</div></div>`;
+    }
+
+    container.innerHTML = html;
 }
 
-async function toggleDisponibilidade(id, ativo) {
-    const { error } = await supabase.from('disponibilidade').update({ ativo }).eq('id', id);
-    if (error) { alert('Erro: '+error.message); return; }
-    carregarDisponibilidade();
-}
+// ========== EXCLUIR SEMANA COMPLETA ==========
+async function excluirSemana(dataInicio) {
+    if (!confirm('Excluir toda a disponibilidade desta semana?')) return;
+    
+    const { error } = await supabase
+        .from('disponibilidade')
+        .delete()
+        .eq('data_inicio_semana', dataInicio);
 
-async function excluirDisponibilidade(id) {
-    if (!confirm('Excluir esta disponibilidade?')) return;
-    const { error } = await supabase.from('disponibilidade').delete().eq('id', id);
-    if (error) { alert('Erro: '+error.message); return; }
+    if (error) {
+        alert('Erro ao excluir: ' + error.message);
+        return;
+    }
     carregarDisponibilidade();
 }
 

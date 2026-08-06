@@ -561,6 +561,7 @@
             const tempo = parseInt(sel.options[sel.selectedIndex]?.dataset.tempo) || 30;
             servicoSelecionado = { id: servicoId, tempo };
 
+            // Busca disponibilidade: dia da semana fixo OU data específica
             const diaSemana = new Date(data + 'T00:00:00').getDay();
             const { data: disp, error: e1 } = await supabase
                 .from('disponibilidade')
@@ -596,7 +597,7 @@
                     let conflito = false;
                     for (let a of agendamentos) {
                         const aHora = new Date(1970, 0, 1, ...a.hora.split(':').map(Number));
-                        const aDur = 30;
+                        const aDur = 30; // simplificado (poderia buscar a duração real)
                         const aFim = new Date(aHora.getTime() + aDur * 60000);
                         const slotFim = new Date(horaAtual.getTime() + tempo * 60000);
                         if ( (horaAtual < aFim && slotFim > aHora) ) {
@@ -655,7 +656,7 @@
             btnConfirm.disabled = true;
             btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Confirmando...';
 
-            // Verificar conflito
+            // Verificar conflito novamente (segurança)
             const { data: agendamentos, error: eAg } = await supabase
                 .from('agendamentos')
                 .select('id, hora, servico_id')
