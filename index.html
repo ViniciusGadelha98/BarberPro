@@ -1783,7 +1783,9 @@ async function carregarSelectsPlanos() {
 // ================================================================
 async function carregarAgendaDia() {
     const data = document.getElementById('agendaData').value || today();
-    document.getElementById('agendaTituloDia').innerHTML = `<i class="fas fa-calendar"></i> Agenda - ${formatDateBR(data)}`;
+    // CORREÇÃO: exibir data sem converter para Date
+    const dataExibicao = data.split('-').reverse().join('/');
+    document.getElementById('agendaTituloDia').innerHTML = `<i class="fas fa-calendar"></i> Agenda - ${dataExibicao}`;
 
     const { data: agendamentos, error } = await supabase
         .from('agendamentos')
@@ -1820,9 +1822,13 @@ async function carregarAgendaDia() {
         const clienteNome = clientesMap[a.cliente_id] || 'Cliente';
         const servico = servicosMap[a.servico_id];
         const servHtml = servico ? ` ${escapeHtml(servico.nome)} (${servico ? servico.tempo||30 : 30}min)` : '';
+        const obsHtml = a.observacao ? `<br><span class="text-muted" style="font-size:0.8rem;">📝 ${escapeHtml(a.observacao)}</span>` : '';
         return `
         <div class="list-item">
-            <div class="info"><strong>${escapeHtml(a.hora)}</strong> - ${escapeHtml(clienteNome)}${servHtml}</div>
+            <div class="info">
+                <strong>${escapeHtml(a.hora)}</strong> - ${escapeHtml(clienteNome)}${servHtml}
+                ${obsHtml}
+            </div>
             <div class="actions">
                 <button class="btn btn-sm btn-accent" onclick="editarAgendamento('${escapeHtml(a.id)}')"><i class="fas fa-pen"></i></button>
                 <button class="btn btn-sm btn-success" onclick="marcarRealizado('${escapeHtml(a.id)}')"><i class="fas fa-check"></i></button>
@@ -2396,24 +2402,27 @@ function carregarDiasSemana() {
     const dataInicio = document.getElementById('dispDataInicio').value;
     if (!dataInicio) return;
 
-    const inicio = new Date(dataInicio + 'T00:00:00');
+    // Parse manual da data para evitar fuso
+    const [ano, mes, dia] = dataInicio.split('-').map(Number);
+    const inicio = new Date(ano, mes - 1, dia);
+
     const container = document.getElementById('diasSemanaContainer');
     const diasNomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
     let html = '<div style="display:flex; gap:8px; flex-wrap:wrap; margin: 8px 0;">';
     
-    // Gera os 7 dias da semana
     for (let i = 0; i < 7; i++) {
         const data = new Date(inicio);
         data.setDate(inicio.getDate() + i);
-        const dataStr = data.toISOString().split('T')[0];
+        const dataStr = data.getFullYear() + '-' + String(data.getMonth()+1).padStart(2,'0') + '-' + String(data.getDate()).padStart(2,'0');
         const diaSemana = data.getDay();
         const nomeDia = diasNomes[diaSemana];
+        const diaFormatado = String(data.getDate()).padStart(2,'0') + '/' + String(data.getMonth()+1).padStart(2,'0');
         
         html += `
             <div style="flex:1; min-width:80px; text-align:center; padding:8px; background:#f1f5f9; border-radius:12px; cursor:pointer; border:2px solid transparent;" 
                  id="diaCard_${dataStr}" onclick="toggleDiaSemana('${dataStr}', ${diaSemana})">
                 <div style="font-weight:600; font-size:0.75rem;">${nomeDia}</div>
-                <div style="font-size:0.7rem; color:#64748b;">${dataStr.split('-')[2]}/${dataStr.split('-')[1]}</div>
+                <div style="font-size:0.7rem; color:#64748b;">${diaFormatado}</div>
                 <div id="status_${dataStr}" style="font-size:0.6rem; color:#94a3b8;">❌ Desmarcado</div>
             </div>
         `;
@@ -2421,6 +2430,7 @@ function carregarDiasSemana() {
     html += '</div>';
     container.innerHTML = html;
     document.getElementById('horariosSemanaContainer').innerHTML = '';
+    diasSemanaSelecionados = {};
 }
 
 function toggleDiaSemana(dataStr, diaSemana) {
@@ -2456,7 +2466,8 @@ function gerarHorariosDiasSelecionados() {
     keys.forEach(dataStr => {
         const { diaSemana } = diasSemanaSelecionados[dataStr];
         const diasNomes = ['Domingo', 'Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta', 'Sábado'];
-        const dataFormatada = `${dataStr.split('-')[2]}/${dataStr.split('-')[1]}/${dataStr.split('-')[0]}`;
+        const [ano, mes, dia] = dataStr.split('-').map(Number);
+        const dataFormatada = String(dia).padStart(2,'0') + '/' + String(mes).padStart(2,'0') + '/' + ano;
         
         html += `
             <div style="background:#f8fafc; padding:14px; border-radius:12px; margin-bottom:12px; border-left:4px solid #f59e0b;">
@@ -2516,10 +2527,11 @@ async function salvarDisponibilidadeSemana() {
     }
 
     // Calcular data fim (7 dias depois)
-    const inicioDate = new Date(dataInicio + 'T00:00:00');
+    const [ano, mes, dia] = dataInicio.split('-').map(Number);
+    const inicioDate = new Date(ano, mes - 1, dia);
     const fimDate = new Date(inicioDate);
     fimDate.setDate(fimDate.getDate() + 6);
-    const dataFim = fimDate.toISOString().split('T')[0];
+    const dataFim = fimDate.getFullYear() + '-' + String(fimDate.getMonth()+1).padStart(2,'0') + '-' + String(fimDate.getDate()).padStart(2,'0');
 
     // Verificar se já existe disponibilidade para esta semana
     const { data: existente, error: eExist } = await supabase
@@ -2533,12 +2545,10 @@ async function salvarDisponibilidadeSemana() {
         return;
     }
 
-    // Se já existe, pergunta se quer sobrescrever
     if (existente && existente.length > 0) {
         if (!confirm('Já existe disponibilidade cadastrada para esta semana. Deseja sobrescrever?')) {
             return;
         }
-        // Apagar os registros antigos
         const { error: eDel } = await supabase
             .from('disponibilidade')
             .delete()
@@ -2549,7 +2559,6 @@ async function salvarDisponibilidadeSemana() {
         }
     }
 
-    // Coletar todos os dias selecionados com seus horários
     const registros = [];
     for (let dataStr of keys) {
         const inicio = document.getElementById(`horarioInicio_${dataStr}`).value;
@@ -2573,14 +2582,13 @@ async function salvarDisponibilidadeSemana() {
             hora_fim: fim,
             intervalo: intervalo,
             ativo: true,
-            data_especifica: dataStr,           // guarda a data específica
+            data_especifica: dataStr,
             data_inicio_semana: dataInicio,
             data_fim_semana: dataFim,
             criado_em: nowISO()
         });
     }
 
-    // Salvar todos os registros
     const { error } = await supabase
         .from('disponibilidade')
         .insert(registros);
@@ -2630,7 +2638,6 @@ async function carregarDisponibilidade() {
         return;
     }
 
-    // Agrupar por semana
     const semanas = {};
     data.forEach(d => {
         const chave = d.data_inicio_semana || 'sem_data';
@@ -2651,13 +2658,21 @@ async function carregarDisponibilidade() {
         const semana = semanas[chave];
         if (!semana.data_inicio) continue;
 
-        const dataInicio = semana.data_inicio.split('-').reverse().join('/');
-        const dataFim = semana.data_fim ? semana.data_fim.split('-').reverse().join('/') : dataInicio;
+        // Formatar datas sem usar Date
+        const dataInicioArr = semana.data_inicio.split('-');
+        const dataInicioFormatada = dataInicioArr[2] + '/' + dataInicioArr[1] + '/' + dataInicioArr[0];
+        let dataFimFormatada = '';
+        if (semana.data_fim) {
+            const dataFimArr = semana.data_fim.split('-');
+            dataFimFormatada = dataFimArr[2] + '/' + dataFimArr[1] + '/' + dataFimArr[0];
+        } else {
+            dataFimFormatada = dataInicioFormatada;
+        }
 
         html += `
             <div style="background:#f8fafc; border-radius:12px; padding:12px; margin-bottom:12px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                    <strong>📅 Semana: ${dataInicio} - ${dataFim}</strong>
+                    <strong>📅 Semana: ${dataInicioFormatada} - ${dataFimFormatada}</strong>
                     <button class="btn btn-sm btn-danger" onclick="excluirSemana('${semana.data_inicio}')">
                         <i class="fas fa-trash"></i> Excluir semana
                     </button>
@@ -2667,7 +2682,11 @@ async function carregarDisponibilidade() {
 
         semana.dias.forEach(d => {
             const dataStr = d.data_especifica || '';
-            const diaNome = dataStr ? `${diasNomes[d.dia_semana]} (${dataStr.split('-').reverse().join('/')})` : diasNomes[d.dia_semana];
+            let diaNome = diasNomes[d.dia_semana];
+            if (dataStr) {
+                const partes = dataStr.split('-');
+                diaNome += ` (${partes[2]}/${partes[1]}/${partes[0]})`;
+            }
             html += `
                 <span style="background:${d.ativo ? '#10b981' : '#ef4444'}; color:white; padding:4px 12px; border-radius:40px; font-size:0.7rem; font-weight:500;">
                     ${diaNome} ${d.hora_inicio}-${d.hora_fim} (${d.intervalo}min)
@@ -2684,12 +2703,10 @@ async function carregarDisponibilidade() {
 // ========== EXCLUIR SEMANA COMPLETA ==========
 async function excluirSemana(dataInicio) {
     if (!confirm('Excluir toda a disponibilidade desta semana?')) return;
-    
     const { error } = await supabase
         .from('disponibilidade')
         .delete()
         .eq('data_inicio_semana', dataInicio);
-
     if (error) {
         alert('Erro ao excluir: ' + error.message);
         return;

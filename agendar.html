@@ -429,7 +429,6 @@
             sel.innerHTML = '<option value="">-- Selecione um serviço --</option>';
             if (data && data.length > 0) {
                 data.forEach(s => {
-                    // Mostra apenas NOME e CATEGORIA (se tiver)
                     const nomeExibicao = s.categoria ? `${s.nome} - ${s.categoria}` : s.nome;
                     sel.innerHTML += `<option value="${s.id}" data-tempo="${s.tempo || 30}">${nomeExibicao}</option>`;
                 });
@@ -543,7 +542,7 @@
             document.getElementById('msgErro').textContent = '';
         }
 
-        // ========== BUSCAR HORÁRIOS ==========
+        // ========== BUSCAR HORÁRIOS (CORRIGIDO PARA NÃO CONVERTER DATA) ==========
         async function buscarHorarios() {
             const data = document.getElementById('dataSelect').value;
             const servicoId = document.getElementById('servicoSelect').value;
@@ -561,8 +560,10 @@
             const tempo = parseInt(sel.options[sel.selectedIndex]?.dataset.tempo) || 30;
             servicoSelecionado = { id: servicoId, tempo };
 
-            // Busca disponibilidade: dia da semana fixo OU data específica
-            const diaSemana = new Date(data + 'T00:00:00').getDay();
+            // CORREÇÃO: Calcular o dia da semana sem converter para UTC
+            const [ano, mes, dia] = data.split('-').map(Number);
+            const diaSemana = new Date(ano, mes - 1, dia).getDay();
+
             const { data: disp, error: e1 } = await supabase
                 .from('disponibilidade')
                 .select('*')
@@ -597,7 +598,7 @@
                     let conflito = false;
                     for (let a of agendamentos) {
                         const aHora = new Date(1970, 0, 1, ...a.hora.split(':').map(Number));
-                        const aDur = 30; // simplificado (poderia buscar a duração real)
+                        const aDur = 30;
                         const aFim = new Date(aHora.getTime() + aDur * 60000);
                         const slotFim = new Date(horaAtual.getTime() + tempo * 60000);
                         if ( (horaAtual < aFim && slotFim > aHora) ) {
