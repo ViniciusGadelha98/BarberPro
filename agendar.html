@@ -784,5 +784,13 @@ async function buscarHorarios() {
             document.getElementById('dataSelect').value = hoje;
         };
     </script>
+    <script>
+  // Registrar service worker do cliente
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(() => console.log('SW cliente registrado'))
+      .catch(err => console.error('Erro SW cliente:', err));
+  }
+    </script>
 </body>
 </html>

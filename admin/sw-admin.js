@@ -2,9 +2,7 @@
 const CACHE_NAME = 'barberpro-admin-v1';
 const urlsToCache = [
   '/admin/index.html',
-  '/admin/manifest-admin.json',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
-  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js'
+  '/admin/manifest-admin.json'
 ];
 
 self.addEventListener('install', event => {
@@ -23,6 +21,7 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  // Toma o controle imediatamente
   self.clients.claim();
 });
 

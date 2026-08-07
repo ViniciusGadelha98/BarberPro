@@ -2865,5 +2865,35 @@ async function globalSearch(texto) {
 // ================================================================
 initLogin();
 </script>
+<script>
+  // ================================================================
+  //  REGISTRA O SERVICE WORKER DO ADMIN (ESCOPO /admin/)
+  // ================================================================
+  if ('serviceWorker' in navigator) {
+    // Desregistra qualquer service worker existente que possa conflitar
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for (let registration of registrations) {
+        // Se não for o SW do admin, desregistra
+        if (!registration.active || !registration.active.scriptURL.includes('/admin/sw-admin.js')) {
+          registration.unregister();
+          console.log('SW antigo desregistrado:', registration.active?.scriptURL);
+        }
+      }
+    }).then(function() {
+      // Registra o SW do admin
+      navigator.serviceWorker.register('/admin/sw-admin.js', { scope: '/admin/' })
+        .then(function(registration) {
+          console.log('✅ SW Admin registrado com sucesso!');
+          // Força a atualização para tomar controle imediatamente
+          if (registration.installing) {
+            registration.installing.postMessage('skipWaiting');
+          }
+        })
+        .catch(function(error) {
+          console.log('❌ Erro ao registrar SW Admin:', error);
+        });
+    });
+  }
+</script>
 </body>
 </html>
