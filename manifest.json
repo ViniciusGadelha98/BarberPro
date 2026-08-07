@@ -2,7 +2,7 @@
   "name": "Barber Pro - Gestão de Cortes",
   "short_name": "Barber Pro",
   "description": "Gerencie clientes, agendamentos e pagamentos offline.",
-  "start_url": "/",
+  "start_url": "/agendar.html",
   "display": "standalone",
   "background_color": "#f4f6fa",
   "theme_color": "#2d2d2d",
