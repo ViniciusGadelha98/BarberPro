@@ -1,7 +1,7 @@
 {
-  "name": "Barber Pro - Gestão de Cortes",
-  "short_name": "Barber Pro",
-  "description": "Gerencie clientes, agendamentos e pagamentos offline.",
+  "name": "BarberPro - Agendamento",
+  "short_name": "BarberPro",
+  "description": "Agende seu corte de cabelo",
   "start_url": "/agendar.html",
   "display": "standalone",
   "background_color": "#f4f6fa",

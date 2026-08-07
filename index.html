@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BarberPro - Agendamento</title>
+    <title>BarberPro</title>
+    <!-- LINK PARA O MANIFEST (necessário para o PWA) -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
         body {
             background: #0f172a;
             display: flex;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            font-family: 'Inter', -apple-system, sans-serif;
             color: white;
             text-align: center;
             padding: 20px;
@@ -20,18 +23,19 @@
         .container {
             max-width: 400px;
         }
-        .container i {
+        .icon {
             font-size: 4rem;
             color: #f59e0b;
             margin-bottom: 20px;
         }
-        .container h1 {
+        h1 {
             font-size: 2rem;
             margin-bottom: 10px;
         }
-        .container p {
+        p {
             color: #94a3b8;
             margin-bottom: 20px;
+            font-size: 1rem;
         }
         .btn {
             display: inline-block;
@@ -46,25 +50,35 @@
         .btn:hover {
             transform: scale(1.02);
         }
-        .loading {
+        .btn i {
+            margin-right: 8px;
+        }
+        .info {
             margin-top: 20px;
+            font-size: 0.8rem;
             color: #64748b;
-            font-size: 0.9rem;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 </head>
 <body>
     <div class="container">
-        <i class="fas fa-cut"></i>
+        <div class="icon">✂️</div>
         <h1>BarberPro</h1>
         <p>Agende seu horário de forma rápida e fácil</p>
-        <a href="/agendar.html" class="btn"><i class="fas fa-calendar-check"></i> Agendar Corte</a>
-        <div class="loading">Redirecionando...</div>
+        <a href="/agendar.html" class="btn">
+            <i class="fas fa-calendar-check"></i> Agendar Corte
+        </a>
+        <div class="info">Baixe o app para agendar mais rápido</div>
     </div>
+
     <script>
-        // Redireciona automaticamente para a página de agendamento público
-        window.location.href = "/agendar.html";
+        // SÓ REDIRECIONA SE O APP JÁ ESTIVER ABERTO COMO STANDALONE
+        // Isso NÃO QUEBRA o PWA, porque o app já está no modo standalone
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            window.location.href = "/agendar.html";
+        }
+        // Para quem acessa pelo navegador normal, NÃO redireciona automaticamente
+        // O usuário clica no botão "Agendar Corte" manualmente
     </script>
 </body>
 </html>
