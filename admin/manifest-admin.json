@@ -1,6 +1,6 @@
 {
   "name": "BarberPro Admin",
-  "short_name": "Admin",
+  "short_name": "Barber_Admin",
   "description": "Sistema de gestão da barbearia",
   "start_url": "/admin/index.html",
   "scope": "/admin/",
