@@ -1,21 +1,23 @@
-const CACHE_NAME = 'barberpro-cache-v2';
+// sw.js - Service Worker do Cliente
+const CACHE_NAME = 'barberpro-cliente-v2';
 const urlsToCache = [
-  '/',
-  '/index.html',
+  '/agendar.html',
   '/manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css',
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js'
 ];
 const CDN_ORIGINS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
 
+// INSTALL
 self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache).catch(err => console.warn('SW cache addAll falhou (alguma CDN pode estar indisponível no registro):', err)))
+      .then(cache => cache.addAll(urlsToCache).catch(err => console.warn('SW cache addAll falhou:', err)))
   );
 });
 
+// ACTIVATE
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys => {
@@ -26,11 +28,18 @@ self.addEventListener('activate', event => {
   );
 });
 
+// FETCH - IGNORA REQUISIÇÕES DA PASTA /admin/
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
+  
+  // NÃO intercepta requisições da pasta /admin/
+  if (url.pathname.startsWith('/admin/')) {
+    return; // Deixa o navegador lidar com a requisição
+  }
+
   const isCdn = CDN_ORIGINS.some(o => url.hostname === o);
 
   if (isCdn) {
@@ -60,7 +69,7 @@ self.addEventListener('fetch', event => {
             }
             return networkResp;
           })
-          .catch(() => cached || caches.match('/index.html'));
+          .catch(() => cached || caches.match('/agendar.html'));
         return cached || fetchPromise;
       })
   );

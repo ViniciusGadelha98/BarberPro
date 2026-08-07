@@ -785,11 +785,32 @@ async function buscarHorarios() {
         };
     </script>
     <script>
-  // Registrar service worker do cliente
+  // ================================================================
+  //  REGISTRA O SERVICE WORKER DO CLIENTE
+  //  E FORÇA A REATIVAÇÃO SE NECESSÁRIO
+  // ================================================================
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js', { scope: '/' })
-      .then(() => console.log('SW cliente registrado'))
-      .catch(err => console.error('Erro SW cliente:', err));
+    // Primeiro, verifica se o SW do cliente está ativo
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      let clienteExiste = false;
+      for (let registration of registrations) {
+        if (registration.active && registration.active.scriptURL.includes('/sw.js')) {
+          clienteExiste = true;
+          console.log('SW Cliente já registrado');
+        }
+      }
+      
+      // Se não existe ou está inativo, registra novamente
+      if (!clienteExiste) {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+          .then(function(registration) {
+            console.log('✅ SW Cliente registrado com sucesso!');
+          })
+          .catch(function(error) {
+            console.log('❌ Erro ao registrar SW Cliente:', error);
+          });
+      }
+    });
   }
     </script>
 </body>
