@@ -6,6 +6,7 @@
     <title>Agende seu Horário</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
+    <link rel="manifest" href="/manifest.json">
     <style>
         * {
             margin: 0;
@@ -787,30 +788,20 @@ async function buscarHorarios() {
     <script>
   // ================================================================
   //  REGISTRA O SERVICE WORKER DO CLIENTE
-  //  E FORÇA A REATIVAÇÃO SE NECESSÁRIO
+  //  COM VERIFICAÇÃO DE ERROS
   // ================================================================
   if ('serviceWorker' in navigator) {
-    // Primeiro, verifica se o SW do cliente está ativo
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-      let clienteExiste = false;
-      for (let registration of registrations) {
-        if (registration.active && registration.active.scriptURL.includes('/sw.js')) {
-          clienteExiste = true;
-          console.log('SW Cliente já registrado');
-        }
-      }
-      
-      // Se não existe ou está inativo, registra novamente
-      if (!clienteExiste) {
-        navigator.serviceWorker.register('/sw.js', { scope: '/' })
-          .then(function(registration) {
-            console.log('✅ SW Cliente registrado com sucesso!');
-          })
-          .catch(function(error) {
-            console.log('❌ Erro ao registrar SW Cliente:', error);
-          });
-      }
-    });
+    console.log('[PWA Cliente] Tentando registrar SW...');
+    navigator.serviceWorker.register('/sw.js', { scope: '/' })
+      .then(function(registration) {
+        console.log('[PWA Cliente] ✅ SW registrado com sucesso!');
+        console.log('[PWA Cliente] Escopo:', registration.scope);
+      })
+      .catch(function(error) {
+        console.log('[PWA Cliente] ❌ Erro ao registrar SW:', error);
+      });
+  } else {
+    console.log('[PWA Cliente] Service Worker não suportado neste navegador.');
   }
     </script>
 </body>

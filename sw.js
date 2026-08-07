@@ -1,4 +1,4 @@
-// sw.js - Service Worker do Cliente (BarberPro)
+// sw.js - Service Worker do Cliente (VERSÃO CORRIGIDA)
 const CACHE_NAME = 'barberpro-cliente-v3';
 const urlsToCache = [
   '/agendar.html',
@@ -7,101 +7,84 @@ const urlsToCache = [
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js'
 ];
 
-// Lista de origens CDN para cache separado
-const CDN_ORIGINS = ['cdnjs.cloudflare.com', 'cdn.jsdelivr.net'];
-
-// ========== INSTALL ==========
+// INSTALL
 self.addEventListener('install', event => {
-  // Força o service worker a ativar imediatamente
+  console.log('[SW Cliente] Instalando...');
   self.skipWaiting();
-  
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
+        console.log('[SW Cliente] Cache aberto');
         return cache.addAll(urlsToCache).catch(err => {
-          console.warn('SW: Alguns recursos não foram cacheados:', err);
+          console.warn('[SW Cliente] Erro ao adicionar ao cache:', err);
         });
-      })
-      .catch(err => {
-        console.error('SW: Falha ao abrir cache:', err);
       })
   );
 });
 
-// ========== ACTIVATE ==========
+// ACTIVATE
 self.addEventListener('activate', event => {
+  console.log('[SW Cliente] Ativando...');
   event.waitUntil(
     caches.keys().then(keys => {
       return Promise.all(
         keys.filter(key => key !== CACHE_NAME).map(key => {
-          console.log('SW: Removendo cache antigo:', key);
+          console.log('[SW Cliente] Removendo cache antigo:', key);
           return caches.delete(key);
         })
       );
     }).then(() => {
-      // Toma o controle imediatamente
+      console.log('[SW Cliente] Ativado e tomando controle...');
       return self.clients.claim();
     })
   );
 });
 
-// ========== FETCH ==========
+// FETCH
 self.addEventListener('fetch', event => {
   const req = event.request;
-  
-  // Ignora requisições que não são GET
   if (req.method !== 'GET') return;
-
+  
   const url = new URL(req.url);
   
-  // ===== NÃO INTERCEPTA REQUISIÇÕES DA PASTA /admin/ =====
-  // Isso é crucial para não conflitar com o PWA do barbeiro
+  // NÃO intercepta requisições da pasta /admin/
   if (url.pathname.startsWith('/admin/')) {
-    return; // Deixa o navegador lidar com a requisição
-  }
-
-  // ===== REQUISIÇÕES PARA CDN =====
-  const isCdn = CDN_ORIGINS.some(origin => url.hostname === origin);
-  
-  if (isCdn) {
-    event.respondWith(
-      caches.match(req).then(cached => {
-        // Se tiver em cache, retorna; senão, busca na rede e cacheia
-        const fetchPromise = fetch(req).then(networkResp => {
-          const respClone = networkResp.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(req, respClone))
-            .catch(() => {});
-          return networkResp;
-        }).catch(() => cached);
-        
-        return cached || fetchPromise;
-      })
-    );
     return;
   }
 
-  // ===== REQUISIÇÕES PARA O PRÓPRIO SITE =====
+  // Estratégia: Cache First, depois rede
   event.respondWith(
-    caches.match(req).then(cached => {
-      // Se tiver em cache, retorna
-      if (cached) {
-        return cached;
-      }
-      
-      // Senão, busca na rede e cacheia (se for bem-sucedido)
-      return fetch(req).then(networkResp => {
-        if (networkResp && networkResp.status === 200 && networkResp.type === 'basic') {
-          const respClone = networkResp.clone();
-          caches.open(CACHE_NAME)
-            .then(cache => cache.put(req, respClone))
-            .catch(() => {});
+    caches.match(req)
+      .then(cachedResponse => {
+        // Se encontrou no cache, retorna
+        if (cachedResponse) {
+          console.log('[SW Cliente] Cache hit:', url.pathname);
+          return cachedResponse;
         }
-        return networkResp;
-      }).catch(() => {
-        // Fallback: retorna a página principal se offline
-        return caches.match('/agendar.html');
-      });
-    })
+        
+        // Se não, busca na rede
+        console.log('[SW Cliente] Buscando na rede:', url.pathname);
+        return fetch(req)
+          .then(response => {
+            // Verifica se é uma resposta válida
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+            
+            // Clona e guarda no cache
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                cache.put(req, responseToCache);
+              })
+              .catch(err => console.warn('[SW Cliente] Erro ao guardar no cache:', err));
+            
+            return response;
+          })
+          .catch(() => {
+            // Se falhou tudo, retorna a página inicial (se estiver em cache)
+            return caches.match('/agendar.html');
+          });
+      })
   );
 });
